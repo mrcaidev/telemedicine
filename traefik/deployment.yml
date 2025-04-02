@@ -15,12 +15,13 @@ spec:
       containers:
         - name: traefik
           image: traefik
-          args:
-            - --api.insecure
-            - --providers.kubernetesingress
           ports:
             - containerPort: 80
             - containerPort: 8080
+          volumeMounts:
+            - name: traefik-volume-config-map
+              mountPath: /etc/traefik
+              readOnly: true
           resources:
             requests:
               cpu: 128m
@@ -28,4 +29,8 @@ spec:
             limits:
               cpu: 256m
               memory: 512Mi
+      volumes:
+        - name: traefik-volume-config-map
+          configMap:
+            name: traefik-config-map
       serviceAccountName: traefik-account
