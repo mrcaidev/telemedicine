@@ -5,5 +5,3 @@ metadata:
 data:
   traefik.toml: |
     [providers.kubernetesIngress]
-    [api]
-    insecure = true
