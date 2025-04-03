@@ -2,15 +2,19 @@ import { Hono } from "hono";
 import { verify } from "hono/jwt";
 import { logger } from "hono/logger";
 
-const app = new Hono().basePath("/api/auth");
+const app = new Hono();
 
 app.use(logger());
 
-app.all("/ping", (c) => {
+app.get("/livez", (c) => {
   return c.text("ok");
 });
 
-app.all("/gateway", async (c) => {
+app.get("/readyz", (c) => {
+  return c.text("ok");
+});
+
+app.get("/gateway", async (c) => {
   try {
     const token = c.req.header("Authorization")?.slice(7);
 
@@ -19,6 +23,7 @@ app.all("/gateway", async (c) => {
     }
 
     const payload = await verify(token, "a-string-secret-at-least-256-bits-long");
+
     const { id, role } = payload as { id: string; role: string };
 
     c.header("X-User-Id", id);
