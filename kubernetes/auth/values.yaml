@@ -63,13 +63,11 @@ ingress:
   enabled: true
   className: ""
   annotations:
-    {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
+    traefik.ingress.kubernetes.io/router.middlewares: default-circuit-breaker@kubernetescrd,default-content-type@kubernetescrd,default-forward-auth@kubernetescrd,default-headers@kubernetescrd,default-rate-limit@kubernetescrd
   hosts:
-    - host: localhost
+    - host: api.localhost
       paths:
-        - path: /api/auth
+        - path: /auth
           pathType: Prefix
   tls: []
   #  - secretName: chart-example-tls
@@ -92,11 +90,11 @@ resources:
 # This is to setup the liveness and readiness probes more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
 livenessProbe:
   httpGet:
-    path: /api/auth/ping
+    path: /livez
     port: http
 readinessProbe:
   httpGet:
-    path: /api/auth/ping
+    path: /readyz
     port: http
 
 # This section is for setting up autoscaling more information can be found here: https://kubernetes.io/docs/concepts/workloads/autoscaling/
