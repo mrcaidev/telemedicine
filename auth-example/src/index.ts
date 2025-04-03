@@ -34,4 +34,15 @@ app.get("/gateway", async (c) => {
   }
 });
 
+app.get("/auth/me", (c) => {
+  const id = c.req.header("X-User-Id");
+  const role = c.req.header("X-User-Role");
+
+  if (!id || !role) {
+    return c.body(null, 204);
+  }
+
+  return c.json({ id, role });
+})
+
 export default app;
