@@ -1,0 +1,16 @@
+{
+  "name": "auth-example",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun run --hot src/index.ts",
+    "build": "tsc && bun build --outdir dist --target bun --minify src/index.ts"
+  },
+  "dependencies": {
+    "hono": "^4.7.5"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.2.8",
+    "typescript": "^5.8.2"
+  }
+}
