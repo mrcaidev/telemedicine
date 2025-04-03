@@ -63,7 +63,7 @@ ingress:
   enabled: true
   className: ""
   annotations:
-    {}
+    traefik.ingress.kubernetes.io/router.middlewares: default-forward-auth@kubernetescrd,default-rate-limit@kubernetescrd,default-headers@kubernetescrd
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
   hosts:
