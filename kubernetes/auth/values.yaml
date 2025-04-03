@@ -63,7 +63,7 @@ ingress:
   enabled: true
   className: ""
   annotations:
-    traefik.ingress.kubernetes.io/router.middlewares: default-circuit-breaker@kubernetescrd,default-content-type@kubernetescrd,default-forward-auth@kubernetescrd,default-headers@kubernetescrd,default-rate-limit@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: default-all@kubernetescrd
   hosts:
     - host: api.localhost
       paths:
