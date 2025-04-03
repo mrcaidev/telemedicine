@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: whoami-deployment
+  name: whoami
 spec:
   replicas: 1
   selector:
@@ -15,8 +15,6 @@ spec:
       containers:
         - name: whoami
           image: traefik/whoami
-          ports:
-            - containerPort: 80
           resources:
             requests:
               cpu: 64m
