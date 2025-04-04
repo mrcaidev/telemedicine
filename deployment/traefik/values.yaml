@@ -8,6 +8,10 @@ service:
     service.beta.kubernetes.io/do-loadbalancer-redirect-http-to-https: "true"
     service.beta.kubernetes.io/do-loadbalancer-size-unit: "1"
 
+ingressRoute:
+  dashboard:
+    enabled: true
+
 extraObjects:
   - apiVersion: traefik.io/v1alpha1
     kind: Middleware
