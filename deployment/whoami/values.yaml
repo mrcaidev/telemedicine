@@ -62,10 +62,8 @@ service:
 ingress:
   enabled: true
   className: ""
-  annotations:
-    traefik.ingress.kubernetes.io/router.middlewares: default-all@kubernetescrd
   hosts:
-    - host: localhost
+    - host: telemedicine.ink
       paths:
         - path: /whoami
           pathType: Prefix

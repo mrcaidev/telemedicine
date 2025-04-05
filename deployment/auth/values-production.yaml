@@ -1,6 +1,0 @@
-ingress:
-  hosts:
-    - host: api.telemedicine.ink
-      paths:
-        - path: /auth
-          pathType: Prefix
