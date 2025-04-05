@@ -1,0 +1,8 @@
+ingress:
+  annotations:
+    traefik.ingress.kubernetes.io/router.middlewares: default-rate-limit@kubernetescrd
+  hosts:
+    - host: staging-telemedicine.ink
+      paths:
+        - path: /whoami
+          pathType: Prefix

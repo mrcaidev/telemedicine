@@ -1,12 +1,5 @@
 service:
-  annotations:
-    service.beta.kubernetes.io/do-loadbalancer-name: "telemedicine-lb-staging"
-    service.beta.kubernetes.io/do-loadbalancer-protocol: "http"
-    service.beta.kubernetes.io/do-loadbalancer-http-ports: "80"
-    service.beta.kubernetes.io/do-loadbalancer-tls-ports: "443"
-    service.beta.kubernetes.io/do-loadbalancer-certificate-name: "telemedicine-cert-staging"
-    service.beta.kubernetes.io/do-loadbalancer-redirect-http-to-https: "true"
-    service.beta.kubernetes.io/do-loadbalancer-size-unit: "1"
+  type: ClusterIP
 
 ingressRoute:
   dashboard:
