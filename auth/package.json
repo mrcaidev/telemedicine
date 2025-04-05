@@ -1,16 +1,19 @@
 {
-  "name": "auth-example",
+  "name": "auth",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "bun run --hot src/index.ts",
-    "build": "tsc && bun build --outdir dist --target bun --minify src/index.ts"
+    "build": "tsc && bun build --outdir dist --target bun --minify src/index.ts",
+    "check": "biome check"
   },
   "dependencies": {
-    "hono": "^4.7.5"
+    "hono": "^4.7.5",
+    "valibot": "^1.0.0"
   },
   "devDependencies": {
-    "@types/bun": "^1.2.8",
+    "@biomejs/biome": "^1.9.4",
+    "@types/bun": "1.2.6",
     "typescript": "^5.8.2"
   }
 }

@@ -10,24 +10,17 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "strict": true,
-    "allowImportingTsExtensions": true,
     "module": "ESNext",
     "moduleResolution": "bundler",
     "noUncheckedSideEffectImports": true,
-    "paths": {
-      "@/*": [
-        "./src/*"
-      ]
-    },
+    "paths": { "@/*": ["./src/*"] },
     "resolveJsonModule": true,
     "noEmit": true,
     "allowJs": true,
     "erasableSyntaxOnly": true,
     "esModuleInterop": true,
     "verbatimModuleSyntax": true,
-    "lib": [
-      "ESNext"
-    ],
+    "lib": ["ESNext"],
     "moduleDetection": "force",
     "target": "ESNext",
     "incremental": true,
