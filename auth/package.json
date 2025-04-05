@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "bun run --hot src/index.ts",
     "build": "tsc && bun build --outdir dist --target bun --minify src/index.ts",
+    "test:unit": "bun test unit.test.ts",
     "check": "biome check"
   },
   "dependencies": {
