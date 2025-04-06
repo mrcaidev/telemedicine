@@ -1,3 +1,5 @@
+name: Auth CI
+
 on:
   pull_request:
     branches:
@@ -7,6 +9,7 @@ on:
 
 jobs:
   ci:
+    name: CI
     runs-on: ubuntu-latest
     defaults:
       run:
