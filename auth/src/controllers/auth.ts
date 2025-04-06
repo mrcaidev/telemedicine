@@ -1,5 +1,6 @@
 import { validator } from "@/middleware/validator";
 import * as authService from "@/services/auth";
+import { ok } from "@/utils/response";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import * as v from "valibot";
@@ -13,7 +14,7 @@ authController.get("/me", async (c) => {
   }
 
   const result = await authService.getUserById(id);
-  return c.json(result);
+  return c.json(ok(result));
 });
 
 authController.post(
@@ -32,6 +33,6 @@ authController.post(
   async (c) => {
     const { email, password } = c.req.valid("json");
     const result = await authService.loginWithEmailPassword(email, password);
-    return c.json(result);
+    return c.json(ok(result));
   },
 );

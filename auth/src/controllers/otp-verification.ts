@@ -1,5 +1,6 @@
 import { validator } from "@/middleware/validator";
 import * as otpVerificationService from "@/services/otp-verification";
+import { ok } from "@/utils/response";
 import { Hono } from "hono";
 import * as v from "valibot";
 
@@ -16,7 +17,7 @@ otpVerificationController.post(
   async (c) => {
     const { email } = c.req.valid("json");
     await otpVerificationService.sendOtp(email);
-    return c.body(null, 204);
+    return c.json(ok(null), 200);
   },
 );
 
@@ -36,6 +37,6 @@ otpVerificationController.post(
   async (c) => {
     const { email, otp } = c.req.valid("json");
     await otpVerificationService.verifyOtp(email, otp);
-    return c.body(null, 204);
+    return c.json(ok(null), 200);
   },
 );

@@ -6,6 +6,7 @@ import { isValiError } from "valibot";
 import { authController } from "./controllers/auth";
 import { otpVerificationController } from "./controllers/otp-verification";
 import { verifyJwt } from "./utils/jwt";
+import { err } from "./utils/response";
 
 const app = new Hono();
 
@@ -41,15 +42,15 @@ app.route("/otp", otpVerificationController);
 
 app.onError((error: unknown, c: Context) => {
   if (isValiError(error)) {
-    return c.json({ error: error.message }, 400);
+    return c.json(err(400, error.message), 400);
   }
 
   if (error instanceof HTTPException) {
-    return c.json({ error: error.message }, error.status);
+    return c.json(err(error.status, error.message), error.status);
   }
 
   console.error(error);
-  return c.json({ error: "Server error" }, 500);
+  return c.json(err(500, "Server error"), 500);
 });
 
 export default app;
