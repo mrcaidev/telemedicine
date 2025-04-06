@@ -46,4 +46,9 @@ jobs:
         run: doctl kubernetes cluster kubeconfig save --expiry-seconds 600 ${{ vars.K8S_CLUSTER_NAME }}
 
       - name: Deploy to Kubernetes
-        run: helm upgrade --install auth $GITHUB_WORKSPACE/deployment/auth --values $GITHUB_WORKSPACE/deployment/auth/values-staging.yaml --set image.repository=${{ vars.DOCKERHUB_USERNAME }}/telemedicine-auth --set image.tag=$(echo $GITHUB_SHA | head -c7)
+        run: |
+          helm upgrade --install auth $GITHUB_WORKSPACE/deployment/auth \
+            --values $GITHUB_WORKSPACE/deployment/auth/values-staging.yaml
+            --set image=${{ vars.DOCKERHUB_USERNAME }}/telemedicine-auth:$(echo $GITHUB_SHA | head -c7)
+            --set secrets.JWT_SECRET=${{ secrets.JWT_SECRET }}
+            --set secrets.POSTGRES_URL=postgresql://${{ secrets.AUTH_POSTGRES_USER }}:${{ secrets.AUTH_POSTGRES_PASSWORD }}@auth-postgres-postgresql.default.svc.cluster.local:5432/${{ secrets.AUTH_POSTGRES_DB }}
