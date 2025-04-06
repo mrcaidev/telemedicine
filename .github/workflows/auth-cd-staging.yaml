@@ -46,4 +46,4 @@ jobs:
         run: doctl kubernetes cluster kubeconfig save --expiry-seconds 600 ${{ vars.K8S_CLUSTER_NAME }}
 
       - name: Deploy to Kubernetes
-        run: helm upgrade --install auth $GITHUB_WORKSPACE/auth --values $GITHUB_WORKSPACE/auth/values-staging.yaml --set image.repository=${{ vars.DOCKERHUB_USERNAME }}/telemedicine-auth --set image.tag=$(echo $GITHUB_SHA | head -c7)
+        run: helm upgrade --install auth $GITHUB_WORKSPACE/deployment/auth --values $GITHUB_WORKSPACE/deployment/auth/values-staging.yaml --set image.repository=${{ vars.DOCKERHUB_USERNAME }}/telemedicine-auth --set image.tag=$(echo $GITHUB_SHA | head -c7)
