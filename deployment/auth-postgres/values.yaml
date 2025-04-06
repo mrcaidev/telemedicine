@@ -1,0 +1,5 @@
+primary:
+  persistence:
+    storageClass: do-block-storage
+  initdb:
+    scriptsConfigMap: auth-postgres-initdb

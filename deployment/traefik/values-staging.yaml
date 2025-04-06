@@ -1,0 +1,5 @@
+service:
+  annotations:
+    service.beta.kubernetes.io/do-loadbalancer-name: "telemedicine-lb-staging"
+    service.beta.kubernetes.io/do-loadbalancer-certificate-name: "telemedicine-cert-staging"
+    service.beta.kubernetes.io/do-loadbalancer-size-unit: "1"

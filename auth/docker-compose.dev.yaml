@@ -1,0 +1,30 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - 3000:3000
+    environment:
+      - JWT_SECRET=a-string-secret-at-least-256-bits-long
+      - POSTGRES_URL=postgres://dev:dev@postgres:5432/dev
+    volumes:
+      - .:/code
+      - /code/node_modules
+    depends_on:
+      - postgres
+    restart: always
+
+  postgres:
+    image: postgres
+    environment:
+      - POSTGRES_USER=dev
+      - POSTGRES_PASSWORD=dev
+      - POSTGRES_DB=dev
+    volumes:
+      - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+      - postgres-data:/var/lib/postgresql/data
+    restart: always
+
+volumes:
+  postgres-data:

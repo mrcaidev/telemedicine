@@ -1,0 +1,21 @@
+# Container image: <repository>:<tag>
+image: mrcaidev/telemedicine-auth
+
+# Hostname that ingress listens on.
+host: api.telemedicine.ink
+
+# Traffic -> Ingress -> Service:<port> -> Pod:<port>
+port: 3000
+
+# Path prefixes in charge.
+paths:
+  - /auth
+  - /oauth
+  - /otp
+
+# Autoscaling range: <minReplicas> - <maxReplicas>
+minReplicas: 1
+maxReplicas: 5
+
+# Secret environment variables.
+secrets:

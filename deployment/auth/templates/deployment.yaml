@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    app: {{ .Release.Name }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ .Release.Name }}
+          image: {{ .Values.image }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: {{ .Values.port }}
+          envFrom:
+            - secretRef:
+                name: {{ .Release.Name }}
+          livenessProbe:
+            httpGet:
+              path: /livez
+              port: {{ .Values.port }}
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: {{ .Values.port }}
+      serviceAccountName: {{ .Release.Name }}

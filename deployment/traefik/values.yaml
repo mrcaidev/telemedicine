@@ -1,0 +1,75 @@
+ingressRoute:
+  dashboard:
+    enabled: true
+
+ports:
+  websecure:
+    targetPort: web
+
+service:
+  annotations:
+    service.beta.kubernetes.io/do-loadbalancer-name: "telemedicine-lb"
+    service.beta.kubernetes.io/do-loadbalancer-protocol: "http"
+    service.beta.kubernetes.io/do-loadbalancer-http-ports: "80"
+    service.beta.kubernetes.io/do-loadbalancer-tls-ports: "443"
+    service.beta.kubernetes.io/do-loadbalancer-certificate-name: "telemedicine-cert"
+    service.beta.kubernetes.io/do-loadbalancer-redirect-http-to-https: "true"
+    service.beta.kubernetes.io/do-loadbalancer-size-unit: "2"
+    service.beta.kubernetes.io/do-loadbalancer-enable-backend-keepalive: "true"
+
+extraObjects:
+  - apiVersion: traefik.io/v1alpha1
+    kind: Middleware
+    metadata:
+      name: all
+    spec:
+      chain:
+        middlewares:
+          - name: circuit-breaker
+          - name: forward-auth
+          - name: headers
+          - name: rate-limit
+
+  - apiVersion: traefik.io/v1alpha1
+    kind: Middleware
+    metadata:
+      name: circuit-breaker
+    spec:
+      circuitBreaker:
+        expression: NetworkErrorRatio() > 0.3
+
+  - apiVersion: traefik.io/v1alpha1
+    kind: Middleware
+    metadata:
+      name: forward-auth
+    spec:
+      forwardAuth:
+        address: http://auth:3000/gateway
+        authResponseHeadersRegex: ^X-User-
+
+  - apiVersion: traefik.io/v1alpha1
+    kind: Middleware
+    metadata:
+      name: headers
+    spec:
+      headers:
+        accessControlAllowCredentials: true
+        accessControlAllowHeaders:
+          - Authorization
+        accessControlAllowMethods:
+          - PUT
+          - PATCH
+          - DELETE
+          - OPTIONS
+        accessControlAllowOriginListRegex:
+          - ^https?:\\/\\/(.+\\.)?localhost(:[0-9]+)?$
+          - ^https?:\\/\\/(.+\\.)?telemedicine\\.ink$
+
+  - apiVersion: traefik.io/v1alpha1
+    kind: Middleware
+    metadata:
+      name: rate-limit
+    spec:
+      rateLimit:
+        average: 100
+        burst: 200
