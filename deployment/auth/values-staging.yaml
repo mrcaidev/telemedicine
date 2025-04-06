@@ -1,6 +1,3 @@
-ingress:
-  hosts:
-    - host: api.staging-telemedicine.ink
-      paths:
-        - path: /auth
-          pathType: Prefix
+host: api.staging-telemedicine.ink
+minReplicas: 1
+maxReplicas: 3

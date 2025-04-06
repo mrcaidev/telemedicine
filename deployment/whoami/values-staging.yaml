@@ -1,6 +1,0 @@
-ingress:
-  hosts:
-    - host: staging-telemedicine.ink
-      paths:
-        - path: /whoami
-          pathType: Prefix
