@@ -7,6 +7,8 @@ on:
       - main
     paths:
       - auth/**
+      - deployment/auth/**
+      - .github/workflows/auth-cd.yaml
   # Deploy to production on release.
   release:
     types:
