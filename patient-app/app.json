@@ -32,14 +32,14 @@
   "jsEngine": "hermes",
   "newArchEnabled": true,
   "android": {
-    "package": "ink.telemedicine",
+    "package": "ink.telemedicine.patient",
     "adaptiveIcon": {
       "foregroundImage": "src/assets/images/adaptive-icon.png",
       "backgroundColor": "#f0fdfa"
     }
   },
   "ios": {
-    "bundleIdentifier": "ink.telemedicine"
+    "bundleIdentifier": "ink.telemedicine.patient"
   },
   "experiments": {
     "typedRoutes": true
