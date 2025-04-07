@@ -1,5 +1,10 @@
+import { PaperProvider } from "@/providers/paper";
 import { Slot } from "expo-router";
 
 export default function RootLayout() {
-  return <Slot />;
+  return (
+    <PaperProvider>
+      <Slot />
+    </PaperProvider>
+  );
 }
