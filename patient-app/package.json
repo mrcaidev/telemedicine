@@ -1,0 +1,30 @@
+{
+  "name": "patient-app",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "expo-router/entry",
+  "scripts": {
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "check": "tsc && biome check",
+    "clean": "rimraf .expo android dist ios *.tsbuildinfo"
+  },
+  "dependencies": {
+    "expo": "~52.0.44",
+    "expo-dev-client": "~5.0.19",
+    "expo-router": "~4.0.20",
+    "expo-splash-screen": "~0.29.22",
+    "expo-status-bar": "~2.0.1",
+    "expo-system-ui": "~4.0.9",
+    "react": "18.3.1",
+    "react-native": "0.76.9"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@types/react": "~18.3.12",
+    "eas-cli": "^16.2.1",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.8.3"
+  }
+}

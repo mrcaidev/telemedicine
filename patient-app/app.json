@@ -1,0 +1,47 @@
+{
+  "name": "Telemedicine",
+  "description": "Patient app for telemedicine platform.",
+  "slug": "telemedicine",
+  "owner": "mrcaidev",
+  "sdkVersion": "52.0.0",
+  "version": "0.1.0",
+  "platforms": ["android", "ios"],
+  "githubUrl": "https://github.com/mrcaidev/telemedicine",
+  "orientation": "portrait",
+  "userInterfaceStyle": "light",
+  "backgroundColor": "#f0fdfa",
+  "primaryColor": "#009689",
+  "icon": "src/assets/images/icon.png",
+  "scheme": "telemedicine",
+  "extra": {
+    "eas": {
+      "projectId": "3d9e815d-dc8c-4161-890d-275b78b50b83"
+    }
+  },
+  "plugins": [
+    "expo-router",
+    [
+      "expo-splash-screen",
+      {
+        "backgroundColor": "#f0fdfa",
+        "image": "src/assets/images/splash.png",
+        "imageWidth": 200
+      }
+    ]
+  ],
+  "jsEngine": "hermes",
+  "newArchEnabled": true,
+  "android": {
+    "package": "ink.telemedicine",
+    "adaptiveIcon": {
+      "foregroundImage": "src/assets/images/adaptive-icon.png",
+      "backgroundColor": "#f0fdfa"
+    }
+  },
+  "ios": {
+    "bundleIdentifier": "ink.telemedicine"
+  },
+  "experiments": {
+    "typedRoutes": true
+  }
+}
