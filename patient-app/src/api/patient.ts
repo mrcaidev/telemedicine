@@ -1,26 +1,24 @@
-import { devSleep } from "@/utils/dev";
+import { tokenStore } from "@/utils/secure-store";
 import type { Patient } from "@/utils/types";
-import { useMutation } from "@tanstack/react-query";
-
-const mockPatient: Patient = {
-  id: "ea0c3f1c-b3f4-4299-a3a4-598c49605a6c",
-  email: "mock@example.com",
-  nickname: "Mock",
-  avatarUrl: null,
-  gender: "male",
-  birthDate: "1987-06-05",
-  createdAt: "2025-04-10T14:58:28.020Z",
-};
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { request } from "./request";
 
 export function useCreatePatientMutation() {
+  const queryClient = useQueryClient();
+
   return useMutation<
     Patient & { token: string },
     Error,
     { email: string; password: string; otp: string }
   >({
     mutationFn: async (variables) => {
-      await devSleep(1000);
-      return { ...mockPatient, token: "mock-jwt" };
+      return await request.post("/patients", variables);
+    },
+    onSuccess: async ({ token, ...me }) => {
+      await tokenStore.setItem(token);
+
+      queryClient.cancelQueries({ queryKey: ["me"] });
+      queryClient.setQueryData(["me"], me);
     },
   });
 }

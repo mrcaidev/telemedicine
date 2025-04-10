@@ -318,8 +318,7 @@ function RegisterButton() {
     mutate(
       { email, password, otp },
       {
-        onSuccess: (data) => {
-          console.log(data);
+        onSuccess: () => {
           router.push("/");
         },
       },
