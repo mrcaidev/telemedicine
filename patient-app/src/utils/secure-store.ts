@@ -2,13 +2,13 @@ import * as SecureStore from "expo-secure-store";
 
 function createSecureStore(name: string) {
   return {
-    async getItem() {
+    async get() {
       return await SecureStore.getItemAsync(name);
     },
-    async setItem(value: string) {
+    async set(value: string) {
       await SecureStore.setItemAsync(name, value);
     },
-    async removeItem() {
+    async remove() {
       await SecureStore.deleteItemAsync(name);
     },
   };

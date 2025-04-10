@@ -20,7 +20,7 @@ type ResponseJson<T> = {
 async function wrappedFetch<T>(pathname: string, init: RequestInit) {
   await devSleep(1000);
 
-  const token = await tokenStore.getItem();
+  const token = await tokenStore.get();
 
   const res = await fetch(process.env.EXPO_PUBLIC_API_BASE_URL + pathname, {
     ...init,

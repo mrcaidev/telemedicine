@@ -15,7 +15,7 @@ export function useCreatePatientMutation() {
       return await request.post("/patients", variables);
     },
     onSuccess: async ({ token, ...me }) => {
-      await tokenStore.setItem(token);
+      await tokenStore.set(token);
 
       queryClient.cancelQueries({ queryKey: ["me"] });
       queryClient.setQueryData(["me"], me);
