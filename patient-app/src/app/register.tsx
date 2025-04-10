@@ -1,7 +1,8 @@
 import { useSendOtpMutation } from "@/api/auth";
+import { useCreatePatientMutation } from "@/api/patient";
 import { useCountdown } from "@/hooks/use-countdown";
 import { valibotResolver } from "@hookform/resolvers/valibot";
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import {
   Controller,
   FormProvider,
@@ -90,7 +91,7 @@ export default function RegisterPage() {
         <PasswordInput />
         <ConfirmPasswordInput />
         <AcceptCheckbox />
-        <SubmitButton />
+        <RegisterButton />
       </FormProvider>
       <Divider style={{ marginTop: 24, marginBottom: 16 }} />
       <LogInPrompt />
@@ -304,16 +305,34 @@ function AcceptCheckbox() {
   );
 }
 
-function SubmitButton() {
+function RegisterButton() {
   const { handleSubmit } = useFormContext<FormSchema>();
+
+  const { mutate, isPending } = useCreatePatientMutation();
+
+  const router = useRouter();
+
+  const register = handleSubmit((variables) => {
+    const { email, password, otp } = variables;
+
+    mutate(
+      { email, password, otp },
+      {
+        onSuccess: (data) => {
+          console.log(data);
+          router.push("/");
+        },
+      },
+    );
+  });
 
   return (
     <Button
       mode="contained"
       icon="account-plus"
-      onPress={handleSubmit((data) => {
-        console.log(data);
-      })}
+      loading={isPending}
+      disabled={isPending}
+      onPress={register}
     >
       Register
     </Button>
