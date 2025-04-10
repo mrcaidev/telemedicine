@@ -1,3 +1,5 @@
+import { useSendOtpMutation } from "@/api/auth";
+import { useCountdown } from "@/hooks/use-countdown";
 import { useForm } from "@tanstack/react-form";
 import { Link } from "expo-router";
 import { View } from "react-native";
@@ -91,7 +93,7 @@ export default function RegisterPage() {
                 style={{ flexGrow: 1 }}
               />
               <View style={{ marginTop: 6 }}>
-                <SendOtpButton />
+                <SendOtpButton email={field.form.getFieldValue("email")} />
               </View>
             </View>
             {field.state.meta.errors[0] ? (
@@ -239,15 +241,40 @@ export default function RegisterPage() {
   );
 }
 
-function SendOtpButton() {
+type SendOtpButtonProps = {
+  email: string;
+};
+
+function SendOtpButton({ email }: SendOtpButtonProps) {
+  const emailValid = v.EMAIL_REGEX.test(email);
+
+  const { mutate, isPending } = useSendOtpMutation();
+
+  const { countdown, isCounting, start } = useCountdown(60);
+
+  const sendOtp = () => {
+    if (!emailValid) {
+      return;
+    }
+
+    mutate(email, {
+      onSuccess: () => {
+        start();
+      },
+    });
+  };
+
   return (
     <Button
       mode="outlined"
-      icon="send"
+      icon="email-check"
+      loading={isPending}
+      disabled={!emailValid || isPending || isCounting}
+      onPress={sendOtp}
       contentStyle={{ paddingVertical: 4 }}
       style={{ borderRadius: 4 }}
     >
-      Send
+      {isCounting ? `Retry in ${countdown}s` : "Send OTP"}
     </Button>
   );
 }
