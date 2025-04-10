@@ -179,11 +179,14 @@ function SendOtpButton() {
   const { countdown, isCounting, start } = useCountdown(60);
 
   const sendOtp = () => {
-    mutate(email, {
-      onSuccess: () => {
-        start();
+    mutate(
+      { email },
+      {
+        onSuccess: () => {
+          start();
+        },
       },
-    });
+    );
   };
 
   return (
