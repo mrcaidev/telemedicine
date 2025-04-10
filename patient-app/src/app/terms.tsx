@@ -7,7 +7,7 @@ export default function TermsOfServicePage() {
       <View style={{ height: 24 }} />
       <View style={{ marginBottom: 12 }}>
         <Text style={{ marginBottom: 16, fontSize: 32, fontWeight: "bold" }}>
-          Terms of Services
+          Terms of Service
         </Text>
         <Text style={{ fontStyle: "italic" }}>
           Last updated on April 11, 2025
