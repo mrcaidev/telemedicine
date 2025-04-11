@@ -1,8 +1,8 @@
 import { useMeQuery } from "@/api/auth";
 import { LoadingScreen } from "@/components/loading-screen";
-import { Redirect } from "expo-router";
+import { Redirect, Slot } from "expo-router";
 
-export default function Entrypoint() {
+export default function AuthGuard() {
   const { data, isPending } = useMeQuery();
 
   if (isPending) {
@@ -10,7 +10,7 @@ export default function Entrypoint() {
   }
 
   if (data) {
-    return <Redirect href="/home" />;
+    return <Slot />;
   }
 
   return <Redirect href="/login" />;
