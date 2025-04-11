@@ -22,10 +22,7 @@ export default function NotFoundPage() {
       <Text style={{ marginBottom: 16, fontSize: 20, fontWeight: "medium" }}>
         Oops! Page not found
       </Text>
-      <Text
-        style={{ marginBottom: 24, textAlign: "center" }}
-        className="mb-6 text-muted-foreground text-center text-balance"
-      >
+      <Text style={{ marginBottom: 24, textAlign: "center" }}>
         It seems like the page you are looking for does not exist or might have
         been removed.
       </Text>
