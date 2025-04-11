@@ -322,7 +322,7 @@ function RegisterButton() {
       { email, password, otp },
       {
         onSuccess: () => {
-          router.push("/");
+          router.navigate("/");
         },
       },
     );

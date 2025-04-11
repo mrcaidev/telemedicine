@@ -175,7 +175,7 @@ function LogInWithEmailButton() {
   const logIn = handleSubmit((variables) => {
     mutate(variables, {
       onSuccess: () => {
-        router.push("/");
+        router.navigate("/");
       },
     });
   });
