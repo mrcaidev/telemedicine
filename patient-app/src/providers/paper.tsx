@@ -1,3 +1,4 @@
+import type { PropsWithChildren } from "react";
 import { MD3LightTheme, PaperProvider as Provider } from "react-native-paper";
 
 const theme = {
@@ -46,6 +47,6 @@ const theme = {
   },
 };
 
-export function PaperProvider({ children }: { children: React.ReactNode }) {
+export function PaperProvider({ children }: PropsWithChildren) {
   return <Provider theme={theme}>{children}</Provider>;
 }
