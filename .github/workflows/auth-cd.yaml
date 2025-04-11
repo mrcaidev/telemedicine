@@ -8,11 +8,14 @@ on:
     paths:
       - auth/**
       - deployment/auth/**
-      - .github/workflows/auth-cd.yaml
   # Deploy to production on release.
   release:
     types:
       - published
+
+permissions:
+  contents: read
+  deployments: write
 
 jobs:
   set-env:
