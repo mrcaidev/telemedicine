@@ -1,10 +1,10 @@
 import { View } from "react-native";
 import { Text } from "react-native-paper";
 
-export default function AppointmentPage() {
+export default function AppointmentListPage() {
   return (
     <View>
-      <Text>Appointment</Text>
+      <Text>Appointment list</Text>
     </View>
   );
 }
