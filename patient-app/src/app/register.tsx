@@ -48,7 +48,7 @@ const formSchema = v.pipe(
         "Password should be 8-20 characters long, with at least one letter, one digit and one special character",
       ),
       v.regex(
-        /[`~!@#$%^&*()-_=+\[{\]}\\|;:'",<.>\/?]/,
+        /[`~!@#$%^&*()\-_=+\[{\]}\\|;:'",<.>\/?]/,
         "Password should be 8-20 characters long, with at least one letter, one digit and one special character",
       ),
     ),
