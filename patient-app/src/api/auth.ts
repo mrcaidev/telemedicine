@@ -7,7 +7,7 @@ export function useMeQuery() {
   return useQuery<Patient>({
     queryKey: ["me"],
     queryFn: async () => {
-      return await request.get("/me");
+      return await request.get("/auth/me");
     },
   });
 }
@@ -21,7 +21,7 @@ export function useLogInWithEmailMutation() {
     { email: string; password: string }
   >({
     mutationFn: async (variables) => {
-      return await request.post("/login", variables);
+      return await request.post("/auth/login", variables);
     },
     onSuccess: async ({ token, ...me }) => {
       await tokenStore.set(token);
