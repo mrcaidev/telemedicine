@@ -40,7 +40,10 @@
     }
   },
   "ios": {
-    "bundleIdentifier": "ink.telemedicine.patient"
+    "bundleIdentifier": "ink.telemedicine.patient",
+    "config": {
+      "usesNonExemptEncryption": false
+    }
   },
   "experiments": {
     "typedRoutes": true
