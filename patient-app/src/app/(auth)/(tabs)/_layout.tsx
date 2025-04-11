@@ -6,7 +6,6 @@ export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
-        animation: "shift",
         headerShown: false,
         sceneStyle: {
           backgroundColor: "transparent",
