@@ -1,13 +1,14 @@
-import { PaperProvider } from "@/providers/paper";
+import "@/global.css";
 import { QueryProvider } from "@/providers/query";
+import { ThemeProvider } from "@/providers/theme";
 import { Slot } from "expo-router";
 
 export default function RootLayout() {
   return (
-    <QueryProvider>
-      <PaperProvider>
+    <ThemeProvider>
+      <QueryProvider>
         <Slot />
-      </PaperProvider>
-    </QueryProvider>
+      </QueryProvider>
+    </ThemeProvider>
   );
 }
