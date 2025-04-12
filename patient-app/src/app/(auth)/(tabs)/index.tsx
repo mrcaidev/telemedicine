@@ -1,4 +1,5 @@
 import { useUpcomingAppointmentQuery } from "@/api/appointment";
+import { useMeQuery } from "@/api/auth";
 import {
   HighlightedAppointment,
   HighlightedAppointmentError,
@@ -12,7 +13,10 @@ import { Icon, Text, useTheme } from "react-native-paper";
 export default function HomePage() {
   return (
     <ScrollView style={{ paddingHorizontal: 24 }}>
-      <View style={{ paddingTop: 24 }}>
+      <View style={{ paddingTop: 12 }}>
+        <Greeting />
+      </View>
+      <View style={{ paddingTop: 28 }}>
         <View
           style={{
             flexDirection: "row",
@@ -40,6 +44,35 @@ export default function HomePage() {
       </View>
     </ScrollView>
   );
+}
+
+function Greeting() {
+  const { data: me } = useMeQuery();
+
+  const { text, emoji } = greet();
+
+  return (
+    <View style={{ gap: 4 }}>
+      <Text style={{ fontSize: 16, fontWeight: "bold" }}>
+        {text}, {me?.nickname ?? "user"} {emoji}
+      </Text>
+      <Text style={{ opacity: 0.7 }}>How are you feeling today?</Text>
+    </View>
+  );
+}
+
+function greet() {
+  const hour = new Date().getHours();
+  if (hour < 6) {
+    return { text: "It's late", emoji: "🛏️" };
+  }
+  if (hour < 12) {
+    return { text: "Good morning", emoji: "🍞" };
+  }
+  if (hour < 18) {
+    return { text: "Good afternoon", emoji: "☀" };
+  }
+  return { text: "Good evening", emoji: "🌙" };
 }
 
 function UpcomingAppointment() {
