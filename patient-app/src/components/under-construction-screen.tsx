@@ -1,30 +1,33 @@
+import { useRouter } from "expo-router";
+import { ArrowLeftIcon, ConstructionIcon } from "lucide-react-native";
 import { View } from "react-native";
-import { Icon, Text } from "react-native-paper";
+import { Button } from "./ui/button";
+import { Icon } from "./ui/icon";
+import { Text } from "./ui/text";
+import { Muted } from "./ui/typography";
 
 export function UnderConstructionScreen() {
+  const router = useRouter();
+
+  const goBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+      return;
+    }
+    router.navigate("/");
+  };
+
   return (
-    <View
-      style={{
-        flexGrow: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        padding: 24,
-      }}
-    >
-      <Icon source="sign-caution" size={112} />
-      <Text
-        style={{
-          marginTop: 8,
-          marginBottom: 16,
-          fontSize: 20,
-          fontWeight: "medium",
-        }}
-      >
-        Under construction
-      </Text>
-      <Text style={{ marginBottom: 24, textAlign: "center" }}>
-        We are working on this page right now. Please check back later!
-      </Text>
+    <View className="grow items-center justify-center p-6">
+      <Icon as={ConstructionIcon} size={112} className="mb-2" />
+      <Text className="mb-3 text-2xl font-medium">Under construction</Text>
+      <Muted className="mb-6 text-center">
+        We are working on this part right now. Please check back later!
+      </Muted>
+      <Button onPress={goBack}>
+        <Icon as={ArrowLeftIcon} />
+        <Text>Go back</Text>
+      </Button>
     </View>
   );
 }

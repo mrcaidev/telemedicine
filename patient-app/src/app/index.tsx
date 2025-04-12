@@ -1,5 +1,5 @@
-import { LoadingScreen } from "@/components/loading-screen";
+import { UnderConstructionScreen } from "@/components/under-construction-screen";
 
 export default function HomePage() {
-  return <LoadingScreen />;
+  return <UnderConstructionScreen />;
 }
