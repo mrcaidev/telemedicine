@@ -47,7 +47,7 @@ export function HighlightedAppointment({ appointment }: Props) {
               flexDirection: "row",
               alignItems: "center",
               gap: 8,
-              marginBottom: 8,
+              marginBottom: 12,
             }}
           >
             <Icon source="calendar-clock-outline" size={16} />
