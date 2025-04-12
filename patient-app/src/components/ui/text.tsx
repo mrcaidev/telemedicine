@@ -1,28 +1,22 @@
 import * as Slot from "@rn-primitives/slot";
 import type { SlottableTextProps, TextRef } from "@rn-primitives/types";
-import * as React from "react";
-import { Text as RNText } from "react-native";
+import { createContext, forwardRef, useContext } from "react";
+import { Text as NativeText } from "react-native";
 import { cn } from "./utils";
 
-const TextClassContext = React.createContext<string | undefined>(undefined);
+export const TextClassNameContext = createContext("");
 
-const Text = React.forwardRef<TextRef, SlottableTextProps>(
-  ({ className, asChild = false, ...props }, ref) => {
-    const textClass = React.useContext(TextClassContext);
-    const Component = asChild ? Slot.Text : RNText;
+export const Text = forwardRef<TextRef, SlottableTextProps>(
+  ({ asChild = false, className, ...props }, ref) => {
+    const textClassName = useContext(TextClassNameContext);
+    const Component = asChild ? Slot.Text : NativeText;
     return (
       <Component
-        className={cn(
-          "font-sans text-base text-foreground web:select-text",
-          textClass,
-          className,
-        )}
         ref={ref}
+        className={cn("text-foreground text-base", textClassName, className)}
         {...props}
       />
     );
   },
 );
 Text.displayName = "Text";
-
-export { Text, TextClassContext };

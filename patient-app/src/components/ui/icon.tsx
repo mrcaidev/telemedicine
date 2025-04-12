@@ -1,14 +1,14 @@
 import type { LucideIcon, LucideProps } from "lucide-react-native";
 import { cssInterop } from "nativewind";
 import { useContext } from "react";
-import { TextClassContext } from "./text";
+import { TextClassNameContext } from "./text";
 import { cn } from "./utils";
 
-type Props = LucideProps & {
+export type IconProps = LucideProps & {
   as: LucideIcon;
 };
 
-export function Icon({ as: Component, className, ...props }: Props) {
+export const Icon = ({ as: Component, className, ...props }: IconProps) => {
   cssInterop(Component, {
     className: {
       target: "style",
@@ -21,9 +21,13 @@ export function Icon({ as: Component, className, ...props }: Props) {
     },
   });
 
-  const textClassName = useContext(TextClassContext);
+  const textClassName = useContext(TextClassNameContext);
 
   return (
-    <Component size={16} className={cn(textClassName, className)} {...props} />
+    <Component
+      size={16}
+      className={cn("text-foreground", textClassName, className)}
+      {...props}
+    />
   );
-}
+};

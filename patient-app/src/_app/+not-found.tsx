@@ -1,6 +1,6 @@
+import { Button } from "@/components/ui/button";
 import { useRouter } from "expo-router";
-import { View } from "react-native";
-import { Button, Text } from "react-native-paper";
+import { Text, View } from "react-native";
 
 export default function NotFoundPage() {
   const router = useRouter();
@@ -26,9 +26,7 @@ export default function NotFoundPage() {
         It seems like the page you are looking for does not exist or might have
         been removed.
       </Text>
-      <Button mode="contained" icon="home" onPress={goHome}>
-        Take me home
-      </Button>
+      <Button onPress={goHome}>Take me home</Button>
     </View>
   );
 }

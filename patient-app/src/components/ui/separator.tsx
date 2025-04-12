@@ -1,8 +1,8 @@
 import * as SeparatorPrimitive from "@rn-primitives/separator";
-import * as React from "react";
+import { forwardRef } from "react";
 import { cn } from "./utils";
 
-const Separator = React.forwardRef<
+export const Separator = forwardRef<
   SeparatorPrimitive.RootRef,
   SeparatorPrimitive.RootProps
 >(
@@ -12,11 +12,11 @@ const Separator = React.forwardRef<
   ) => (
     <SeparatorPrimitive.Root
       ref={ref}
-      decorative={decorative}
       orientation={orientation}
+      decorative={decorative}
       className={cn(
         "shrink-0 bg-border",
-        orientation === "horizontal" ? "h-[1px] w-full" : "h-full w-[1px]",
+        orientation === "horizontal" ? "w-full h-[1px]" : "w-[1px] h-full",
         className,
       )}
       {...props}
@@ -24,5 +24,3 @@ const Separator = React.forwardRef<
   ),
 );
 Separator.displayName = SeparatorPrimitive.Root.displayName;
-
-export { Separator };

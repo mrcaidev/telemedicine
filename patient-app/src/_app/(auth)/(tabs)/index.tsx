@@ -5,15 +5,16 @@ import {
   HighlightedAppointmentError,
   HighlightedAppointmentSkeleton,
 } from "@/components/appointment/highlighted-appointment";
+import { Icon } from "@/components/ui/icon";
 import { LinearGradient } from "expo-linear-gradient";
 import { Link } from "expo-router";
-import { ScrollView, View } from "react-native";
-import { Icon, Text, useTheme } from "react-native-paper";
+import { ArrowRightIcon, BotIcon } from "lucide-react-native";
+import { ScrollView, Text, View } from "react-native";
 
 export default function HomePage() {
   return (
     <ScrollView style={{ paddingHorizontal: 24 }}>
-      <View style={{ paddingTop: 12 }}>
+      {/* <View style={{ paddingTop: 12 }}>
         <Greeting />
       </View>
       <View style={{ paddingTop: 28 }}>
@@ -41,7 +42,7 @@ export default function HomePage() {
           </Text>
         </View>
         <ChatPageLink />
-      </View>
+      </View> */}
     </ScrollView>
   );
 }
@@ -90,8 +91,6 @@ function UpcomingAppointment() {
 }
 
 function ChatPageLink() {
-  const theme = useTheme();
-
   return (
     <Link href="/chat">
       <LinearGradient
@@ -114,19 +113,12 @@ function ChatPageLink() {
             backgroundColor: "#ffffff44",
           }}
         >
-          <Icon
-            source="robot-outline"
-            size={24}
-            color={theme.colors.background}
-          />
+          <Icon as={BotIcon} size={24} />
         </View>
         <View style={{ gap: 2 }}>
-          <Text style={{ color: theme.colors.onPrimary }}>
-            AI Symptom Evaluation
-          </Text>
+          <Text>AI Symptom Evaluation</Text>
           <Text
             style={{
-              color: theme.colors.onPrimary,
               fontSize: 12,
               opacity: 0.7,
             }}
@@ -135,7 +127,7 @@ function ChatPageLink() {
           </Text>
         </View>
         <View style={{ marginLeft: "auto" }}>
-          <Icon source="arrow-right" size={20} color={theme.colors.onPrimary} />
+          <Icon as={ArrowRightIcon} size={20} />
         </View>
       </LinearGradient>
     </Link>

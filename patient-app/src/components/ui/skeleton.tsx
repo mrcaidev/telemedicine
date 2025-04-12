@@ -1,4 +1,4 @@
-import * as React from "react";
+import { type ComponentPropsWithoutRef, useEffect } from "react";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -8,24 +8,23 @@ import Animated, {
 } from "react-native-reanimated";
 import { cn } from "./utils";
 
-const duration = 1000;
-
-function Skeleton({
+export const Skeleton = ({
   className,
   ...props
-}: Omit<React.ComponentPropsWithoutRef<typeof Animated.View>, "style">) {
+}: Omit<ComponentPropsWithoutRef<typeof Animated.View>, "style">) => {
   const sv = useSharedValue(1);
 
-  React.useEffect(() => {
+  useEffect(() => {
     sv.value = withRepeat(
-      withSequence(withTiming(0.5, { duration }), withTiming(1, { duration })),
+      withSequence(
+        withTiming(0.5, { duration: 1000 }),
+        withTiming(1, { duration: 1000 }),
+      ),
       -1,
     );
-  }, []);
+  }, [sv]);
 
-  const style = useAnimatedStyle(() => ({
-    opacity: sv.value,
-  }));
+  const style = useAnimatedStyle(() => ({ opacity: sv.value }));
 
   return (
     <Animated.View
@@ -34,6 +33,4 @@ function Skeleton({
       {...props}
     />
   );
-}
-
-export { Skeleton };
+};
