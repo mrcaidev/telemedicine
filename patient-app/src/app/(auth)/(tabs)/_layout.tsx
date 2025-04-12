@@ -1,48 +1,21 @@
-import { CommonActions } from "@react-navigation/native";
 import { Tabs } from "expo-router";
-import { BottomNavigation, Icon } from "react-native-paper";
+import { Icon, useTheme } from "react-native-paper";
 
 export default function TabsLayout() {
+  const theme = useTheme();
+
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
+        tabBarActiveBackgroundColor: theme.colors.background,
+        tabBarActiveTintColor: theme.colors.primary,
+        tabBarInactiveBackgroundColor: theme.colors.background,
+        tabBarInactiveTintColor: theme.colors.outline,
         sceneStyle: {
           backgroundColor: "transparent",
         },
       }}
-      tabBar={({ descriptors, insets, navigation, state }) => (
-        <BottomNavigation.Bar
-          navigationState={state}
-          onTabPress={({ route, preventDefault }) => {
-            const event = navigation.emit({
-              type: "tabPress",
-              target: route.key,
-              canPreventDefault: true,
-            });
-            if (event.defaultPrevented) {
-              preventDefault();
-              return;
-            }
-            // @ts-ignore
-            navigation.dispatch({
-              ...CommonActions.navigate(route.name, route.params),
-              target: state.key,
-            });
-          }}
-          safeAreaInsets={insets}
-          getLabelText={({ route }) => {
-            return descriptors[route.key]?.options.tabBarLabel as string;
-          }}
-          renderIcon={({ route, focused, color }) => {
-            return descriptors[route.key]?.options.tabBarIcon?.({
-              focused,
-              color,
-              size: 24,
-            });
-          }}
-        />
-      )}
     >
       <Tabs.Screen
         name="index"
