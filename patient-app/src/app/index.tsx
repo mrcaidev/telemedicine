@@ -1,10 +1,5 @@
-import { Input } from "@/components/ui/input";
-import { View } from "react-native";
+import { LoadingScreen } from "@/components/loading-screen";
 
 export default function HomePage() {
-  return (
-    <View>
-      <Input placeholder="test" />
-    </View>
-  );
+  return <LoadingScreen />;
 }

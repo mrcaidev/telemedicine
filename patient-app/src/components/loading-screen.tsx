@@ -1,12 +1,10 @@
 import { View } from "react-native";
-import { ActivityIndicator } from "react-native-paper";
+import { Spinner } from "./spinner";
 
 export function LoadingScreen() {
   return (
-    <View
-      style={{ flexGrow: 1, justifyContent: "center", alignItems: "center" }}
-    >
-      <ActivityIndicator size="large" />
+    <View className="grow items-center justify-center">
+      <Spinner size={48} />
     </View>
   );
 }
