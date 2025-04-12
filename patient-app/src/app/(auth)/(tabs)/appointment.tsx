@@ -1,10 +1,5 @@
-import { View } from "react-native";
-import { Text } from "react-native-paper";
+import { UnderConstructionScreen } from "@/components/under-construction-screen";
 
 export default function AppointmentListPage() {
-  return (
-    <View>
-      <Text>Appointment list</Text>
-    </View>
-  );
+  return <UnderConstructionScreen />;
 }
