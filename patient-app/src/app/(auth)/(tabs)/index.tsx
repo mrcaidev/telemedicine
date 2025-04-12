@@ -121,14 +121,14 @@ function ChatPageLink() {
           />
         </View>
         <View style={{ gap: 2 }}>
-          <Text style={{ color: theme.colors.onPrimary, fontSize: 14 }}>
+          <Text style={{ color: theme.colors.onPrimary }}>
             AI Symptom Evaluation
           </Text>
           <Text
             style={{
               color: theme.colors.onPrimary,
               fontSize: 12,
-              opacity: 0.8,
+              opacity: 0.7,
             }}
           >
             Chat and get instant guidance

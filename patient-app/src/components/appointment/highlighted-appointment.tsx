@@ -29,13 +29,15 @@ export function HighlightedAppointment({ data }: Props) {
           <Avatar
             url={doctor.avatarUrl}
             text={`${doctor.firstName[0]}${doctor.lastName[0]}`}
-            size={44}
+            size={40}
           />
           <View style={{ marginRight: "auto" }}>
-            <Text numberOfLines={1} style={{ maxWidth: 128, fontSize: 16 }}>
+            <Text numberOfLines={1} style={{ maxWidth: 128 }}>
               Dr. {doctor.firstName} {doctor.lastName}
             </Text>
-            <Text style={{ opacity: 0.7 }}>{doctor.specialties[0]}</Text>
+            <Text style={{ fontSize: 12, opacity: 0.7 }}>
+              {doctor.specialties[0]}
+            </Text>
           </View>
           <StatusBadge appointment={data} />
         </View>
