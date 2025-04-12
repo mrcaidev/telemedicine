@@ -177,7 +177,7 @@ export const Muted = forwardRef<TextRef, SlottableTextProps>(
     return (
       <Component
         ref={ref}
-        className={cn("text-muted-foreground", className)}
+        className={cn("text-muted-foreground text-base", className)}
         {...props}
       />
     );
