@@ -1,4 +1,4 @@
-import { useRouter } from "expo-router";
+import { useGoBack } from "@/hooks/use-go-back";
 import { ArrowLeftIcon, ConstructionIcon } from "lucide-react-native";
 import { View } from "react-native";
 import { Button } from "./ui/button";
@@ -7,15 +7,7 @@ import { Text } from "./ui/text";
 import { Muted } from "./ui/typography";
 
 export function UnderConstructionScreen() {
-  const router = useRouter();
-
-  const goBack = () => {
-    if (router.canGoBack()) {
-      router.back();
-      return;
-    }
-    router.navigate("/");
-  };
+  const goBack = useGoBack();
 
   return (
     <View className="grow items-center justify-center p-6">

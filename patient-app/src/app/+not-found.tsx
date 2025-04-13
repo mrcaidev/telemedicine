@@ -2,20 +2,12 @@ import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { Text } from "@/components/ui/text";
 import { Muted } from "@/components/ui/typography";
-import { useRouter } from "expo-router";
+import { useGoBack } from "@/hooks/use-go-back";
 import { ArrowLeftIcon } from "lucide-react-native";
 import { View } from "react-native";
 
 export default function NotFoundPage() {
-  const router = useRouter();
-
-  const goBack = () => {
-    if (router.canGoBack()) {
-      router.back();
-      return;
-    }
-    router.navigate("/");
-  };
+  const goBack = useGoBack();
 
   return (
     <View className="grow items-center justify-center p-6">
