@@ -6,6 +6,7 @@ import {
   HighlightedAppointmentSkeleton,
 } from "@/components/appointment/highlighted-appointment-card";
 import { Icon } from "@/components/ui/icon";
+import { Separator } from "@/components/ui/separator";
 import { Text } from "@/components/ui/text";
 import { Muted } from "@/components/ui/typography";
 import { LinearGradient } from "expo-linear-gradient";
@@ -17,7 +18,8 @@ export default function HomePage() {
   return (
     <ScrollView className="px-6">
       <Greeting />
-      <View className="flex-row items-center justify-between mt-8 mb-3">
+      <Separator className="mt-6" />
+      <View className="flex-row items-center justify-between mt-4 mb-3">
         <Text className="text-lg font-semibold">Upcoming Appointment</Text>
         <Link href="/appointment" className="text-primary text-sm">
           View all
