@@ -6,7 +6,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 import { Text } from "@/components/ui/text";
 import { Muted, Small } from "@/components/ui/typography";
 import { useCountdown } from "@/hooks/use-countdown";
@@ -96,7 +95,6 @@ export default function RegisterPage() {
           <RegisterButton />
         </FormProvider>
       </View>
-      <Separator className="mt-6 mb-4" />
       <LogInPrompt />
     </View>
   );
@@ -307,7 +305,7 @@ function RegisterButton() {
 
 function LogInPrompt() {
   return (
-    <Text className="text-center">
+    <Text className="mt-4 text-center">
       Already have an account?&nbsp;
       <Link href="/login" className="text-primary">
         Log in
