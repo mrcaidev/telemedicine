@@ -2,10 +2,10 @@ import { Text } from "@/components/ui/text";
 import { H1, H2, P } from "@/components/ui/typography";
 import { ScrollView, View } from "react-native";
 
-export default function TermsOfServicesPage() {
+export default function TermsOfServicePage() {
   return (
     <ScrollView className="px-6">
-      <H1 className="mt-6">Terms of Services</H1>
+      <H1 className="mt-6">Terms of Service</H1>
       <Text className="mt-3 italic">Last updated on April 11, 2025</Text>
       <H2 className="mt-6">1 Introduction</H2>
       <P className="mt-3">
