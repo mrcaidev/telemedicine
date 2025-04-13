@@ -5,6 +5,7 @@ import {
   HighlightedAppointmentError,
   HighlightedAppointmentSkeleton,
 } from "@/components/appointment/highlighted-appointment-card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Icon } from "@/components/ui/icon";
 import { Separator } from "@/components/ui/separator";
 import { Text } from "@/components/ui/text";
@@ -18,7 +19,7 @@ export default function HomePage() {
   return (
     <ScrollView className="px-6">
       <Greeting />
-      <Separator className="mt-6" />
+      <Separator className="mt-2" />
       <View className="flex-row items-center justify-between mt-4 mb-3">
         <Text className="text-lg font-semibold">Upcoming Appointment</Text>
         <Link href="/appointment" className="text-primary text-sm">
@@ -35,6 +36,10 @@ export default function HomePage() {
 function Greeting() {
   const { data: me } = useMeQuery();
 
+  if (!me) {
+    return null;
+  }
+
   const { text, emoji } = (() => {
     const hour = new Date().getHours();
     if (hour < 6) {
@@ -50,11 +55,18 @@ function Greeting() {
   })();
 
   return (
-    <View className="gap-1 mt-4">
-      <Text className="text-lg font-medium">
-        {text}, {me?.nickname ?? "user"} {emoji}
+    <View className="flex-row items-center gap-3 my-2">
+      <Link href="/me">
+        <Avatar alt="My avatar" className="size-9">
+          <AvatarImage source={{ uri: me.avatarUrl ?? undefined }} />
+          <AvatarFallback>
+            <Muted>{me.nickname}</Muted>
+          </AvatarFallback>
+        </Avatar>
+      </Link>
+      <Text className="font-medium">
+        {text}, {me.nickname} {emoji}
       </Text>
-      <Muted>How are you feeling today?</Muted>
     </View>
   );
 }
