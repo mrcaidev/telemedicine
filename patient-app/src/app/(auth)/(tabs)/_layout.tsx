@@ -4,7 +4,7 @@ import { CalendarIcon, HouseIcon, UserRoundIcon } from "lucide-react-native";
 
 export default function TabsLayout() {
   return (
-    <Tabs screenOptions={{ headerShown: false }}>
+    <Tabs screenOptions={{ animation: "shift", headerShown: false }}>
       <Tabs.Screen
         name="index"
         options={{
