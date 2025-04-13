@@ -1,31 +1,15 @@
-# -------- 构建阶段 --------
-FROM node:23-slim AS builder
-
-# 设置构建参数（可通过 docker build --build-arg ENV=development 传入）
-ARG ENV=production
-
-WORKDIR /app
-
-COPY package*.json ./
-
-COPY .env.${ENV} .env
-
-RUN npm install
-
+FROM node:lts-alpine AS build
+WORKDIR /code
+COPY package.json package-lock.json ./
+RUN npm ci
 COPY . .
-
+ENV NODE_ENV=production
 RUN npm run build
 
-RUN npm prune --omit=dev
-
-# -------- 运行阶段 --------
-FROM node:23-slim AS runner
-
+FROM node:lts-alpine
 WORKDIR /app
-
-COPY --from=builder /app ./
-
-# 监听端口
-EXPOSE 3000
-
-CMD ["npm", "start"]
+COPY --from=build /code/public public
+COPY --from=build /code/.next/standalone .
+COPY --from=build /code/.next/static .next/static
+ENV HOSTNAME=0.0.0.0
+CMD ["node", "server.js"]
