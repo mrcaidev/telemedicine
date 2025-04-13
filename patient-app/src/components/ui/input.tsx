@@ -9,7 +9,7 @@ export const Input = forwardRef<ElementRef<typeof TextInput>, TextInputProps>(
         ref={ref}
         editable={editable}
         className={cn(
-          "w-full px-3 py-2 border border-input rounded-md bg-background text-foreground text-lg file:border-0 file:bg-transparent file:font-medium",
+          "px-3 py-2 border border-input rounded-md bg-background text-foreground text-lg file:border-0 file:bg-transparent file:font-medium",
           editable === false && "opacity-50",
           className,
         )}
