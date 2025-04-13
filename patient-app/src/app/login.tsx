@@ -93,7 +93,7 @@ function PasswordInput() {
           <Input
             {...field}
             onChangeText={field.onChange}
-            textContentType="newPassword"
+            textContentType="password"
             secureTextEntry
           />
           {fieldState.error && (
