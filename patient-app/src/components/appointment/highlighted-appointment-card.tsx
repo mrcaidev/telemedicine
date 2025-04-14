@@ -48,13 +48,11 @@ export function HighlightedAppointmentCard({ appointment }: Props) {
           <Icon as={CalendarIcon} className="text-muted-foreground" />
           <Text>{dateObj.format("dddd, LL")}</Text>
           <Muted>
-            (
             {dateObj.isToday()
-              ? "today"
+              ? "(today)"
               : dateObj.isTomorrow()
-                ? "tomorrow"
+                ? "(tomorrow)"
                 : ""}
-            )
           </Muted>
         </View>
         <View className="flex-row items-center gap-2">
