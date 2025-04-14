@@ -1,6 +1,7 @@
 import "@/global.css";
 import { QueryProvider } from "@/providers/query";
 import { ThemeProvider } from "@/providers/theme";
+import "@/utils/datetime";
 import { Slot } from "expo-router";
 
 export default function RootLayout() {

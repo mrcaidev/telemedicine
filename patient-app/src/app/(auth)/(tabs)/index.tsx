@@ -82,7 +82,7 @@ function UpcomingAppointment() {
     return <HighlightedAppointmentError message={error.message} />;
   }
 
-  return <HighlightedAppointmentCard data={data} />;
+  return <HighlightedAppointmentCard appointment={data} />;
 }
 
 function ChatPageLink() {

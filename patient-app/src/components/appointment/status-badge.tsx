@@ -1,4 +1,5 @@
 import type { Appointment } from "@/utils/types";
+import dayjs from "dayjs";
 import {
   CheckCheckIcon,
   CheckIcon,
@@ -33,14 +34,14 @@ export function StatusBadge({ appointment }: Props) {
         text: "cancelled",
       };
     }
-    if (new Date().getTime() < new Date(`${date} ${startTime}`).getTime()) {
+    if (dayjs().isBefore(`${date} ${startTime}`)) {
       return {
         badgeClassName: "bg-green-200",
         icon: CheckIcon,
         text: "confirmed",
       };
     }
-    if (new Date().getTime() < new Date(`${date} ${endTime}`).getTime()) {
+    if (dayjs().isAfter(`${date} ${endTime}`)) {
       return {
         badgeClassName: "bg-blue-200",
         icon: HourglassIcon,

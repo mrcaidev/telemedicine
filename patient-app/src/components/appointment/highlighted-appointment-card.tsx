@@ -1,4 +1,5 @@
 import type { Appointment } from "@/utils/types";
+import dayjs from "dayjs";
 import { Link } from "expo-router";
 import { AlertCircleIcon, CalendarIcon, ClockIcon } from "lucide-react-native";
 import { View } from "react-native";
@@ -10,23 +11,13 @@ import { Muted } from "../ui/typography";
 import { StatusBadge } from "./status-badge";
 
 type Props = {
-  data: Appointment;
+  appointment: Appointment;
 };
 
-const dateFormat = Intl.DateTimeFormat("en-SG", {
-  year: "numeric",
-  month: "long",
-  day: "numeric",
-  weekday: "long",
-});
+export function HighlightedAppointmentCard({ appointment }: Props) {
+  const { id, doctor, date, startTime, endTime } = appointment;
 
-const timeFormat = Intl.DateTimeFormat("en-SG", {
-  hour: "numeric",
-  minute: "numeric",
-});
-
-export function HighlightedAppointmentCard({ data }: Props) {
-  const { id, doctor, date, startTime, endTime } = data;
+  const dateObj = dayjs(date);
 
   return (
     <Link href={{ pathname: "/appointment/[id]", params: { id } }}>
@@ -41,24 +32,37 @@ export function HighlightedAppointmentCard({ data }: Props) {
               </Muted>
             </AvatarFallback>
           </Avatar>
-          <View className="mr-auto">
-            <Text className="max-w-40 font-medium line-clamp-1">
+          <View className="max-w-40 mr-auto">
+            <Text className="font-medium line-clamp-1">
               Dr. {doctor.firstName} {doctor.lastName}
             </Text>
-            <Muted className="text-sm">{doctor.specialties[0] ?? "..."}</Muted>
+            <Muted className="text-sm line-clamp-1">
+              {doctor.specialties.join(", ") || "..."}
+            </Muted>
           </View>
-          <StatusBadge appointment={data} />
+          <View className="self-start">
+            <StatusBadge appointment={appointment} />
+          </View>
         </View>
         <View className="flex-row items-center gap-2 mb-2">
           <Icon as={CalendarIcon} className="text-muted-foreground" />
-          <Text>{dateFormat.format(new Date(date))}</Text>
+          <Text>{dateObj.format("dddd, LL")}</Text>
+          <Muted>
+            (
+            {dateObj.isToday()
+              ? "today"
+              : dateObj.isTomorrow()
+                ? "tomorrow"
+                : ""}
+            )
+          </Muted>
         </View>
         <View className="flex-row items-center gap-2">
           <Icon as={ClockIcon} className="text-muted-foreground" />
           <Text>
-            {timeFormat.format(new Date(`${date} ${startTime}`))}
+            {dayjs(`${date} ${startTime}`).format("LT")}
             &nbsp;-&nbsp;
-            {timeFormat.format(new Date(`${date} ${endTime}`))}
+            {dayjs(`${date} ${endTime}`).format("LT")}
           </Text>
         </View>
       </View>
@@ -75,7 +79,7 @@ export function HighlightedAppointmentSkeleton() {
           <Skeleton className="w-32 h-5" />
           <Skeleton className="w-20 h-4" />
         </View>
-        <Skeleton className="w-20 h-6 rounded-full" />
+        <Skeleton className="self-start w-20 h-6 rounded-full" />
       </View>
       <Skeleton className="h-6 mb-2" />
       <Skeleton className="h-6" />
