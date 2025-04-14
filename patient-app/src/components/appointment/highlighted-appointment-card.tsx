@@ -40,9 +40,7 @@ export function HighlightedAppointmentCard({ appointment }: Props) {
               {doctor.specialties.join(", ") || "..."}
             </Muted>
           </View>
-          <View className="self-start">
-            <StatusBadge appointment={appointment} />
-          </View>
+          <StatusBadge appointment={appointment} />
         </View>
         <View className="flex-row items-center gap-2 mb-2">
           <Icon as={CalendarIcon} className="text-muted-foreground" />
