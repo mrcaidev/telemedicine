@@ -87,6 +87,15 @@ export function HighlightedAppointmentSkeleton() {
   );
 }
 
+export function HighlightedAppointmentEmpty() {
+  return (
+    <View className="flex-row items-center justify-center gap-2 h-36 p-4 border border-border rounded-lg bg-card">
+      <Icon as={CalendarIcon} />
+      <Text>No upcoming appointments</Text>
+    </View>
+  );
+}
+
 type ErrorProps = {
   message: string;
 };

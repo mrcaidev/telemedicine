@@ -1,7 +1,8 @@
-import { useUpcomingAppointmentQuery } from "@/api/appointment";
+import { useAppointmentsQuery } from "@/api/appointment";
 import { useMeQuery } from "@/api/auth";
 import {
   HighlightedAppointmentCard,
+  HighlightedAppointmentEmpty,
   HighlightedAppointmentError,
   HighlightedAppointmentSkeleton,
 } from "@/components/appointment/highlighted-appointment-card";
@@ -72,7 +73,11 @@ function Greeting() {
 }
 
 function UpcomingAppointment() {
-  const { data, error, isPending } = useUpcomingAppointmentQuery();
+  const {
+    data: appointments,
+    error,
+    isPending,
+  } = useAppointmentsQuery({ limit: 1 });
 
   if (isPending) {
     return <HighlightedAppointmentSkeleton />;
@@ -82,7 +87,11 @@ function UpcomingAppointment() {
     return <HighlightedAppointmentError message={error.message} />;
   }
 
-  return <HighlightedAppointmentCard appointment={data} />;
+  if (!appointments[0]) {
+    return <HighlightedAppointmentEmpty />;
+  }
+
+  return <HighlightedAppointmentCard appointment={appointments[0]} />;
 }
 
 function ChatPageLink() {
