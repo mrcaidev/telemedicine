@@ -1,4 +1,18 @@
-import { useAppointmentQuery } from "@/api/appointment";
+import {
+  useAppointmentQuery,
+  useCancelAppointmentMutation,
+} from "@/api/appointment";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
@@ -8,6 +22,7 @@ import { getAppointmentRealtimeStatus } from "@/utils/appointment";
 import dayjs from "dayjs";
 import { Link, useLocalSearchParams } from "expo-router";
 import {
+  ArrowRightIcon,
   CalendarIcon,
   ChartNoAxesColumnIcon,
   ClockIcon,
@@ -99,10 +114,41 @@ export default function AppointmentDetailsPage() {
           <Text>{remark}</Text>
         </View>
       </ScrollView>
-      <Button variant="outline" className="my-6">
-        <Icon as={XIcon} />
-        <Text>Cancel appointment</Text>
-      </Button>
+      <CancelAppointmentButton />
     </View>
+  );
+}
+
+function CancelAppointmentButton() {
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const { mutate, isPending } = useCancelAppointmentMutation(id);
+
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button variant="outline" className="my-6">
+          <Icon as={XIcon} />
+          <Text>Cancel appointment</Text>
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Cancel Appointment</AlertDialogTitle>
+          <AlertDialogDescription>
+            This action is irreversible.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>
+            <Icon as={XIcon} />
+            <Text>Close</Text>
+          </AlertDialogCancel>
+          <AlertDialogAction disabled={isPending} onPress={() => mutate()}>
+            <Icon as={ArrowRightIcon} />
+            <Text>Continue</Text>
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }

@@ -1,5 +1,5 @@
 import type { Appointment } from "@/utils/types";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { request } from "./request";
 
 type UseAppointmentsQueryOptions = {
@@ -34,6 +34,19 @@ export function useAppointmentQuery(id: string) {
     queryKey: ["appointment", id],
     queryFn: async () => {
       return await request.get(`/appointments/${id}`);
+    },
+  });
+}
+
+export function useCancelAppointmentMutation(id: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation<null, Error, void>({
+    mutationFn: async () => {
+      return await request.delete(`/appointments/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["appointment"] });
     },
   });
 }

@@ -2,6 +2,7 @@ import "@/global.css";
 import { QueryProvider } from "@/providers/query";
 import { ThemeProvider } from "@/providers/theme";
 import "@/utils/datetime";
+import { PortalHost } from "@rn-primitives/portal";
 import { Slot } from "expo-router";
 
 export default function RootLayout() {
@@ -9,6 +10,7 @@ export default function RootLayout() {
     <ThemeProvider>
       <QueryProvider>
         <Slot />
+        <PortalHost />
       </QueryProvider>
     </ThemeProvider>
   );

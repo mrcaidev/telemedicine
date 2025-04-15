@@ -15,6 +15,7 @@
     "@hookform/resolvers": "^5.0.1",
     "@react-navigation/bottom-tabs": "^7.2.0",
     "@react-navigation/native": "^7.0.14",
+    "@rn-primitives/alert-dialog": "^1.1.0",
     "@rn-primitives/avatar": "^1.1.0",
     "@rn-primitives/checkbox": "^1.1.0",
     "@rn-primitives/label": "^1.1.0",
