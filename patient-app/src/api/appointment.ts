@@ -28,3 +28,12 @@ export function useAppointmentsQuery(
     },
   });
 }
+
+export function useAppointmentQuery(id: string) {
+  return useQuery<Appointment>({
+    queryKey: ["appointment", id],
+    queryFn: async () => {
+      return await request.get(`/appointments/${id}`);
+    },
+  });
+}

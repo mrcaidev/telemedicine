@@ -1,3 +1,4 @@
+import { getAppointmentRealtimeStatus } from "@/utils/appointment";
 import type { Appointment } from "@/utils/types";
 import dayjs from "dayjs";
 import { Link } from "expo-router";
@@ -40,7 +41,7 @@ export function HighlightedAppointmentCard({ appointment }: Props) {
               {doctor.specialties.join(", ") || "..."}
             </Muted>
           </View>
-          <StatusBadge appointment={appointment} />
+          <StatusBadge status={getAppointmentRealtimeStatus(appointment)} />
         </View>
         <View className="flex-row items-center gap-2 mb-2">
           <Icon as={CalendarIcon} className="text-muted-foreground" />

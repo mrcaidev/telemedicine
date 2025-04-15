@@ -1,5 +1,4 @@
-import type { Appointment } from "@/utils/types";
-import dayjs from "dayjs";
+import { AppointmentRealtimeStatus } from "@/utils/appointment";
 import {
   CheckCheckIcon,
   CheckIcon,
@@ -13,35 +12,33 @@ import { Text } from "../ui/text";
 import { cn } from "../ui/utils";
 
 type Props = {
-  appointment: Appointment;
+  status: (typeof AppointmentRealtimeStatus)[keyof typeof AppointmentRealtimeStatus];
 };
 
-export function StatusBadge({ appointment }: Props) {
-  const { status, date, startTime, endTime } = appointment;
-
+export function StatusBadge({ status }: Props) {
   const { badgeClassName, icon, text } = (() => {
-    if (status === "to_be_rescheduled") {
+    if (status === AppointmentRealtimeStatus.ToBeRescheduled) {
       return {
         badgeClassName: "bg-yellow-200",
         icon: RotateCwIcon,
         text: "rescheduling",
       };
     }
-    if (status === "cancelled") {
+    if (status === AppointmentRealtimeStatus.Cancelled) {
       return {
         badgeClassName: "bg-red-200",
         icon: XIcon,
         text: "cancelled",
       };
     }
-    if (dayjs().isBefore(`${date} ${startTime}`)) {
+    if (status === AppointmentRealtimeStatus.Confirmed) {
       return {
         badgeClassName: "bg-green-200",
         icon: CheckIcon,
         text: "confirmed",
       };
     }
-    if (dayjs().isAfter(`${date} ${endTime}`)) {
+    if (status === AppointmentRealtimeStatus.Ongoing) {
       return {
         badgeClassName: "bg-blue-200",
         icon: HourglassIcon,

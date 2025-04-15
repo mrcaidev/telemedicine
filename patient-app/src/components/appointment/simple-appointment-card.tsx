@@ -1,3 +1,4 @@
+import { getAppointmentRealtimeStatus } from "@/utils/appointment";
 import type { Appointment } from "@/utils/types";
 import dayjs from "dayjs";
 import { Link } from "expo-router";
@@ -36,7 +37,7 @@ export function SimpleAppointmentCard({ appointment }: Props) {
             </Small>
           </View>
         </View>
-        <StatusBadge appointment={appointment} />
+        <StatusBadge status={getAppointmentRealtimeStatus(appointment)} />
       </View>
     </Link>
   );
