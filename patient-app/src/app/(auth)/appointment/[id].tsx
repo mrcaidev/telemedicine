@@ -123,6 +123,10 @@ function CancelAppointmentButton() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { mutate, isPending } = useCancelAppointmentMutation(id);
 
+  const cancel = () => {
+    mutate();
+  };
+
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
@@ -143,7 +147,7 @@ function CancelAppointmentButton() {
             <Icon as={XIcon} />
             <Text>Close</Text>
           </AlertDialogCancel>
-          <AlertDialogAction disabled={isPending} onPress={() => mutate()}>
+          <AlertDialogAction disabled={isPending} onPress={cancel}>
             <Icon as={ArrowRightIcon} />
             <Text>Continue</Text>
           </AlertDialogAction>
