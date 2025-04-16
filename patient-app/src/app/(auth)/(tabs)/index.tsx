@@ -1,4 +1,4 @@
-import { useAppointmentsQuery } from "@/api/appointment";
+import { useAppointmentsInfiniteQuery } from "@/api/appointment";
 import { useMeQuery } from "@/api/auth";
 import {
   HighlightedAppointmentCard,
@@ -75,7 +75,7 @@ function UpcomingAppointment() {
     data: appointments,
     error,
     isPending,
-  } = useAppointmentsQuery({ limit: 1 });
+  } = useAppointmentsInfiniteQuery({ limit: 1 });
 
   if (isPending) {
     return <HighlightedAppointmentSkeleton />;

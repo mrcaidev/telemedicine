@@ -1,31 +1,44 @@
 import type { Appointment } from "@/utils/types";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  type QueryKey,
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { request } from "./request";
 
-type UseAppointmentsQueryOptions = {
+type UseAppointmentsInfiniteQueryOptions = {
   limit?: number;
-  cursor?: string;
-  sortBy?: "date";
+  sortBy?: "startAt" | "endAt";
   sortOrder?: "asc" | "desc";
 };
 
-export function useAppointmentsQuery(
-  options: UseAppointmentsQueryOptions = {},
+export function useAppointmentsInfiniteQuery(
+  options: UseAppointmentsInfiniteQueryOptions = {},
 ) {
-  const { limit = 10, cursor, sortBy = "date", sortOrder = "asc" } = options;
+  const { limit = 10, sortBy = "endAt", sortOrder = "asc" } = options;
 
-  return useQuery<Appointment[]>({
-    queryKey: ["appointment", { limit, cursor, sortBy, sortOrder }],
-    queryFn: async () => {
-      const params = new URLSearchParams();
-      params.append("limit", String(limit));
-      params.append("sortBy", sortBy);
-      params.append("sortOrder", sortOrder);
-      if (cursor) {
-        params.append("cursor", cursor);
-      }
+  return useInfiniteQuery<
+    { appointments: Appointment[]; nextCursor: string | null },
+    Error,
+    Appointment[],
+    QueryKey,
+    string | null
+  >({
+    queryKey: ["appointments", { limit, sortBy, sortOrder }],
+    queryFn: async ({ pageParam: cursor }) => {
+      const params = new URLSearchParams({
+        limit: String(limit),
+        sortBy,
+        sortOrder,
+        ...(cursor && { cursor }),
+      });
       return await request.get(`/appointments?${params}`);
     },
+    initialPageParam: null,
+    getNextPageParam: (lastPage) => lastPage.nextCursor,
+    select: (data) => data.pages.flatMap((page) => page.appointments),
   });
 }
 

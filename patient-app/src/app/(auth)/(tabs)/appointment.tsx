@@ -1,8 +1,9 @@
-import { useAppointmentsQuery } from "@/api/appointment";
+import { useAppointmentsInfiniteQuery } from "@/api/appointment";
 import { HighlightedAppointmentCard } from "@/components/appointment/highlighted-appointment-card";
 import { SimpleAppointmentCard } from "@/components/appointment/simple-appointment-card";
 import { Separator } from "@/components/ui/separator";
 import { Text } from "@/components/ui/text";
+import { Muted } from "@/components/ui/typography";
 import { Link } from "expo-router";
 import { ScrollView, View } from "react-native";
 
@@ -25,7 +26,8 @@ function AppointmentList() {
     data: appointments,
     error,
     isPending,
-  } = useAppointmentsQuery({ limit: 10 });
+    hasNextPage,
+  } = useAppointmentsInfiniteQuery({ limit: 10 });
 
   if (isPending) {
     return <Text>Loading...</Text>;
@@ -52,6 +54,9 @@ function AppointmentList() {
           <SimpleAppointmentCard appointment={appointment} />
         </View>
       ))}
+      <Muted className="mt-2 text-center text-sm">
+        {hasNextPage ? "Loading more for you..." : "- That's all, for now -"}
+      </Muted>
     </View>
   );
 }
