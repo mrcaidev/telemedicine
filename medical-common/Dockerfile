@@ -16,10 +16,10 @@ FROM openjdk:17-slim
 WORKDIR /app
 
 # 复制构建产物
-COPY --from=builder /app/medical-notification/target/medical-notification.jar ./app.jar
+COPY --from=builder /app/medical-eureka-server/target/medical-eureka-server.jar ./app.jar
 
 # 暴露端口
-EXPOSE 8082
+EXPOSE 8761
 
 # 设置时区
 ENV TZ=Asia/Shanghai

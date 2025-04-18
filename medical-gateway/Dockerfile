@@ -1,12 +1,28 @@
+# 构建阶段
+FROM maven:3.8.4-openjdk-17-slim AS builder
+
+# 设置工作目录
+WORKDIR /app
+
+# 复制整个项目
+COPY . .
+
+# 构建项目
+RUN mvn clean package -DskipTests
+
 # 运行阶段
 FROM openjdk:17-slim
 
 WORKDIR /app
 
-# 此处 build context 是 ./medical-gateway
-COPY target/medical-gateway.jar app.jar
+# 复制构建产物
+COPY --from=builder /app/medical-notification/target/medical-notification.jar ./app.jar
 
-EXPOSE 8080
+# 暴露端口
+EXPOSE 8082
+
+# 设置时区
 ENV TZ=Asia/Shanghai
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# 设置启动命令
+ENTRYPOINT ["java", "-jar", "app.jar"] 
