@@ -79,8 +79,8 @@ jobs:
       - name: Build and Push User Service
         uses: docker/build-push-action@v4
         with:
-          context: .
-          file: medical-user/Dockerfile
+          context: ./medical-user
+          file: ./medical-user/Dockerfile
           push: true
           tags: |
             ${{ env.REGISTRY }}/${{ github.repository }}/medical-user:latest
@@ -89,8 +89,8 @@ jobs:
       - name: Build and Push Notification Service
         uses: docker/build-push-action@v4
         with:
-          context: .
-          file: medical-notification/Dockerfile
+          context: ./medical-notification
+          file: ./medical-notification/Dockerfile
           push: true
           tags: |
             ${{ env.REGISTRY }}/${{ github.repository }}/medical-notification:latest
@@ -99,8 +99,8 @@ jobs:
       - name: Build and Push Appointment Service
         uses: docker/build-push-action@v4
         with:
-          context: .
-          file: medical-appointment/Dockerfile
+          context: ./medical-appointment
+          file: ./medical-appointment/Dockerfile
           push: true
           tags: |
             ${{ env.REGISTRY }}/${{ github.repository }}/medical-appointment:latest
@@ -109,8 +109,8 @@ jobs:
       - name: Build and Push Gateway Service
         uses: docker/build-push-action@v4
         with:
-          context: .
-          file: medical-gateway/Dockerfile
+          context: ./medical-gateway
+          file: ./medical-gateway/Dockerfile
           push: true
           tags: |
             ${{ env.REGISTRY }}/${{ github.repository }}/medical-gateway:latest
@@ -119,8 +119,8 @@ jobs:
       - name: Build and Push Eureka Server
         uses: docker/build-push-action@v4
         with:
-          context: .
-          file: medical-eureka-server/Dockerfile
+          context: ./medical-eureka-server
+          file: ./medical-eureka-server/Dockerfile
           push: true
           tags: |
             ${{ env.REGISTRY }}/${{ github.repository }}/medical-eureka-server:latest
