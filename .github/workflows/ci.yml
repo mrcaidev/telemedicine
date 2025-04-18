@@ -53,25 +53,6 @@ jobs:
       - name: Build
         run: cd web-dashboard && npm run build
 
-  build-patient-app:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v1
-        with:
-          bun-version: latest
-
-      - name: Install dependencies
-        run: cd patient-app && bun install
-
-      - name: Lint
-        run: cd patient-app && bun run lint
-
-      - name: Build
-        run: cd patient-app && bun run build
-
   build-auth:
     runs-on: ubuntu-latest
     steps:
@@ -90,7 +71,7 @@ jobs:
 
   # This job will build and push Docker images if on main branch
   deploy:
-    needs: [build-and-test-backend, build-dashboard, build-patient-app, build-auth]
+    needs: [build-and-test-backend, build-dashboard, build-auth]
     if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/backend-initial-commit') && github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
