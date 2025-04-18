@@ -2,9 +2,9 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main", "backend-initial-commit"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main", "backend-initial-commit"]
 
 env:
   REGISTRY: ghcr.io
@@ -16,151 +16,151 @@ jobs:
     permissions:
       contents: read
       packages: write
-    
+
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Log in to the Container registry
-      uses: docker/login-action@v2
-      with:
-        registry: ${{ env.REGISTRY }}
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-    
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
-    
-    - name: Build and push Eureka Server
-      uses: docker/build-push-action@v4
-      with:
-        context: ./medical-eureka-server
-        push: true
-        tags: ${{ env.REGISTRY }}/${{ github.repository }}/medical-eureka-server:${{ env.IMAGE_TAG }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-    
-    - name: Build and push Gateway
-      uses: docker/build-push-action@v4
-      with:
-        context: ./medical-gateway
-        push: true
-        tags: ${{ env.REGISTRY }}/${{ github.repository }}/medical-gateway:${{ env.IMAGE_TAG }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-    
-    - name: Build and push User Service
-      uses: docker/build-push-action@v4
-      with:
-        context: ./medical-user
-        push: true
-        tags: ${{ env.REGISTRY }}/${{ github.repository }}/medical-user:${{ env.IMAGE_TAG }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-    
-    - name: Build and push Notification Service
-      uses: docker/build-push-action@v4
-      with:
-        context: ./medical-notification
-        push: true
-        tags: ${{ env.REGISTRY }}/${{ github.repository }}/medical-notification:${{ env.IMAGE_TAG }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-    
-    - name: Build and push Appointment Service
-      uses: docker/build-push-action@v4
-      with:
-        context: ./medical-appointment
-        push: true
-        tags: ${{ env.REGISTRY }}/${{ github.repository }}/medical-appointment:${{ env.IMAGE_TAG }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+      - uses: actions/checkout@v3
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build and push Eureka Server
+        uses: docker/build-push-action@v4
+        with:
+          context: ./medical-eureka-server
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ github.repository }}/medical-eureka-server:${{ env.IMAGE_TAG }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push Gateway
+        uses: docker/build-push-action@v4
+        with:
+          context: ./medical-gateway
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ github.repository }}/medical-gateway:${{ env.IMAGE_TAG }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push User Service
+        uses: docker/build-push-action@v4
+        with:
+          context: ./medical-user
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ github.repository }}/medical-user:${{ env.IMAGE_TAG }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push Notification Service
+        uses: docker/build-push-action@v4
+        with:
+          context: ./medical-notification
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ github.repository }}/medical-notification:${{ env.IMAGE_TAG }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push Appointment Service
+        uses: docker/build-push-action@v4
+        with:
+          context: ./medical-appointment
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ github.repository }}/medical-appointment:${{ env.IMAGE_TAG }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
   deploy-dev:
     needs: build-and-push
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/backend-initial-commit'
     environment: development
-    
+
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Copy docker-compose file to server
-      uses: appleboy/scp-action@master
-      with:
-        host: ${{ secrets.DEV_HOST }}
-        username: ${{ secrets.DEV_USERNAME }}
-        key: ${{ secrets.DEV_SSH_KEY }}
-        source: "docker-compose.yml"
-        target: "~/medical-platform"
-    
-    - name: Deploy to development server
-      uses: appleboy/ssh-action@master
-      env:
-        REGISTRY: ${{ env.REGISTRY }}
-        GITHUB_REPOSITORY: ${{ github.repository }}
-        IMAGE_TAG: ${{ env.IMAGE_TAG }}
-        MYSQL_USER: ${{ secrets.DEV_MYSQL_USER }}
-        MYSQL_PASSWORD: ${{ secrets.DEV_MYSQL_PASSWORD }}
-        REDIS_PASSWORD: ${{ secrets.DEV_REDIS_PASSWORD }}
-        MAIL_USERNAME: ${{ secrets.DEV_MAIL_USERNAME }}
-        MAIL_PASSWORD: ${{ secrets.DEV_MAIL_PASSWORD }}
-      with:
-        host: ${{ secrets.DEV_HOST }}
-        username: ${{ secrets.DEV_USERNAME }}
-        key: ${{ secrets.DEV_SSH_KEY }}
-        envs: REGISTRY,GITHUB_REPOSITORY,IMAGE_TAG,MYSQL_USER,MYSQL_PASSWORD,REDIS_PASSWORD,MAIL_USERNAME,MAIL_PASSWORD
-        script: |
-          cd ~/medical-platform
-          echo "Pulling new images..."
-          docker-compose pull
-          echo "Stopping and removing old containers..."
-          docker-compose down
-          echo "Starting new containers..."
-          docker-compose up -d
-          echo "Cleaning up old images..."
-          docker image prune -f
+      - uses: actions/checkout@v3
+
+      - name: Copy docker-compose file to server
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.DEV_HOST }}
+          username: ${{ secrets.DEV_USERNAME }}
+          key: ${{ secrets.DEV_SSH_KEY }}
+          source: "docker-compose.yml"
+          target: "~/medical-platform"
+
+      - name: Deploy to development server
+        uses: appleboy/ssh-action@master
+        env:
+          REGISTRY: ${{ env.REGISTRY }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          IMAGE_TAG: ${{ env.IMAGE_TAG }}
+          MYSQL_USER: ${{ secrets.DEV_MYSQL_USER }}
+          MYSQL_PASSWORD: ${{ secrets.DEV_MYSQL_PASSWORD }}
+          REDIS_PASSWORD: ${{ secrets.DEV_REDIS_PASSWORD }}
+          MAIL_USERNAME: ${{ secrets.DEV_MAIL_USERNAME }}
+          MAIL_PASSWORD: ${{ secrets.DEV_MAIL_PASSWORD }}
+        with:
+          host: ${{ secrets.DEV_HOST }}
+          username: ${{ secrets.DEV_USERNAME }}
+          key: ${{ secrets.DEV_SSH_KEY }}
+          envs: REGISTRY,GITHUB_REPOSITORY,IMAGE_TAG,MYSQL_USER,MYSQL_PASSWORD,REDIS_PASSWORD,MAIL_USERNAME,MAIL_PASSWORD
+          script: |
+            cd ~/medical-platform
+            echo "Pulling new images..."
+            docker-compose pull
+            echo "Stopping and removing old containers..."
+            docker-compose down
+            echo "Starting new containers..."
+            docker-compose up -d
+            echo "Cleaning up old images..."
+            docker image prune -f
 
   deploy-prod:
     needs: deploy-dev
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/backend-initial-commit'
     environment: production
-    
+
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Copy docker-compose file to server
-      uses: appleboy/scp-action@master
-      with:
-        host: ${{ secrets.PROD_HOST }}
-        username: ${{ secrets.PROD_USERNAME }}
-        key: ${{ secrets.PROD_SSH_KEY }}
-        source: "docker-compose.yml"
-        target: "~/medical-platform"
-    
-    - name: Deploy to production server
-      uses: appleboy/ssh-action@master
-      env:
-        REGISTRY: ${{ env.REGISTRY }}
-        GITHUB_REPOSITORY: ${{ github.repository }}
-        IMAGE_TAG: ${{ env.IMAGE_TAG }}
-        MYSQL_USER: ${{ secrets.PROD_MYSQL_USER }}
-        MYSQL_PASSWORD: ${{ secrets.PROD_MYSQL_PASSWORD }}
-        REDIS_PASSWORD: ${{ secrets.PROD_REDIS_PASSWORD }}
-        MAIL_USERNAME: ${{ secrets.PROD_MAIL_USERNAME }}
-        MAIL_PASSWORD: ${{ secrets.PROD_MAIL_PASSWORD }}
-      with:
-        host: ${{ secrets.PROD_HOST }}
-        username: ${{ secrets.PROD_USERNAME }}
-        key: ${{ secrets.PROD_SSH_KEY }}
-        envs: REGISTRY,GITHUB_REPOSITORY,IMAGE_TAG,MYSQL_USER,MYSQL_PASSWORD,REDIS_PASSWORD,MAIL_USERNAME,MAIL_PASSWORD
-        script: |
-          cd ~/medical-platform
-          echo "Pulling new images..."
-          docker-compose pull
-          echo "Stopping and removing old containers..."
-          docker-compose down
-          echo "Starting new containers..."
-          docker-compose up -d
-          echo "Cleaning up old images..."
-          docker image prune -f
+      - uses: actions/checkout@v3
+
+      - name: Copy docker-compose file to server
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.PROD_HOST }}
+          username: ${{ secrets.PROD_USERNAME }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          source: "docker-compose.yml"
+          target: "~/medical-platform"
+
+      - name: Deploy to production server
+        uses: appleboy/ssh-action@master
+        env:
+          REGISTRY: ${{ env.REGISTRY }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          IMAGE_TAG: ${{ env.IMAGE_TAG }}
+          MYSQL_USER: ${{ secrets.PROD_MYSQL_USER }}
+          MYSQL_PASSWORD: ${{ secrets.PROD_MYSQL_PASSWORD }}
+          REDIS_PASSWORD: ${{ secrets.PROD_REDIS_PASSWORD }}
+          MAIL_USERNAME: ${{ secrets.PROD_MAIL_USERNAME }}
+          MAIL_PASSWORD: ${{ secrets.PROD_MAIL_PASSWORD }}
+        with:
+          host: ${{ secrets.PROD_HOST }}
+          username: ${{ secrets.PROD_USERNAME }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          envs: REGISTRY,GITHUB_REPOSITORY,IMAGE_TAG,MYSQL_USER,MYSQL_PASSWORD,REDIS_PASSWORD,MAIL_USERNAME,MAIL_PASSWORD
+          script: |
+            cd ~/medical-platform
+            echo "Pulling new images..."
+            docker-compose pull
+            echo "Stopping and removing old containers..."
+            docker-compose down
+            echo "Starting new containers..."
+            docker-compose up -d
+            echo "Cleaning up old images..."
+            docker image prune -f
