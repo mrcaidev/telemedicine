@@ -1,0 +1,28 @@
+server:
+  port: 8761
+
+spring:
+  application:
+    name: eureka-server
+
+eureka:
+  instance:
+    hostname: localhost
+  client:
+    # 不向自己注册服务
+    register-with-eureka: false
+    # 不从自己获取服务信息
+    fetch-registry: false
+    service-url:
+      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
+  server:
+    # 关闭自我保护模式（开发环境使用）
+    enable-self-preservation: false
+    # 清理无效节点的间隔时间（毫秒）
+    eviction-interval-timer-in-ms: 10000
+
+# 日志配置
+logging:
+  level:
+    com.medical.eureka: info
+    org.springframework.cloud.netflix.eureka: info 

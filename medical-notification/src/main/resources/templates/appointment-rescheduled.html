@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>预约改期通知</title>
+</head>
+<body>
+    <div style="max-width: 600px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif;">
+        <h2 style="color: #2c3e50;">预约改期通知</h2>
+        <p>尊敬的 <strong th:text="${patientName}"></strong>：</p>
+        <p>您与 <strong th:text="${doctorName}"></strong> 医生的预约时间已变更：</p>
+        <p>原预约时间：<strong th:text="${oldTime}"></strong></p>
+        <p>新预约时间：<strong th:text="${newTime}"></strong></p>
+        <p>请您按新的预约时间到达医院就诊。如有问题，请及时联系我们。</p>
+        <p>祝您健康！</p>
+        <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+        <p style="color: #7f8c8d; font-size: 12px;">
+            此邮件为系统自动发送，请勿回复。如有问题，请联系客服。
+        </p>
+    </div>
+</body>
+</html> 

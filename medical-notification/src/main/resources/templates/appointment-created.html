@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>预约创建成功通知</title>
+</head>
+<body>
+    <div style="max-width: 600px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif;">
+        <h2 style="color: #2c3e50;">预约创建成功通知</h2>
+        <p>尊敬的 <strong th:text="${patientName}"></strong>：</p>
+        <p>您已成功预约 <strong th:text="${doctorName}"></strong> 医生的诊疗服务。</p>
+        <p>预约时间：<strong th:text="${appointmentTime}"></strong></p>
+        <p>请您按时到达医院就诊。如需取消或改期，请提前通过平台操作。</p>
+        <p>祝您健康！</p>
+        <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+        <p style="color: #7f8c8d; font-size: 12px;">
+            此邮件为系统自动发送，请勿回复。如有问题，请联系客服。
+        </p>
+    </div>
+</body>
+</html> 

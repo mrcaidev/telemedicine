@@ -1,0 +1,114 @@
+name: Medical Platform CI
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_TAG: ${{ github.sha }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build with Maven
+        run: mvn clean package -DskipTests
+
+      - name: Run Tests
+        run: mvn test
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push User Service
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: medical-user/Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ github.repository }}/medical-user:latest
+            ${{ env.REGISTRY }}/${{ github.repository }}/medical-user:${{ env.IMAGE_TAG }}
+
+      - name: Build and Push Notification Service
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: medical-notification/Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ github.repository }}/medical-notification:latest
+            ${{ env.REGISTRY }}/${{ github.repository }}/medical-notification:${{ env.IMAGE_TAG }}
+
+      - name: Build and Push Appointment Service
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: medical-appointment/Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ github.repository }}/medical-appointment:latest
+            ${{ env.REGISTRY }}/${{ github.repository }}/medical-appointment:${{ env.IMAGE_TAG }}
+
+      - name: Build and Push Gateway Service
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: medical-gateway/Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ github.repository }}/medical-gateway:latest
+            ${{ env.REGISTRY }}/${{ github.repository }}/medical-gateway:${{ env.IMAGE_TAG }}
+
+      - name: Build and Push Eureka Server
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: medical-eureka-server/Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ github.repository }}/medical-eureka-server:latest
+            ${{ env.REGISTRY }}/${{ github.repository }}/medical-eureka-server:${{ env.IMAGE_TAG }}
+
+  health-check:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Health Endpoints
+        run: |
+          for service in user notification appointment gateway eureka-server; do
+            echo "Checking $service health endpoints..."
+            curl -f http://localhost:808${i}/livez || exit 1
+            curl -f http://localhost:808${i}/readyz || exit 1
+          done
+
+  deploy:
+    needs: health-check
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    environment: production
+
+    steps:
+      - name: Deploy to Production
+        run: |
+          echo "Deploying to production..."
