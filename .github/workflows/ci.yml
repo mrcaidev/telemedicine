@@ -27,12 +27,35 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      # 可保留也可移除
-      # - name: Build with Maven
-      #   run: mvn clean package -DskipTests
+      - name: Build User Service
+        run: |
+          cd medical-user
+          mvn clean package -DskipTests
+          cd ..
 
-      - name: Build All Modules
-        run: mvn clean install -DskipTests
+      - name: Build Notification Service
+        run: |
+          cd medical-notification
+          mvn clean package -DskipTests
+          cd ..
+
+      - name: Build Appointment Service
+        run: |
+          cd medical-appointment
+          mvn clean package -DskipTests
+          cd ..
+
+      - name: Build Gateway Service
+        run: |
+          cd medical-gateway
+          mvn clean package -DskipTests
+          cd ..
+
+      - name: Build Eureka Server
+        run: |
+          cd medical-eureka-server
+          mvn clean package -DskipTests
+          cd ..
 
       - name: Run Tests
         run: mvn test
