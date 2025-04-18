@@ -2,9 +2,9 @@ name: Medical Platform CI
 
 on:
   push:
-    branches: [ "main", "develop" ]
+    branches: [ "main", "develop", "backend-initial-commit" ]
   pull_request:
-    branches: [ "main", "develop" ]
+    branches: [ "main", "develop", "backend-initial-commit" ]
 
 env:
   REGISTRY: ghcr.io
