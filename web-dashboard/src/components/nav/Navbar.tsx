@@ -6,7 +6,7 @@ import Sheetbar from "@/components/nav/Sheetbar";
 
 export default function Navbar() {
   return (
-    <header className="w-full h-20 sticky top-0 z-10 bg-white border-b shadow-sm px-4 py-2 flex justify-between items-center text-sm">
+    <header className="w-full h-15 sticky top-0 z-10 bg-white border-b shadow-sm px-4 py-2 flex justify-between items-center text-sm">
       {/* 左侧标题 */}
       {/* <div className="font-semibold text-lg text-blue-600">Telemedicine</div> */}
       <div className="flex items-center space-x-4">

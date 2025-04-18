@@ -9,7 +9,7 @@ export default function Navbar() {
     const [open, setOpen] = useState(false)
   
     return (
-      <header className="h-20 bg-white border-b shadow-sm sticky top-0 z-50">
+      <header className="h-15 bg-white border-b shadow-sm sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="text-xl font-bold text-blue-600">
