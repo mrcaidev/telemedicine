@@ -79,7 +79,7 @@ export default function RegisterPage() {
         <div>
           <Label>Role</Label>
           <Select
-            defaultValue="PATIENT"
+            defaultValue="DOCTOR"
             onValueChange={(val) =>
               setValue("role", val as "PATIENT" | "DOCTOR")
             }

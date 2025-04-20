@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-
+import Providers from "@/components/auth/providers";
 export const metadata: Metadata = {
   title: "Telemedicine",
   description: "Telemedicine platform for doctors and patients",
@@ -14,7 +14,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        {children}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
