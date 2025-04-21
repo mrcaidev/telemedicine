@@ -1,5 +1,175 @@
-import { UnderConstructionScreen } from "@/components/under-construction-screen";
+import { useDoctorAvailabilityQuery, useDoctorQuery } from "@/api/doctor";
+import { LoadingScreen } from "@/components/loading-screen";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/icon";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Text } from "@/components/ui/text";
+import { Muted, P } from "@/components/ui/typography";
+import type { DoctorAvailability } from "@/utils/types";
+import { useLocalSearchParams } from "expo-router";
+import {
+  AlertCircleIcon,
+  CalendarXIcon,
+  MarsIcon,
+  VenusIcon,
+} from "lucide-react-native";
+import { useState } from "react";
+import { ScrollView, View } from "react-native";
 
 export default function DoctorDetailsPage() {
-  return <UnderConstructionScreen />;
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const { data: doctor, isPending, error } = useDoctorQuery(id);
+
+  if (isPending) {
+    return <LoadingScreen />;
+  }
+
+  if (error) {
+    return error.message;
+  }
+
+  return (
+    <ScrollView>
+      <View className="absolute inset-x-0 top-0 h-32 bg-primary" />
+      <View className="px-6 mt-12">
+        <Avatar alt="Doctor avatar" className="size-28 mb-4">
+          <AvatarImage source={{ uri: doctor.avatarUrl ?? undefined }} />
+          <AvatarFallback>
+            <Muted>
+              {doctor.firstName[0]} {doctor.lastName[0]}
+            </Muted>
+          </AvatarFallback>
+        </Avatar>
+        <View className="flex-row items-center gap-1 mb-1">
+          <Text className="text-2xl font-bold">
+            {doctor.firstName} {doctor.lastName}
+          </Text>
+          <Icon
+            as={doctor.gender === "male" ? MarsIcon : VenusIcon}
+            className={
+              doctor.gender === "male" ? "text-blue-500" : "text-pink-500"
+            }
+          />
+        </View>
+        <Muted>{doctor.email}</Muted>
+      </View>
+      <View className="px-6 mt-6 gap-2">
+        <Text className="text-lg font-medium">Introduction</Text>
+        {doctor.description.split("\n").map((line, index) => (
+          // biome-ignore lint/suspicious/noArrayIndexKey: immutable
+          <P key={index} className="text-muted-foreground text-sm">
+            {line}
+          </P>
+        ))}
+      </View>
+      <View className="px-6 mt-6 gap-2">
+        <Text className="text-lg font-medium">Specialties</Text>
+        <View className="flex-row items-center gap-1 flex-wrap">
+          {doctor.specialties.map((specialty) => (
+            <Badge key={specialty} variant="outline">
+              <Text>{specialty}</Text>
+            </Badge>
+          ))}
+        </View>
+      </View>
+      <View className="px-6 mt-6 gap-2">
+        <Text className="text-lg font-medium">Book Appointment</Text>
+        <AvailabilityTabs />
+      </View>
+    </ScrollView>
+  );
+}
+
+function AvailabilityTabs() {
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const {
+    data: availabilities,
+    isPending,
+    error,
+  } = useDoctorAvailabilityQuery(id);
+
+  const [tabValue, setTabValue] = useState("1");
+
+  if (isPending) {
+    return (
+      <View className="gap-2">
+        <Skeleton className="h-10" />
+        <Skeleton className="h-24" />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View className="flex-row items-center justify-center gap-2 h-36 p-4 border border-border rounded-lg bg-card">
+        <Icon as={AlertCircleIcon} />
+        <Text>{error.message}</Text>
+      </View>
+    );
+  }
+
+  return (
+    <Tabs value={tabValue} onValueChange={setTabValue}>
+      <TabsList>
+        <TabsTrigger value="1">
+          <Text>Mon</Text>
+        </TabsTrigger>
+        <TabsTrigger value="2">
+          <Text>Tue</Text>
+        </TabsTrigger>
+        <TabsTrigger value="3">
+          <Text>Wed</Text>
+        </TabsTrigger>
+        <TabsTrigger value="4">
+          <Text>Thu</Text>
+        </TabsTrigger>
+        <TabsTrigger value="5">
+          <Text>Fri</Text>
+        </TabsTrigger>
+        <TabsTrigger value="6">
+          <Text>Sat</Text>
+        </TabsTrigger>
+        <TabsTrigger value="7">
+          <Text>Sun</Text>
+        </TabsTrigger>
+      </TabsList>
+      {[1, 2, 3, 4, 5, 6, 7].map((weekday) => (
+        <TabsContent key={weekday} value={String(weekday)}>
+          <AvailabilityTab
+            availabilities={availabilities.filter((a) => a.weekday === weekday)}
+          />
+        </TabsContent>
+      ))}
+    </Tabs>
+  );
+}
+
+function AvailabilityTab({
+  availabilities,
+}: { availabilities: DoctorAvailability[] }) {
+  if (availabilities.length === 0) {
+    return (
+      <View className="flex-row items-center justify-center gap-2 h-24 border border-border border-dashed rounded-md mt-2">
+        <Icon as={CalendarXIcon} className="text-muted-foreground" />
+        <Muted>Not available on this day</Muted>
+      </View>
+    );
+  }
+
+  return (
+    <View className="flex-row flex-wrap mt-2">
+      {availabilities.map((availability) => (
+        <View key={availability.id} className="w-1/2 p-1">
+          <Button variant="outline">
+            <Text>
+              {availability.startTime} - {availability.endTime}
+            </Text>
+          </Button>
+        </View>
+      ))}
+    </View>
+  );
 }
