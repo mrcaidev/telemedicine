@@ -1,5 +1,18 @@
+import { useBookAppointmentMutation } from "@/api/appointment";
 import { useDoctorAvailabilityQuery, useDoctorQuery } from "@/api/doctor";
 import { LoadingScreen } from "@/components/loading-screen";
+import { Spinner } from "@/components/spinner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -7,21 +20,33 @@ import { Icon } from "@/components/ui/icon";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Text } from "@/components/ui/text";
+import { Textarea } from "@/components/ui/textarea";
 import { Muted, P } from "@/components/ui/typography";
+import { computeNextDateOfWeekday } from "@/utils/datetime";
 import type { DoctorAvailability } from "@/utils/types";
-import { useLocalSearchParams } from "expo-router";
+import dayjs from "dayjs";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   AlertCircleIcon,
+  CalendarIcon,
   CalendarXIcon,
+  CheckIcon,
+  ClockIcon,
   MarsIcon,
+  UserRoundIcon,
   VenusIcon,
+  XIcon,
 } from "lucide-react-native";
 import { useState } from "react";
 import { ScrollView, View } from "react-native";
 
-export default function DoctorDetailsPage() {
+function useCurrentDoctorQuery() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { data: doctor, isPending, error } = useDoctorQuery(id);
+  return useDoctorQuery(id);
+}
+
+export default function DoctorDetailsPage() {
+  const { data: doctor, isPending, error } = useCurrentDoctorQuery();
 
   if (isPending) {
     return <LoadingScreen />;
@@ -163,13 +188,99 @@ function AvailabilityTab({
     <View className="flex-row flex-wrap mt-2">
       {availabilities.map((availability) => (
         <View key={availability.id} className="w-1/2 p-1">
-          <Button variant="outline">
-            <Text>
-              {availability.startTime} - {availability.endTime}
-            </Text>
-          </Button>
+          <BookButton availability={availability} />
         </View>
       ))}
     </View>
+  );
+}
+
+function BookButton({ availability }: { availability: DoctorAvailability }) {
+  const { data: doctor } = useCurrentDoctorQuery();
+  const date = computeNextDateOfWeekday(availability.weekday);
+
+  const [remark, setRemark] = useState("");
+
+  const { mutate, isPending } = useBookAppointmentMutation();
+
+  const router = useRouter();
+
+  const book = () => {
+    mutate(
+      {
+        doctorId: doctor?.id ?? "",
+        date: date.format("YYYY-MM-DD"),
+        startTime: availability.startTime,
+        endTime: availability.endTime,
+        remark,
+      },
+      {
+        onSuccess: (data) => {
+          router.navigate({
+            pathname: "/appointment/[id]",
+            params: { id: data.id },
+          });
+        },
+      },
+    );
+  };
+
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button variant="outline">
+          <Text>
+            {availability.startTime} - {availability.endTime}
+          </Text>
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Book Appointment</AlertDialogTitle>
+          <AlertDialogDescription>
+            You are booking an appointment. Please confirm the details below.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <View className="gap-2">
+          <View className="flex-row items-center gap-2">
+            <Icon as={UserRoundIcon} className="text-muted-foreground" />
+            <Text>
+              Dr. {doctor?.firstName} {doctor?.lastName}
+            </Text>
+          </View>
+          <View className="flex-row items-center gap-2">
+            <Icon as={CalendarIcon} className="text-muted-foreground" />
+            <Text>{date.format("dddd, LL")}</Text>
+          </View>
+          <View className="flex-row items-center gap-2">
+            <Icon as={ClockIcon} className="text-muted-foreground" />
+            <Text>
+              {dayjs(availability.startTime, "HH:mm").format("LT")}
+              &nbsp;-&nbsp;
+              {dayjs(availability.endTime, "HH:mm").format("LT")}
+            </Text>
+          </View>
+          <View className="gap-2 mt-1">
+            <Textarea
+              value={remark}
+              onChangeText={setRemark}
+              maxLength={200}
+              placeholder="Leave a remark... (optional)"
+              className="text-base"
+            />
+          </View>
+        </View>
+        <AlertDialogFooter>
+          <AlertDialogCancel>
+            <Icon as={XIcon} />
+            <Text>Close</Text>
+          </AlertDialogCancel>
+          <AlertDialogAction disabled={isPending} onPress={book}>
+            {isPending ? <Spinner /> : <Icon as={CheckIcon} />}
+            <Text>Confirm</Text>
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }

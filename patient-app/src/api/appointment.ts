@@ -51,6 +51,29 @@ export function useAppointmentQuery(id: string) {
   });
 }
 
+export function useBookAppointmentMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    Appointment,
+    Error,
+    {
+      doctorId: string;
+      date: string;
+      startTime: string;
+      endTime: string;
+      remark: string;
+    }
+  >({
+    mutationFn: async (variables) => {
+      return await request.post("/appointments", variables);
+    },
+    onSuccess: (data) => {
+      queryClient.setQueryData<Appointment>(["appointment", data.id], data);
+    },
+  });
+}
+
 export function useCancelAppointmentMutation(id: string) {
   const queryClient = useQueryClient();
 
