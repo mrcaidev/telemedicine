@@ -19,7 +19,7 @@ import { Icon } from "@/components/ui/icon";
 import { Separator } from "@/components/ui/separator";
 import { Text } from "@/components/ui/text";
 import { getAppointmentRealtimeStatus } from "@/utils/appointment";
-import dayjs from "dayjs";
+import { formatDate, formatTime } from "@/utils/datetime";
 import { Link, useLocalSearchParams } from "expo-router";
 import {
   ArrowRightIcon,
@@ -80,7 +80,7 @@ export default function AppointmentDetailsPage() {
             <Icon as={CalendarIcon} className="text-muted-foreground" />
             <Text className="font-medium">Date</Text>
           </View>
-          <Text>{dayjs(date).format("dddd, LL")}</Text>
+          <Text>{formatDate(date)}</Text>
         </View>
         <Separator className="my-4" />
         <View className="flex-row items-center">
@@ -89,9 +89,9 @@ export default function AppointmentDetailsPage() {
             <Text className="font-medium">Time</Text>
           </View>
           <Text>
-            {dayjs(`${date} ${startTime}`).format("LT")}
+            {formatTime(startTime)}
             &nbsp;-&nbsp;
-            {dayjs(`${date} ${endTime}`).format("LT")}
+            {formatTime(endTime)}
           </Text>
         </View>
         <Separator className="my-4" />

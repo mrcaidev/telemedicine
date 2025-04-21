@@ -14,6 +14,18 @@ dayjs.extend(isTomorrow);
 dayjs.extend(localizedFormat);
 dayjs.extend(relativeTime);
 
+export function formatIsoAsDate(iso: string) {
+  return dayjs(iso).format("dddd, LL");
+}
+
+export function formatDate(date: string) {
+  return dayjs(date, "YYYY-MM-DD").format("dddd, LL");
+}
+
+export function formatTime(time: string) {
+  return dayjs(time, "HH:mm").format("LT");
+}
+
 export function computeNextDateOfWeekday(weekday: number) {
   const targetDateObject = dayjs().day(weekday);
 

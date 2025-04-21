@@ -1,4 +1,5 @@
 import { getAppointmentRealtimeStatus } from "@/utils/appointment";
+import { formatTime } from "@/utils/datetime";
 import type { Appointment } from "@/utils/types";
 import dayjs from "dayjs";
 import { Link } from "expo-router";
@@ -31,9 +32,9 @@ export function SimpleAppointmentCard({ appointment }: Props) {
             />
             <Small>{dayjs(date).format("L")}</Small>
             <Small>
-              {dayjs(`${date} ${startTime}`).format("LT")}
+              {formatTime(startTime)}
               &nbsp;-&nbsp;
-              {dayjs(`${date} ${endTime}`).format("LT")}
+              {formatTime(endTime)}
             </Small>
           </View>
         </View>

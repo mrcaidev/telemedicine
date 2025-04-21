@@ -22,9 +22,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Text } from "@/components/ui/text";
 import { Textarea } from "@/components/ui/textarea";
 import { Muted, P } from "@/components/ui/typography";
-import { computeNextDateOfWeekday } from "@/utils/datetime";
+import { computeNextDateOfWeekday, formatTime } from "@/utils/datetime";
 import type { DoctorAvailability } from "@/utils/types";
-import dayjs from "dayjs";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   AlertCircleIcon,
@@ -255,9 +254,9 @@ function BookButton({ availability }: { availability: DoctorAvailability }) {
           <View className="flex-row items-center gap-2">
             <Icon as={ClockIcon} className="text-muted-foreground" />
             <Text>
-              {dayjs(availability.startTime, "HH:mm").format("LT")}
+              {formatTime(availability.startTime)}
               &nbsp;-&nbsp;
-              {dayjs(availability.endTime, "HH:mm").format("LT")}
+              {formatTime(availability.endTime)}
             </Text>
           </View>
           <View className="gap-2 mt-1">
