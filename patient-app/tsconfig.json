@@ -19,6 +19,11 @@
     "moduleDetection": "force",
     "incremental": true
   },
-  "include": ["**/*", ".expo/types/**/*.ts", "expo-env.d.ts"],
+  "include": [
+    "**/*",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts",
+    "nativewind-env.d.ts"
+  ],
   "exclude": ["android", "dist", "ios"]
 }

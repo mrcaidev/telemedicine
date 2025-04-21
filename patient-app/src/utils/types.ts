@@ -33,3 +33,11 @@ export type Appointment = {
   status: AppointmentStatus;
   createdAt: string;
 };
+
+export type DoctorAvailability = {
+  id: string;
+  weekday: number;
+  startTime: string;
+  endTime: string;
+  createdAt: string;
+};
