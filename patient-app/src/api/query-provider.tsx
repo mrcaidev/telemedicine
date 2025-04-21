@@ -1,7 +1,7 @@
-import { RequestError } from "@/api/request";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { PropsWithChildren } from "react";
 import { Alert } from "react-native";
+import { RequestError } from "./request";
 
 const client = new QueryClient({
   defaultOptions: {

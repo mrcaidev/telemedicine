@@ -1,5 +1,5 @@
+import { QueryProvider } from "@/api/query-provider";
 import "@/global.css";
-import { QueryProvider } from "@/providers/query";
 import "@/utils/datetime";
 import { PortalHost } from "@rn-primitives/portal";
 import { Slot } from "expo-router";
