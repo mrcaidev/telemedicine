@@ -14,8 +14,6 @@ export default function RoleBasedRedirect() {
 
       if (role === "DOCTOR") {
         router.push("/dashboard/doctor");
-      } else if (role === "PATIENT") {
-        router.push("/dashboard/patient");
       } else if (role === "CLINIC") {
         router.push("/dashboard/clinic");
       } else if (role === "PLATFORM") {

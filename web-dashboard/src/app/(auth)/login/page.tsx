@@ -1,23 +1,19 @@
 "use client";
 
 import { useForm } from "react-hook-form";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
-import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema } from "@/lib/schema";
 import { z } from "zod";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import GoogleSignInButton from "@/components/auth/google-signin-button";
-import RoleBasedRedirect from "@/components/auth/role-based-redirect";
 import { signIn } from "next-auth/react";
+import RoleBasedRedirect from "@/components/auth/role-based-redirect";
 
 type LoginForm = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
-  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -34,11 +30,10 @@ export default function LoginPage() {
       redirect: false,
       email: data.email,
       password: data.password,
-      callbackUrl: "/login", 
+      callbackUrl: "/login", // 登录后由 RoleBasedRedirect 跳转
     });
 
-    if (res?.ok) {
-    } else {
+    if (!res?.ok) {
       alert("Login failed");
     }
 
@@ -67,31 +62,10 @@ export default function LoginPage() {
             )}
           </div>
 
-          <Button
-            type="submit"
-            className="w-full cursor-pointer"
-            disabled={loading}
-          >
-            {loading ? "Login..." : "Login"}
+          <Button type="submit" className="w-full cursor-pointer" disabled={loading}>
+            {loading ? "Logging in..." : "Login"}
           </Button>
         </form>
-
-        <div className="relative text-center my-6">
-          <div className="absolute left-0 right-0 top-1/2 border-t border-gray-300"></div>
-          <span className="bg-white px-4 text-sm text-gray-500 relative z-10">
-            or continue with
-          </span>
-        </div>
-
-        <GoogleSignInButton />
-
-        {/* 注册跳转按钮 */}
-        <p className="text-center text-sm text-gray-500">
-          Not Registered yet?
-          <Link href="/register" className="text-blue-500 hover:underline ml-1">
-            Register
-          </Link>
-        </p>
       </div>
     </>
   );

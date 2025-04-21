@@ -1,8 +1,9 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Globe, LogOut, User } from "lucide-react";
+import { Globe,  LogOut, User } from "lucide-react";
 import Sheetbar from "@/components/nav/Sheetbar";
+import Link from "next/link";
 
 export default function Navbar() {
   return (
@@ -11,7 +12,12 @@ export default function Navbar() {
       {/* <div className="font-semibold text-lg text-blue-600">Telemedicine</div> */}
       <div className="flex items-center space-x-4">
         <Sheetbar />
-        <span className="text-blue-600 font-semibold text-lg hidden md:inline">Telemedicine</span>
+        <Link
+          href="/"
+          className="text-blue-600 font-semibold text-lg hidden md:inline hover:underline"
+        >
+          Telemedicine
+        </Link>
       </div>
 
       {/* 右侧功能区 */}
@@ -21,23 +27,6 @@ export default function Navbar() {
           <Globe className="w-4 h-4" />
           <span>En</span>
         </div>
-
-        {/* 用户菜单 */}
-        {/* <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="px-2 flex items-center space-x-1">
-              <User className="w-4 h-4" />
-              <span>Dr. Zhang</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => alert("Profile")}>Profile</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => alert("Sign Out")}>
-              <LogOut className="w-4 h-4 mr-2" />
-              Sign Out
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu> */}
 
         <div className="flex items-center space-x-2">
           <Button

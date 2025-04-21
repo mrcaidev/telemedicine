@@ -3,18 +3,27 @@ import NextAuth from "next-auth";
 declare module "next-auth" {
   interface Session {
     user: {
-      name?: string | null;
+      id: string;
       email?: string | null;
-      image?: string | null;
-      role?: "DOCTOR" | "PATIENT" | "CLINIC" | "PLATFORM"; // 你定义的角色
+      name?: string | null;
+      role: "DOCTOR" | "CLINIC" | "PLATFORM";
+      token: string;
+      avatar?: string | null;
     };
   }
 
   interface User {
-    role?: "DOCTOR" | "PATIENT" | "CLINIC" | "PLATFORM";
+    id: string;
+    email: string;
+    role: "DOCTOR" | "CLINIC" | "PLATFORM";
+    token: string;
+    avatar?: string | null;
   }
 
   interface JWT {
-    role?: "DOCTOR" | "PATIENT" | "CLINIC" | "PLATFORM";
+    id: string;
+    role: "DOCTOR" | "CLINIC" | "PLATFORM";
+    accessToken: string;
+    avatar?: string | null;
   }
 }

@@ -26,13 +26,19 @@ export default function AuthMenu() {
 
   const user = session.user;
   const dashboardUrl =
-    user?.role === "DOCTOR" ? "/dashboard/doctor" : "/dashboard/doctor";
+    user?.role === "DOCTOR"
+      ? "/dashboard/doctor"
+      : user?.role === "CLINIC"
+      ? "/dashboard/clinic"
+      : user?.role === "PLATFORM"
+      ? "/dashboard/platform"
+      : "/dashboard";
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Avatar className="h-9 w-9 cursor-pointer border">
-          <AvatarImage src={user?.image || ""} />
+          <AvatarImage src={user?.avatar || ""} />
           <AvatarFallback>{user?.name?.charAt(0) || "U"}</AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
