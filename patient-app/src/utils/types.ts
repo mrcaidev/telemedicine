@@ -1,5 +1,6 @@
 export type Patient = {
   id: string;
+  role: "patient";
   email: string;
   nickname: string;
   avatarUrl: string | null;
@@ -10,6 +11,7 @@ export type Patient = {
 
 export type Doctor = {
   id: string;
+  role: "doctor";
   email: string;
   firstName: string;
   lastName: string;
