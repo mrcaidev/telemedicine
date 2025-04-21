@@ -1,4 +1,3 @@
-import { devSleep } from "@/utils/dev";
 import { tokenStore } from "@/utils/secure-store";
 
 export class RequestError extends Error {
@@ -18,8 +17,6 @@ type ResponseJson<T> = {
 };
 
 async function wrappedFetch<T>(pathname: string, init: RequestInit) {
-  await devSleep(1000);
-
   const token = await tokenStore.get();
 
   const res = await fetch(process.env.EXPO_PUBLIC_API_BASE_URL + pathname, {
