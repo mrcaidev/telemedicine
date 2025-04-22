@@ -19,7 +19,7 @@ import { Icon } from "@/components/ui/icon";
 import { Separator } from "@/components/ui/separator";
 import { Text } from "@/components/ui/text";
 import { getAppointmentRealtimeStatus } from "@/utils/appointment";
-import { formatDate, formatTime } from "@/utils/datetime";
+import { formatIsoAsDate, formatIsoAsTime } from "@/utils/datetime";
 import { Link, useLocalSearchParams } from "expo-router";
 import {
   ArrowRightIcon,
@@ -43,7 +43,7 @@ export default function AppointmentDetailsPage() {
     return <Text>Error: {error.message}</Text>;
   }
 
-  const { doctor, date, startTime, endTime, remark } = appointment;
+  const { doctor, startAt, endAt, remark } = appointment;
   const status = getAppointmentRealtimeStatus(appointment);
 
   return (
@@ -80,7 +80,7 @@ export default function AppointmentDetailsPage() {
             <Icon as={CalendarIcon} className="text-muted-foreground" />
             <Text className="font-medium">Date</Text>
           </View>
-          <Text>{formatDate(date)}</Text>
+          <Text>{formatIsoAsDate(startAt)}</Text>
         </View>
         <Separator className="my-4" />
         <View className="flex-row items-center">
@@ -89,9 +89,9 @@ export default function AppointmentDetailsPage() {
             <Text className="font-medium">Time</Text>
           </View>
           <Text>
-            {formatTime(startTime)}
+            {formatIsoAsTime(startAt)}
             &nbsp;-&nbsp;
-            {formatTime(endTime)}
+            {formatIsoAsTime(endAt)}
           </Text>
         </View>
         <Separator className="my-4" />

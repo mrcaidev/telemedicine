@@ -1,5 +1,5 @@
 import { getAppointmentRealtimeStatus } from "@/utils/appointment";
-import { formatTime } from "@/utils/datetime";
+import { formatIsoAsTime } from "@/utils/datetime";
 import type { Appointment } from "@/utils/types";
 import dayjs from "dayjs";
 import { Link } from "expo-router";
@@ -15,7 +15,7 @@ type Props = {
 };
 
 export function SimpleAppointmentCard({ appointment }: Props) {
-  const { id, doctor, date, startTime, endTime } = appointment;
+  const { id, doctor, startAt, endAt } = appointment;
 
   return (
     <Link href={{ pathname: "/appointment/[id]", params: { id } }}>
@@ -30,11 +30,11 @@ export function SimpleAppointmentCard({ appointment }: Props) {
               size={14}
               className="text-muted-foreground"
             />
-            <Small>{dayjs(date).format("L")}</Small>
+            <Small>{dayjs(startAt).format("L")}</Small>
             <Small>
-              {formatTime(startTime)}
+              {formatIsoAsTime(startAt)}
               &nbsp;-&nbsp;
-              {formatTime(endTime)}
+              {formatIsoAsTime(endAt)}
             </Small>
           </View>
         </View>

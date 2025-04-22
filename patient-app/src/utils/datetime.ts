@@ -18,6 +18,10 @@ export function formatIsoAsDate(iso: string) {
   return dayjs(iso).format("dddd, LL");
 }
 
+export function formatIsoAsTime(iso: string) {
+  return dayjs(iso).format("LT");
+}
+
 export function formatDate(date: string) {
   return dayjs(date, "YYYY-MM-DD").format("dddd, LL");
 }
