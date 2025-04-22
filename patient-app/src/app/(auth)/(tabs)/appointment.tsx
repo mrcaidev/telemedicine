@@ -5,7 +5,7 @@ import { Separator } from "@/components/ui/separator";
 import { Text } from "@/components/ui/text";
 import { Muted } from "@/components/ui/typography";
 import { Link } from "expo-router";
-import { ScrollView, View } from "react-native";
+import { FlatList, ScrollView, View } from "react-native";
 
 export default function AppointmentListPage() {
   return (
@@ -27,6 +27,7 @@ function AppointmentList() {
     error,
     isPending,
     hasNextPage,
+    fetchNextPage,
   } = useAppointmentsInfiniteQuery({ limit: 10 });
 
   if (isPending) {
@@ -48,15 +49,24 @@ function AppointmentList() {
       <View className="mb-2">
         <HighlightedAppointmentCard appointment={highlightedAppointment} />
       </View>
-      {restAppointments.map((appointment, index) => (
-        <View key={appointment.id}>
-          {index === 0 || <Separator />}
-          <SimpleAppointmentCard appointment={appointment} />
-        </View>
-      ))}
-      <Muted className="mt-2 text-center text-sm">
-        {hasNextPage ? "Loading more for you..." : "- That's all, for now -"}
-      </Muted>
+      <FlatList
+        data={restAppointments}
+        renderItem={({ item }) => <SimpleAppointmentCard appointment={item} />}
+        keyExtractor={(item) => item.id}
+        onEndReached={() => {
+          if (hasNextPage) {
+            fetchNextPage();
+          }
+        }}
+        ItemSeparatorComponent={Separator}
+        ListFooterComponent={
+          <Muted className="mt-2 text-center text-sm">
+            {hasNextPage
+              ? "Loading more for you..."
+              : "- That's all, for now -"}
+          </Muted>
+        }
+      />
     </View>
   );
 }
