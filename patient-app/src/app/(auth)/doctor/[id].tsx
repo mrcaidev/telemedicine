@@ -24,6 +24,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Muted, P } from "@/components/ui/typography";
 import { computeNextDateOfWeekday, formatTime } from "@/utils/datetime";
 import type { DoctorAvailability } from "@/utils/types";
+import dayjs from "dayjs";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   AlertCircleIcon,
@@ -208,9 +209,12 @@ function BookButton({ availability }: { availability: DoctorAvailability }) {
     mutate(
       {
         doctorId: doctor?.id ?? "",
-        date: date.format("YYYY-MM-DD"),
-        startTime: availability.startTime,
-        endTime: availability.endTime,
+        startAt: dayjs(
+          `${date.format("YYYY-MM-DD")} ${availability.startTime}`,
+        ).toISOString(),
+        endAt: dayjs(
+          `${date.format("YYYY-MM-DD")} ${availability.endTime}`,
+        ).toISOString(),
         remark,
       },
       {
