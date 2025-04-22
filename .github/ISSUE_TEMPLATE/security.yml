@@ -1,0 +1,125 @@
+name: 🛡️ Security
+description: Trace vulnerability, threat, risk and control.
+labels:
+  - security
+projects:
+  - mrcaidev/4
+body:
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      description: Which category(-ies) does the threat belong to?
+      multiple: true
+      options:
+        - Spoofing
+        - Tampering
+        - Repudiation
+        - Information Disclosure
+        - Denial of Service
+        - Elevation of Privilege
+    validations:
+      required: true
+  - type: input
+    id: assets
+    attributes:
+      label: Assets
+      description: What assets are affected?
+      placeholder: Personal data, access token, server infrastructure...
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Exploit
+      description: How the attack can be performed?
+      placeholder: 1. ...
+    validations:
+      required: true
+  - type: dropdown
+    id: damage-potential
+    attributes:
+      label: Damage Potential
+      description: How much damage will be caused?
+      options:
+        - 1 (Nothing)
+        - 2 (Individual)
+        - 3 (Everything)
+    validations:
+      required: true
+  - type: dropdown
+    id: reproducibility
+    attributes:
+      label: Reproducibility
+      description: How easy is it to reproduce the attack?
+      options:
+        - 1 (Hard)
+        - 2 (Medium)
+        - 3 (Easy)
+    validations:
+      required: true
+  - type: dropdown
+    id: exploitability
+    attributes:
+      label: Exploitability
+      description: What is needed to exploit this threat?
+      options:
+        - 1 (Advanced tool)
+        - 2 (Existing malware)
+        - 3 (No tool)
+    validations:
+      required: true
+  - type: dropdown
+    id: affected-users
+    attributes:
+      label: Affected Users
+      description: How many users will be affected?
+      options:
+        - 1 (None)
+        - 2 (Some)
+        - 3 (All)
+    validations:
+      required: true
+  - type: dropdown
+    id: discoverability
+    attributes:
+      label: Discoverability
+      description: How easy is it to discover this threat?
+      options:
+        - 1 (Hard)
+        - 2 (Medium)
+        - 3 (Easy)
+    validations:
+      required: true
+  - type: input
+    id: priority
+    attributes:
+      label: Priority
+      description: (DI + E + R) * (A + D)
+      placeholder: 1-54
+    validations:
+      required: true
+  - type: textarea
+    id: control
+    attributes:
+      label: Control
+      description: How to deal with the risk?
+      placeholder: Ignore / Accept / Avoid / Mitigate / Transfer
+    validations:
+      required: true
+  - type: input
+    id: reference
+    attributes:
+      label: Reference
+      description: Is there any document or link to refer to?
+      placeholder: CVE, OWASP, ...
+    validations:
+      required: false
+  - type: textarea
+    id: remark
+    attributes:
+      label: Remark
+      description: What else should be considered?
+      placeholder: Remember to ...
+    validations:
+      required: false
