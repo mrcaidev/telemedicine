@@ -11,11 +11,11 @@ export function useDoctorQuery(id: string) {
   });
 }
 
-export function useDoctorAvailabilityQuery(id: string) {
+export function useDoctorAvailabilitiesQuery(doctorId: string) {
   return useQuery<DoctorAvailability[]>({
-    queryKey: ["doctor", id, "availability"],
+    queryKey: ["doctor", doctorId, "availabilities"],
     queryFn: async () => {
-      return await request.get(`/doctor_availabilities/${id}`);
+      return await request.get(`/doctor-availabilities/${doctorId}`);
     },
   });
 }
