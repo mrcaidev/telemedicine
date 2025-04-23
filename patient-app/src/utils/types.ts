@@ -9,6 +9,12 @@ export type Patient = {
   createdAt: string;
 };
 
+export type Clinic = {
+  id: string;
+  name: string;
+  createdAt: string;
+};
+
 export type Doctor = {
   id: string;
   role: "doctor";
@@ -19,6 +25,7 @@ export type Doctor = {
   gender: "male" | "female";
   description: string;
   specialties: string[];
+  clinic: Clinic;
   createdAt: string;
 };
 
