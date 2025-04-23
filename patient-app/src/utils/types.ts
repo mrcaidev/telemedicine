@@ -2,7 +2,7 @@ export type Patient = {
   id: string;
   role: "patient";
   email: string;
-  nickname: string;
+  nickname: string | null;
   avatarUrl: string | null;
   gender: "male" | "female" | null;
   birthDate: string | null;
