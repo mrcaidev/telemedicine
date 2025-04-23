@@ -1,5 +1,6 @@
 import { useBookAppointmentMutation } from "@/api/appointment";
 import { useDoctorAvailabilityQuery, useDoctorQuery } from "@/api/doctor";
+import { ErrorScreen } from "@/components/error-screen";
 import { LoadingScreen } from "@/components/loading-screen";
 import { Spinner } from "@/components/spinner";
 import {
@@ -53,7 +54,7 @@ export default function DoctorDetailsPage() {
   }
 
   if (error) {
-    return error.message;
+    return <ErrorScreen message={error.message} />;
   }
 
   return (

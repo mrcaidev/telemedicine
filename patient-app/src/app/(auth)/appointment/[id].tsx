@@ -2,6 +2,7 @@ import {
   useAppointmentQuery,
   useCancelAppointmentMutation,
 } from "@/api/appointment";
+import { ErrorScreen } from "@/components/error-screen";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -40,7 +41,7 @@ export default function AppointmentDetailsPage() {
   }
 
   if (error) {
-    return <Text>Error: {error.message}</Text>;
+    return <ErrorScreen message={error.message} />;
   }
 
   const { doctor, startAt, endAt, remark } = appointment;
