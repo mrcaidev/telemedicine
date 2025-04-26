@@ -1,0 +1,114 @@
+server:
+  port: 8085
+
+spring:
+  application:
+    name: medical-notification
+  # 数据库配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3307/notification_db?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: root
+  # Kafka配置
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: notification-service-3
+      auto-offset-reset: latest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: com.medical.notification.model.event
+  # 邮件配置
+  mail:
+    host: smtp.qq.com
+    port: 587
+    username: 1037674882@qq.com     # 邮箱地址
+    password: gdfscqillllnbcih             # 授权码
+    default-encoding: UTF-8
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+  # Jackson配置
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+    serialization:
+      WRITE_DATES_AS_TIMESTAMPS: false
+
+# Mybatis Plus配置
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      logic-delete-field: isDeleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+  mapper-locations: classpath*:/mapper/**/*.xml
+  type-aliases-package: com.medical.notification.model.entity
+
+# Eureka配置
+eureka:
+  client:
+    # 不向 eureka server 注册自己
+    register-with-eureka: false
+    # 不从 eureka server 获取信息
+    fetch-registry: false
+#    service-url:
+#      defaultZone: http://localhost:8761/eureka/
+#    registry-fetch-interval-seconds: 5
+#  instance:
+#    instance-id: ${spring.application.name}:${server.port}
+#    prefer-ip-address: true
+#    lease-renewal-interval-in-seconds: 5
+#    lease-expiration-duration-in-seconds: 10
+
+# Knife4j配置
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
+    swagger-model-name: 实体类列表
+    enable-group: true
+    enable-request-cache: true
+  production: false
+  basic:
+    enable: false
+
+# SpringDoc配置
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    disable-swagger-default-url: false
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+  group-configs:
+    - group: 默认分组
+      paths-to-match: /**
+      packages-to-scan: com.medical.notification.controller
+
+# 通知配置
+notification:
+  kafka:
+    topics:
+      appointment-created: appointment_created
+      appointment-rescheduled: appointment_rescheduled
+      appointment-cancelled: appointment_cancelled
+      email: email
+  email:
+    templates:
+      appointment-created: appointment-created
+      appointment-rescheduled: appointment-rescheduled
+      appointment-cancelled: appointment-cancelled
+
+logging:
+  level:
+    com.medical.notification: debug

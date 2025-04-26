@@ -1,0 +1,90 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: medical-gateway
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      routes:
+        - id: medical-user
+          uri: http://localhost:8081
+          predicates:
+            - Path=/api/auth/**, /api/users/**, /api/patients/**, /api/otp/**, /v3/api-docs/**, /api/doctors/**
+          filters:
+            - StripPrefix=1
+        - id: medical-appointment
+          uri: http://localhost:8084
+          predicates:
+            - Path=/api/appointment/**, /v3/api-docs/**,/api/appointments/**
+          filters:
+            - StripPrefix=1
+        - id: medical-notification
+          uri: http://localhost:8085
+          predicates:
+            - Path=/api/notification/**, /v3/api-docs/**
+          filters:
+            - StripPrefix=1
+  main:
+    web-application-type: reactive
+
+# Springdoc配置
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    urls-primary-name: medical-gateway
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+
+# Eureka配置
+eureka:
+  client:
+    # 不向 eureka server 注册自己
+    register-with-eureka: false
+    # 不从 eureka server 获取信息
+    fetch-registry: false
+#    service-url:
+#      defaultZone: http://localhost:8761/eureka/
+#    registry-fetch-interval-seconds: 5
+#  instance:
+#    instance-id: ${spring.application.name}:${server.port}
+#    prefer-ip-address: true
+#    lease-renewal-interval-in-seconds: 5
+#    lease-expiration-duration-in-seconds: 10
+
+# 日志配置
+logging:
+  level:
+    com.medical.gateway: info
+    org.springframework.cloud.gateway: info
+    org.springframework.cloud.netflix.eureka: info
+
+# Redis配置（用于限流）
+data:
+  redis:
+    host: localhost
+    port: 6379
+    password: 123456
+    database: 0
+
+# Resilience4j断路器配置
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        permittedNumberOfCallsInHalfOpenState: 3
+        waitDurationInOpenState: 5s
+        failureRateThreshold: 50
+        eventConsumerBufferSize: 10
+  timelimiter:
+    configs:
+      default:
+        timeoutDuration: 5s
+        cancelRunningFuture: true 

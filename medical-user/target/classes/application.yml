@@ -1,0 +1,122 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: medical-user
+  # 数据库配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3307/user_db?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: root
+  # Jackson配置
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+    serialization:
+      WRITE_DATES_AS_TIMESTAMPS: false
+  # 邮件服务配置
+
+
+  mail:
+    host: smtp.qq.com
+    port: 587
+    username: 1037674882@qq.com     # 邮箱地址
+    password: gdfscqillllnbcih             # 授权码
+    default-encoding: UTF-8
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+
+
+
+
+  # Redis配置
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: 123456
+      database: 0
+      timeout: 10000
+      lettuce:
+        pool:
+          max-active: 8
+          max-wait: -1
+          max-idle: 8
+          min-idle: 0
+      client-type: lettuce
+
+# Mybatis Plus配置
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: ASSIGN_ID
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+  mapper-locations: classpath:/mapper/**/*.xml
+
+# Eureka配置
+eureka:
+  client:
+    # 不向 eureka server 注册自己
+    register-with-eureka: false
+    # 不从 eureka server 获取信息
+    fetch-registry: false
+#    service-url:
+#      defaultZone: http://localhost:8761/eureka/
+#    # 从Eureka服务器获取注册信息的间隔时间
+#    registry-fetch-interval-seconds: 5
+#  instance:
+#    # 实例ID
+#    instance-id: ${spring.application.name}:${server.port}
+#    # 显示IP
+#    prefer-ip-address: true
+#    # 向Eureka服务器发送心跳的间隔时间
+#    lease-renewal-interval-in-seconds: 5
+#    # 如果Eureka服务器在这段时间内没有收到心跳，则移除此实例
+#    lease-expiration-duration-in-seconds: 10
+
+# Knife4j配置
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
+    swagger-model-name: 实体类列表
+    enable-group: true
+    enable-request-cache: true
+  production: false
+  basic:
+    enable: false
+
+# SpringDoc配置
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    disable-swagger-default-url: false
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+  group-configs:
+    - group: 默认分组
+      paths-to-match: /**
+      packages-to-scan: com.medical.user.controller
+
+# JWT配置
+jwt:
+  secret: medical-platform-jwt-secret-key-must-be-at-least-256-bits
+  expire-time: 86400000 # 24小时
+
+# 日志配置
+logging:
+  level:
+    com.medical.user: info

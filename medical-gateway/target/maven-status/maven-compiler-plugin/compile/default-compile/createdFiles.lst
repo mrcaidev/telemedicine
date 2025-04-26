@@ -1,0 +1,6 @@
+com\medical\gateway\config\SwaggerConfig.class
+com\medical\gateway\filter\AuthFilter.class
+com\medical\gateway\GatewayApplication.class
+com\medical\gateway\filter\LoggingFilter.class
+com\medical\gateway\config\CorsConfig.class
+com\medical\gateway\filter\AuthFilter$1.class
