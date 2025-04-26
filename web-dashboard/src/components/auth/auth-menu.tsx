@@ -11,6 +11,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
+function logout () {
+  localStorage.removeItem("token");
+  sessionStorage.clear();
+
+  signOut({ callbackUrl: "/" });
+}
+
 export default function AuthMenu() {
   const { data: session, status } = useSession();
 
@@ -26,11 +33,11 @@ export default function AuthMenu() {
 
   const user = session.user;
   const dashboardUrl =
-    user?.role === "DOCTOR"
+    user?.role === "doctor"
       ? "/dashboard/doctor"
-      : user?.role === "CLINIC"
+      : user?.role === "clinic_admin"
       ? "/dashboard/clinic"
-      : user?.role === "PLATFORM"
+      : user?.role === "platform_admin"
       ? "/dashboard/platform"
       : "/dashboard";
 
@@ -46,7 +53,7 @@ export default function AuthMenu() {
         <DropdownMenuItem asChild>
           <Link href={dashboardUrl}>Dashboard</Link>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/" })}>
+        <DropdownMenuItem onClick={() => {logout}}>
           Sign Out
         </DropdownMenuItem>
       </DropdownMenuContent>
