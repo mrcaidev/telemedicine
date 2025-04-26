@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-
+import { RawAppointment } from "@/types/appointment";
 let hasFetched = false;
 
 export function useAppointments() {
-  const [appointments, setAppointments] = useState<any[]>([]);
+  const [appointments, setAppointments] = useState<RawAppointment[]>([]);
   const [loading, setLoading] = useState(false);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
 

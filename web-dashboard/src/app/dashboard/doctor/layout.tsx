@@ -15,8 +15,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <div className="flex flex-col min-h-screen">
           <Navbar />
           <div className="flex flex-1">
-            <DoctorSidebar />
-            <main className="flex-1 p-6 bg-gray-50">{children}</main>
+            <div className="w-56 shrink-0 h-screen sticky top-0">
+              <DoctorSidebar />
+            </div>
+            <main className="flex-1 p-6 bg-gray-50 overflow-y-auto">{children}</main>
           </div>
         </div>
       </ProtectedRoute>

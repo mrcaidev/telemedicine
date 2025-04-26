@@ -10,7 +10,7 @@ const VALID_SORT_FIELDS = ["startTime", "endTime", "createdAt", "endAt"];
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
 
-  if (!session || session.user.role !== "DOCTOR") {
+  if (!session || session.user.role !== "doctor") {
     return NextResponse.json(
       { code: 401, message: "Unauthorized" },
       { status: 401 }
@@ -28,8 +28,7 @@ export async function GET(req: NextRequest) {
 
   const safeSortBy = VALID_SORT_FIELDS.includes(sortBy) ? sortBy : "endAt";
 
-  const backendUrl = new URL(`${BACKEND_API}/mock/appointments`);
-  //   const backendUrl = new URL(`${BACKEND_API}/appointments`);
+  const backendUrl = new URL(`${BACKEND_API}/appointments`);
   backendUrl.searchParams.append("doctorId", doctorId);
   backendUrl.searchParams.append("limit", limit);
   backendUrl.searchParams.append("sortBy", safeSortBy);
@@ -65,7 +64,6 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    // 如果 mock 接口没排序，手动排一下
     result.data.appointments.sort((a: any, b: any) => {
       const timeA = new Date(a[safeSortBy]).getTime();
       const timeB = new Date(b[safeSortBy]).getTime();
