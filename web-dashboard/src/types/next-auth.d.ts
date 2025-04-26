@@ -6,24 +6,27 @@ declare module "next-auth" {
       id: string;
       email?: string | null;
       name?: string | null;
-      role: "DOCTOR" | "CLINIC" | "PLATFORM";
+      role: "doctor" | "clinic_admin" | "platform_admin";
       token: string;
       avatar?: string | null;
+      clinicId?: string | null;
     };
   }
 
   interface User {
     id: string;
     email: string;
-    role: "DOCTOR" | "CLINIC" | "PLATFORM";
+    role: "doctor" | "clinic_admin" | "platform_admin";
     token: string;
     avatar?: string | null;
+    clinicId?: string | null;
   }
 
   interface JWT {
     id: string;
-    role: "DOCTOR" | "CLINIC" | "PLATFORM";
+    role: "doctor" | "clinic_admin" | "platform_admin";
     accessToken: string;
     avatar?: string | null;
+    clinicId?: string | null;
   }
 }

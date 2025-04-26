@@ -12,11 +12,11 @@ export default function RoleBasedRedirect() {
     if (status === "authenticated") {
       const role = session.user?.role;
 
-      if (role === "DOCTOR") {
+      if (role === "doctor") {
         router.push("/dashboard/doctor");
-      } else if (role === "CLINIC") {
+      } else if (role === "clinic_admin") {
         router.push("/dashboard/clinic");
-      } else if (role === "PLATFORM") {
+      } else if (role === "platform_admin") {
         router.push("/dashboard/platform");
       } else {
         router.push("/dashboard");

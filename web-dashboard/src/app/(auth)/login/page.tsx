@@ -62,9 +62,50 @@ export default function LoginPage() {
             )}
           </div>
 
-          <Button type="submit" className="w-full cursor-pointer" disabled={loading}>
+          <div className="flex items-start space-x-2">
+            <input type="checkbox" {...register("acceptPolicy")} />
+            <label className="text-sm text-gray-600">
+              I accept the{" "}
+              <a
+                href="/terms"
+                className="text-blue-500 underline"
+                target="_blank"
+              >
+                Terms
+              </a>{" "}
+              and{" "}
+              <a
+                href="/privacy"
+                className="text-blue-500 underline"
+                target="_blank"
+              >
+                Privacy Policy
+              </a>
+              .
+            </label>
+          </div>
+          {errors.acceptPolicy && (
+            <p className="text-sm text-red-500">
+              {errors.acceptPolicy.message}
+            </p>
+          )}
+
+          <Button
+            type="submit"
+            className="w-full cursor-pointer"
+            disabled={loading}
+          >
             {loading ? "Logging in..." : "Login"}
           </Button>
+
+          <p className="text-center text-sm text-gray-500">
+            <a
+              href="/forgot-password"
+              className="text-blue-500 hover:underline"
+            >
+              Forgot password?
+            </a>
+          </p>
         </form>
       </div>
     </>
