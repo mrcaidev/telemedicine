@@ -2,6 +2,7 @@ import {
   useAppointmentQuery,
   useCancelAppointmentMutation,
 } from "@/api/appointment";
+import { ErrorScreen } from "@/components/error-screen";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,7 +18,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
+import { cn } from "@/components/ui/utils";
 import { getAppointmentRealtimeStatus } from "@/utils/appointment";
 import dayjs from "dayjs";
 import { Link, useLocalSearchParams } from "expo-router";
@@ -26,35 +29,61 @@ import {
   CalendarIcon,
   ChartNoAxesColumnIcon,
   ClockIcon,
+  type LucideIcon,
   PencilLineIcon,
+  UserRoundIcon,
   XIcon,
 } from "lucide-react-native";
-import { ScrollView, View } from "react-native";
+import { ScrollView, View, type ViewProps } from "react-native";
 
-export default function AppointmentDetailsPage() {
+export default function AppointmentPage() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { data: appointment, error, isPending } = useAppointmentQuery(id);
+  const { data: appointment, isPending, error } = useAppointmentQuery(id);
 
   if (isPending) {
-    return <Text>Loading...</Text>;
+    return (
+      <View className="grow mx-6">
+        <Text className="mt-2 text-2xl font-bold">Appointment Details</Text>
+        <ScrollView className="grow mt-6">
+          <Row icon={UserRoundIcon} title="Doctor">
+            <Skeleton className="w-full h-7" />
+          </Row>
+          <Separator className="my-4" />
+          <Row icon={CalendarIcon} title="Date">
+            <Skeleton className="w-full h-5" />
+          </Row>
+          <Separator className="my-4" />
+          <Row icon={ClockIcon} title="Time">
+            <Skeleton className="w-full h-5" />
+          </Row>
+          <Separator className="my-4" />
+          <Row icon={ChartNoAxesColumnIcon} title="Status">
+            <Skeleton className="w-full h-5" />
+          </Row>
+          <Separator className="my-4" />
+          <Row icon={PencilLineIcon} title="Remark" className="items-start">
+            <Skeleton className="w-full h-20" />
+          </Row>
+        </ScrollView>
+        <View className="my-6">
+          <CancelAppointmentButton />
+        </View>
+      </View>
+    );
   }
 
   if (error) {
-    return <Text>Error: {error.message}</Text>;
+    return <ErrorScreen message={error.message} />;
   }
 
-  const { doctor, date, startTime, endTime, remark } = appointment;
-  const status = getAppointmentRealtimeStatus(appointment);
+  const { doctor, startAt, endAt, remark } = appointment;
+  const realtimeStatus = getAppointmentRealtimeStatus(appointment);
 
   return (
-    <View className="grow px-6">
-      <Text className="mt-2 mb-6 text-2xl font-bold">Appointment Details</Text>
-      <ScrollView className="grow">
-        <View className="flex-row items-center">
-          <View className="flex-row items-center gap-2 w-24">
-            <Icon as={ClockIcon} className="text-muted-foreground" />
-            <Text className="font-medium">Doctor</Text>
-          </View>
+    <View className="grow mx-6">
+      <Text className="mt-2 text-2xl font-bold">Appointment Details</Text>
+      <ScrollView className="grow mt-6">
+        <Row icon={UserRoundIcon} title="Doctor">
           <Link
             href={{ pathname: "/doctor/[id]", params: { id: doctor.id } }}
             className="grow"
@@ -73,48 +102,49 @@ export default function AppointmentDetailsPage() {
               </Text>
             </View>
           </Link>
-        </View>
+        </Row>
         <Separator className="my-4" />
-        <View className="flex-row items-center">
-          <View className="flex-row items-center gap-2 w-24">
-            <Icon as={CalendarIcon} className="text-muted-foreground" />
-            <Text className="font-medium">Date</Text>
-          </View>
-          <Text>{dayjs(date).format("dddd, LL")}</Text>
-        </View>
+        <Row icon={CalendarIcon} title="Date">
+          <Text>{dayjs(startAt).format("dddd, LL")}</Text>
+        </Row>
         <Separator className="my-4" />
-        <View className="flex-row items-center">
-          <View className="flex-row items-center gap-2 w-24">
-            <Icon as={ClockIcon} className="text-muted-foreground" />
-            <Text className="font-medium">Time</Text>
-          </View>
+        <Row icon={ClockIcon} title="Time">
           <Text>
-            {dayjs(`${date} ${startTime}`).format("LT")}
+            {dayjs(startAt).format("LT")}
             &nbsp;-&nbsp;
-            {dayjs(`${date} ${endTime}`).format("LT")}
+            {dayjs(endAt).format("LT")}
           </Text>
-        </View>
+        </Row>
         <Separator className="my-4" />
-        <View className="flex-row items-center">
-          <View className="flex-row items-center gap-2 w-24">
-            <Icon
-              as={ChartNoAxesColumnIcon}
-              className="text-muted-foreground"
-            />
-            <Text className="font-medium">Status</Text>
-          </View>
-          <Text>{status}</Text>
-        </View>
+        <Row icon={ChartNoAxesColumnIcon} title="Status">
+          <Text>{realtimeStatus}</Text>
+        </Row>
         <Separator className="my-4" />
-        <View className="flex-row items-start">
-          <View className="flex-row items-center gap-2 w-24">
-            <Icon as={PencilLineIcon} className="text-muted-foreground" />
-            <Text className="font-medium">Remark</Text>
-          </View>
+        <Row icon={PencilLineIcon} title="Remark" className="items-start">
           <Text>{remark}</Text>
-        </View>
+        </Row>
       </ScrollView>
-      <CancelAppointmentButton />
+      <View className="my-6">
+        <CancelAppointmentButton />
+      </View>
+    </View>
+  );
+}
+
+function Row({
+  icon,
+  title,
+  className,
+  children,
+  ...props
+}: ViewProps & { icon: LucideIcon; title: string }) {
+  return (
+    <View className={cn("flex-row items-center", className)} {...props}>
+      <View className="flex-row items-center gap-2 w-24">
+        <Icon as={icon} className="text-muted-foreground" />
+        <Text className="font-medium">{title}</Text>
+      </View>
+      {children}
     </View>
   );
 }
@@ -130,7 +160,7 @@ function CancelAppointmentButton() {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="outline" className="my-6">
+        <Button variant="outline">
           <Icon as={XIcon} />
           <Text>Cancel appointment</Text>
         </Button>
@@ -147,7 +177,7 @@ function CancelAppointmentButton() {
             <Icon as={XIcon} />
             <Text>Close</Text>
           </AlertDialogCancel>
-          <AlertDialogAction disabled={isPending} onPress={cancel}>
+          <AlertDialogAction onPress={cancel} disabled={isPending}>
             <Icon as={ArrowRightIcon} />
             <Text>Continue</Text>
           </AlertDialogAction>

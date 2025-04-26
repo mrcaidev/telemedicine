@@ -59,12 +59,12 @@ function Greeting() {
         <Avatar alt="My avatar" className="size-9">
           <AvatarImage source={{ uri: me.avatarUrl ?? undefined }} />
           <AvatarFallback>
-            <Muted>{me.nickname}</Muted>
+            <Muted>{me.nickname?.[0] ?? me.email[0]}</Muted>
           </AvatarFallback>
         </Avatar>
       </Link>
       <Text className="font-medium">
-        {text}, {me.nickname} {emoji}
+        {text}, {me.nickname || me.email} {emoji}
       </Text>
     </View>
   );

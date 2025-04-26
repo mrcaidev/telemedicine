@@ -59,9 +59,8 @@ export function useBookAppointmentMutation() {
     Error,
     {
       doctorId: string;
-      date: string;
-      startTime: string;
-      endTime: string;
+      startAt: string;
+      endAt: string;
       remark: string;
     }
   >({

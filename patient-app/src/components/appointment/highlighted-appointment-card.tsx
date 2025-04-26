@@ -1,4 +1,5 @@
 import { getAppointmentRealtimeStatus } from "@/utils/appointment";
+import { formatIsoAsDate, formatIsoAsTime } from "@/utils/datetime";
 import type { Appointment } from "@/utils/types";
 import dayjs from "dayjs";
 import { Link } from "expo-router";
@@ -16,9 +17,7 @@ type Props = {
 };
 
 export function HighlightedAppointmentCard({ appointment }: Props) {
-  const { id, doctor, date, startTime, endTime } = appointment;
-
-  const dateObj = dayjs(date);
+  const { id, doctor, startAt, endAt } = appointment;
 
   return (
     <Link href={{ pathname: "/appointment/[id]", params: { id } }}>
@@ -45,11 +44,11 @@ export function HighlightedAppointmentCard({ appointment }: Props) {
         </View>
         <View className="flex-row items-center gap-2 mb-2">
           <Icon as={CalendarIcon} className="text-muted-foreground" />
-          <Text>{dateObj.format("dddd, LL")}</Text>
+          <Text>{formatIsoAsDate(startAt)}</Text>
           <Muted>
-            {dateObj.isToday()
+            {dayjs(startAt).isToday()
               ? "(today)"
-              : dateObj.isTomorrow()
+              : dayjs(startAt).isTomorrow()
                 ? "(tomorrow)"
                 : ""}
           </Muted>
@@ -57,9 +56,9 @@ export function HighlightedAppointmentCard({ appointment }: Props) {
         <View className="flex-row items-center gap-2">
           <Icon as={ClockIcon} className="text-muted-foreground" />
           <Text>
-            {dayjs(`${date} ${startTime}`).format("LT")}
+            {formatIsoAsTime(startAt)}
             &nbsp;-&nbsp;
-            {dayjs(`${date} ${endTime}`).format("LT")}
+            {formatIsoAsTime(endAt)}
           </Text>
         </View>
       </View>

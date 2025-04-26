@@ -10,7 +10,7 @@ export const AppointmentRealtimeStatus = {
 } as const;
 
 export function getAppointmentRealtimeStatus(appointment: Appointment) {
-  const { status, date, startTime, endTime } = appointment;
+  const { status, startAt, endAt } = appointment;
 
   if (status === "to_be_rescheduled") {
     return AppointmentRealtimeStatus.ToBeRescheduled;
@@ -20,11 +20,11 @@ export function getAppointmentRealtimeStatus(appointment: Appointment) {
     return AppointmentRealtimeStatus.Cancelled;
   }
 
-  if (dayjs().isBefore(`${date} ${startTime}`)) {
+  if (dayjs().isBefore(startAt)) {
     return AppointmentRealtimeStatus.Confirmed;
   }
 
-  if (dayjs().isBefore(`${date} ${endTime}`)) {
+  if (dayjs().isBefore(endAt)) {
     return AppointmentRealtimeStatus.Ongoing;
   }
 
