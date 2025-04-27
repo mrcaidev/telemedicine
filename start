@@ -1,0 +1,18 @@
+echo '🚀 Deploying traefik...'
+helm install traefik oci://ghcr.io/traefik/helm/traefik --values ./deployment/traefik/values.yaml
+
+echo '🚀 Deploying kafka...'
+helm install kafka oci://registry-1.docker.io/bitnamicharts/kafka --values ./deployment/kafka/values.yaml
+
+echo '🚀 Deploying notification...'
+helm install notification ./deployment/notification
+
+echo '🚀 Deploying user-postgres...'
+kubectl create configmap user-postgres-initdb --from-file=./user/initdb
+helm install user-postgres oci://registry-1.docker.io/bitnamicharts/postgresql --values ./deployment/user-postgres/values.yaml
+
+echo '🚀 Deploying user...'
+helm install user ./deployment/user
+
+echo '🚀 Deploying web-dashboard...'
+helm install web-dashboard ./deployment/web-dashboard
