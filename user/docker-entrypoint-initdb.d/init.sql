@@ -13,7 +13,7 @@ create type gender as enum (
 create table users (
   id uuid default gen_random_uuid() primary key,
   role user_role not null,
-  email text unique not null,
+  email text not null,
   password_hash text default null,
   created_at timestamptz default now() not null,
   deleted_at timestamptz default null
