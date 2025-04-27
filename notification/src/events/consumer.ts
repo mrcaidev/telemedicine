@@ -1,4 +1,4 @@
-import { sendEmail } from "@/utils/email";
+import { resend } from "@/utils/resend";
 import { consumer } from "./kafka";
 
 // 订阅 EmailRequested 主题。
@@ -12,11 +12,15 @@ await consumer.run({
     if (!text) {
       return;
     }
+
+    console.log("kafka consumer received message:", text);
+
     const json = JSON.parse(text);
     if (!json) {
       return;
     }
 
+    // 处理 EmailRequested 事件。
     if (topic === "EmailRequested") {
       await consumeEmailRequestedEvent(json);
     }
@@ -34,5 +38,26 @@ type EmailRequestedEvent = {
 };
 
 async function consumeEmailRequestedEvent(event: EmailRequestedEvent) {
-  await sendEmail(event);
+  if (Bun.env.NODE_ENV !== "production") {
+    console.log("skip sending email in non-production environment");
+    console.log("email:", JSON.stringify(event));
+    return;
+  }
+
+  const { data, error } = await resend.emails.send({
+    from: "Telemedicine <notification@telemedicine.ink>",
+    to: event.to,
+    cc: event.cc,
+    bcc: event.bcc,
+    subject: event.subject,
+    text: event.content,
+    ...(event.scheduledAt ? { scheduledAt: event.scheduledAt } : {}),
+  });
+
+  if (error) {
+    console.error("failed to send email:", error.message);
+    return;
+  }
+
+  console.log("sent email:", data?.id);
 }
