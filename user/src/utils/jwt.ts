@@ -1,7 +1,7 @@
-import type { User } from "@/utils/types";
+import type { FullUser } from "@/utils/types";
 import { sign, verify } from "hono/jwt";
 
-type Payload = Pick<User, "id" | "role">;
+type Payload = Pick<FullUser, "id" | "role">;
 
 const JWT_SECRET = Bun.env.JWT_SECRET;
 

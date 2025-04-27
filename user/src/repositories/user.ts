@@ -1,6 +1,6 @@
-import type { UserCommon } from "@/utils/types";
+import { camelToSnakeJson, snakeToCamelJson } from "@/utils/case";
+import type { User } from "@/utils/types";
 import { sql } from "bun";
-import { HTTPException } from "hono/http-exception";
 
 export async function findOneById(id: string) {
   const [row] = await sql`
@@ -13,12 +13,7 @@ export async function findOneById(id: string) {
     return null;
   }
 
-  return {
-    id: row.id,
-    role: row.role,
-    email: row.email,
-    passwordHash: row.password_hash,
-  } as UserCommon;
+  return snakeToCamelJson(row) as User;
 }
 
 export async function findOneByEmail(email: string) {
@@ -32,30 +27,20 @@ export async function findOneByEmail(email: string) {
     return null;
   }
 
-  return {
-    id: row.id,
-    role: row.role,
-    email: row.email,
-    passwordHash: row.password_hash,
-  } as UserCommon;
+  return snakeToCamelJson(row) as User;
 }
 
 export async function insertOne(
-  data: Pick<UserCommon, "role" | "email" | "passwordHash">,
+  data: Pick<User, "role" | "email" | "passwordHash">,
 ) {
   const [row] = await sql`
-    insert into users ${sql({ role: data.role, email: data.email, password_hash: data.passwordHash })}
+    insert into users ${sql(camelToSnakeJson(data))}
     returning id, role, email, password_hash
   `;
 
   if (!row) {
-    throw new HTTPException(500, { message: "Failed to insert user" });
+    throw new Error("Failed to insert user");
   }
 
-  return {
-    id: row.id,
-    role: row.role,
-    email: row.email,
-    passwordHash: row.password_hash,
-  } as UserCommon;
+  return snakeToCamelJson(row) as User;
 }

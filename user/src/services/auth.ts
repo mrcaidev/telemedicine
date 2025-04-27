@@ -4,7 +4,7 @@ import * as patientRepository from "@/repositories/patient";
 import * as platformAdminRepository from "@/repositories/platform-admin";
 import * as userRepository from "@/repositories/user";
 import { signJwt } from "@/utils/jwt";
-import type { User } from "@/utils/types";
+import type { Role } from "@/utils/types";
 import { HTTPException } from "hono/http-exception";
 
 export async function getUserById(id: string) {
@@ -14,28 +14,8 @@ export async function getUserById(id: string) {
     throw new HTTPException(404, { message: "User not found" });
   }
 
-  // 获取其完整信息。
-  let fullUser: User | null;
-  if (user.role === "platform_admin") {
-    fullUser = await platformAdminRepository.findOneById(user.id);
-  } else if (user.role === "clinic_admin") {
-    fullUser = await clinicAdminRepository.findOneById(user.id);
-  } else if (user.role === "doctor") {
-    fullUser = await doctorRepository.findOneById(user.id);
-  } else if (user.role === "patient") {
-    fullUser = await patientRepository.findOneById(user.id);
-  } else {
-    throw new HTTPException(500, {
-      message: `Unknown user role: ${user.role}`,
-    });
-  }
-
-  // 一般不会走到这一步。
-  if (!fullUser) {
-    throw new HTTPException(404, { message: "User not found" });
-  }
-
-  return fullUser;
+  // 再根据角色查对应表，获取其完整信息。
+  return await findOneUserById(user.id, user.role);
 }
 
 export async function logInWithEmailAndPassword(
@@ -66,29 +46,32 @@ export async function logInWithEmailAndPassword(
     throw new HTTPException(401, { message: "Wrong password. Try again?" });
   }
 
+  // 为其颁发 JWT。
+  const token = await signJwt({ id: user.id, role: user.role });
+
   // 获取其完整信息。
-  let fullUser: User | null;
-  if (user.role === "platform_admin") {
-    fullUser = await platformAdminRepository.findOneById(user.id);
-  } else if (user.role === "clinic_admin") {
-    fullUser = await clinicAdminRepository.findOneById(user.id);
-  } else if (user.role === "doctor") {
-    fullUser = await doctorRepository.findOneById(user.id);
-  } else if (user.role === "patient") {
-    fullUser = await patientRepository.findOneById(user.id);
-  } else {
-    throw new HTTPException(500, {
-      message: `Unknown user role: ${user.role}`,
-    });
-  }
+  const fullUser = await findOneUserById(user.id, user.role);
 
   // 一般不会走到这一步。
   if (!fullUser) {
     throw new HTTPException(404, { message: "User not found" });
   }
 
-  // 为其颁发 JWT。
-  const token = await signJwt({ id: user.id, role: user.role });
-
   return { ...fullUser, token };
+}
+
+async function findOneUserById(id: string, role: Role) {
+  if (role === "platform_admin") {
+    return await platformAdminRepository.findOneById(id);
+  }
+  if (role === "clinic_admin") {
+    return await clinicAdminRepository.findOneById(id);
+  }
+  if (role === "doctor") {
+    return await doctorRepository.findOneById(id);
+  }
+  if (role === "patient") {
+    return await patientRepository.findOneById(id);
+  }
+  throw new HTTPException(500, { message: `Unknown user role: ${role}` });
 }
