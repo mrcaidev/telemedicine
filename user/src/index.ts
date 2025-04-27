@@ -3,6 +3,7 @@ import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { logger } from "hono/logger";
 import { isValiError } from "valibot";
+import { authController } from "./controllers/auth";
 import { authGatewayController } from "./controllers/auth-gateway";
 import { otpVerificationController } from "./controllers/otp-verification";
 
@@ -21,6 +22,7 @@ app.get("/readyz", async (c) => {
 
 app.route("/auth-gateway", authGatewayController);
 app.route("/otp", otpVerificationController);
+app.route("/auth", authController);
 
 app.onError((error, c) => {
   if (isValiError(error)) {

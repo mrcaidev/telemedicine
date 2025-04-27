@@ -7,44 +7,33 @@ export type UserCommon = {
   role: Role;
   email: string;
   passwordHash: string | null;
-  passwordSalt: string | null;
-  createdAt: string;
-  deletedAt: string | null;
 };
 
-export type PlatformAdmin = UserCommon & {};
+export type PlatformAdmin = Pick<UserCommon, "id" | "role" | "email"> & {};
 
 export type Clinic = {
   id: string;
   name: string;
-  createdAt: string;
-  createdBy: PlatformAdmin["id"];
-  deletedAt: string | null;
-  deletedBy: PlatformAdmin["id"] | null;
 };
 
-export type ClinicAdmin = UserCommon & {
-  clinicId: Clinic["id"];
+export type ClinicAdmin = Pick<UserCommon, "id" | "role" | "email"> & {
   firstName: string;
   lastName: string;
-  createdBy: PlatformAdmin["id"];
-  deletedBy: PlatformAdmin["id"] | null;
+  clinic: Clinic;
 };
 
-export type Doctor = UserCommon & {
-  clinicId: Clinic["id"];
+export type Doctor = Pick<UserCommon, "id" | "role" | "email"> & {
   firstName: string;
   lastName: string;
   avatarUrl: string | null;
   gender: Gender;
   description: string;
   specialties: string[];
-  createdBy: ClinicAdmin["id"];
-  deletedBy: ClinicAdmin["id"] | null;
+  clinic: Clinic;
 };
 
-export type Patient = UserCommon & {
-  nickname: string;
+export type Patient = Pick<UserCommon, "id" | "role" | "email"> & {
+  nickname: string | null;
   avatarUrl: string | null;
   gender: Gender | null;
   birthDate: string | null;

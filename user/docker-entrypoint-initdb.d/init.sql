@@ -15,7 +15,6 @@ create table users (
   role user_role not null,
   email text unique not null,
   password_hash text default null,
-  password_salt text default null,
   created_at timestamptz default now() not null,
   deleted_at timestamptz default null
 );
@@ -57,7 +56,7 @@ create table doctors (
 
 create table patients (
   id uuid primary key references users(id),
-  nickname text not null,
+  nickname text default null,
   avatar_url text default null,
   gender gender default null,
   birth_date date default null
