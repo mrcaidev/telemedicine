@@ -1,3 +1,4 @@
+import { uuidSchema } from "@/common/schema";
 import { validator } from "@/middleware/validator";
 import * as doctorService from "@/services/doctor";
 import { Hono } from "hono";
@@ -7,12 +8,7 @@ export const doctorController = new Hono();
 
 doctorController.get(
   "/:id",
-  validator(
-    "param",
-    v.object({
-      id: v.pipe(v.string(), v.uuid("Invalid ID")),
-    }),
-  ),
+  validator("param", v.object({ id: uuidSchema })),
   async (c) => {
     const { id } = c.req.valid("param");
     const doctor = await doctorService.findOneById(id);
