@@ -56,8 +56,8 @@ jobs:
           context: "{{defaultContext}}:user"
           push: true
           tags: |
-            ${{ vars.DOCKERHUB_USERNAME }}/telemedicine-notification:latest
-            ${{ vars.DOCKERHUB_USERNAME }}/telemedicine-notification:${{ needs.set-env.outputs.tag }}
+            ${{ vars.DOCKERHUB_USERNAME }}/telemedicine-user:latest
+            ${{ vars.DOCKERHUB_USERNAME }}/telemedicine-user:${{ needs.set-env.outputs.tag }}
 
   deploy:
     name: Deploy
