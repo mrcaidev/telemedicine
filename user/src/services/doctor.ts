@@ -43,6 +43,7 @@ export async function createOne(
 
   // 创建医生。
   const doctor = await doctorRepository.insertOne({
+    id: user.id,
     firstName: data.firstName,
     lastName: data.lastName,
     clinic,

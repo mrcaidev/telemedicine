@@ -42,6 +42,7 @@ export async function createOne(
 
   // 创建诊所管理员。
   const clinicAdmin = await clinicAdminRepository.insertOne({
+    id: user.id,
     firstName: data.firstName,
     lastName: data.lastName,
     clinic,

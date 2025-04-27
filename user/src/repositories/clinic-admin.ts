@@ -22,13 +22,10 @@ export async function findOneById(id: string) {
   } as WithFull<ClinicAdmin>;
 }
 
-export async function insertOne(
-  data: Pick<ClinicAdmin, "firstName" | "lastName" | "clinic"> & {
-    createdBy: string;
-  },
-) {
+export async function insertOne(data: ClinicAdmin & { createdBy: string }) {
   const [row] = await sql`
     insert into clinic_admins ${sql({
+      id: data.id,
       first_name: data.firstName,
       last_name: data.lastName,
       clinic_id: data.clinic.id,

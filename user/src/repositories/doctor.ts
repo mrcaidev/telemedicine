@@ -23,12 +23,13 @@ export async function findOneById(id: string) {
 }
 
 export async function insertOne(
-  data: Pick<Doctor, "firstName" | "lastName" | "clinic"> & {
+  data: Pick<Doctor, "id" | "firstName" | "lastName" | "clinic"> & {
     createdBy: string;
   },
 ) {
   const [row] = await sql`
     insert into doctors ${sql({
+      id: data.id,
       clinic_id: data.clinic.id,
       first_name: data.firstName,
       last_name: data.lastName,
