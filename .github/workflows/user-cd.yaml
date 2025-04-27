@@ -85,5 +85,5 @@ jobs:
             --values ${{ github.workspace }}/deployment/user/values-${{ needs.set-env.outputs.environment }}.yaml \
             --set image=${{ vars.DOCKERHUB_USERNAME }}/telemedicine-user:${{ needs.set-env.outputs.tag }} \
             --set secrets.JWT_SECRET=${{ secrets.JWT_SECRET }} \
-            --set secrets.POSTGRES_URL=postgresql://${{ secrets.USER_POSTGRES_USER }}:${{ secrets.USER_POSTGRES_PASSWORD }}@auth-postgres-postgresql:5432/${{ secrets.USER_POSTGRES_DB }} \
+            --set secrets.POSTGRES_URL=postgresql://${{ secrets.USER_POSTGRES_USER }}:${{ secrets.USER_POSTGRES_PASSWORD }}@user-postgres-postgresql:5432/${{ secrets.USER_POSTGRES_DB }} \
             --set secrets.KAFKA_BROKERS=${{ secrets.KAFKA_BROKERS }}
