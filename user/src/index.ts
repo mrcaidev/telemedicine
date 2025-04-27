@@ -3,6 +3,7 @@ import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { logger } from "hono/logger";
 import { isValiError } from "valibot";
+import { authGatewayController } from "./controllers/auth-gateway";
 import { otpVerificationController } from "./controllers/otp-verification";
 
 const app = new Hono();
@@ -18,6 +19,7 @@ app.get("/readyz", async (c) => {
   return c.text("ready");
 });
 
+app.route("/auth-gateway", authGatewayController);
 app.route("/otp", otpVerificationController);
 
 app.onError((error, c) => {

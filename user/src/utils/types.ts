@@ -50,6 +50,8 @@ export type Patient = UserCommon & {
   birthDate: string | null;
 };
 
+export type User = PlatformAdmin | ClinicAdmin | Doctor | Patient;
+
 export type OtpVerification = {
   id: string;
   email: string;
