@@ -1,0 +1,5 @@
+image:
+host: api.staging-telemedicine.ink
+minReplicas: 1
+maxReplicas: 3
+secrets:

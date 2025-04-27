@@ -1,0 +1,5 @@
+image:
+host: api.telemedicine.ink
+minReplicas: 1
+maxReplicas: 5
+secrets:

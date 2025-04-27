@@ -1,0 +1,10 @@
+image: mrcaidev/telemedicine-notification:test
+host: api.localhost
+port: 3000
+paths:
+  - /notifications
+minReplicas: 1
+maxReplicas: 2
+secrets:
+  RESEND_API_KEY: re_TwGvQkP2_7rxSr7mmyVadUz7EraYdwohW
+  KAFKA_BROKERS: kafka:9092
