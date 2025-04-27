@@ -12,11 +12,8 @@ platformAdminController.post(
   bearerAuth({ token: Bun.env.SUPER_ADMIN_TOKEN }),
   validator("json", v.object({ email: emailSchema, password: passwordSchema })),
   async (c) => {
-    const { email, password } = c.req.valid("json");
-    const platformAdmin = await platformAdminService.createPlatformAdmin({
-      email,
-      password,
-    });
+    const data = c.req.valid("json");
+    const platformAdmin = await platformAdminService.createOne(data);
     return c.json({ code: 0, message: "", data: platformAdmin }, 201);
   },
 );

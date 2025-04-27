@@ -3,7 +3,7 @@ import * as userRepository from "@/repositories/user";
 import * as otpVerificationService from "@/services/otp-verification";
 import { signJwt } from "@/utils/jwt";
 
-export async function createPatient(data: {
+export async function createOne(data: {
   email: string;
   password: string;
   otp: string;

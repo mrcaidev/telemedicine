@@ -9,7 +9,7 @@ export const authController = new Hono();
 
 authController.get("/me", authGuard(), async (c) => {
   const userId = c.get("userId");
-  const user = await authService.getUserById(userId);
+  const user = await authService.findUserById(userId);
   return c.json({ code: 0, message: "", data: user });
 });
 

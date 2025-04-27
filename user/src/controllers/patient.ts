@@ -14,7 +14,7 @@ patientController.post(
   ),
   async (c) => {
     const data = c.req.valid("json");
-    const patientWithToken = await patientService.createPatient(data);
+    const patientWithToken = await patientService.createOne(data);
     return c.json({ code: 0, message: "", data: patientWithToken }, 201);
   },
 );

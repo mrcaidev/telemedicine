@@ -1,10 +1,7 @@
 import * as platformAdminRepository from "@/repositories/platform-admin";
 import * as userRepository from "@/repositories/user";
 
-export async function createPlatformAdmin(data: {
-  email: string;
-  password: string;
-}) {
+export async function createOne(data: { email: string; password: string }) {
   // 密码加盐。
   const passwordHash = await Bun.password.hash(data.password);
 

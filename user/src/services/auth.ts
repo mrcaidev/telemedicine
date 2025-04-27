@@ -7,7 +7,7 @@ import { signJwt } from "@/utils/jwt";
 import type { Role } from "@/utils/types";
 import { HTTPException } from "hono/http-exception";
 
-export async function getUserById(id: string) {
+export async function findUserById(id: string) {
   // 先找到该用户的角色。
   const user = await userRepository.findOneById(id);
   if (!user) {
