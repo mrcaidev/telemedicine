@@ -1,14 +1,11 @@
 name: Notification CD
 
 on:
-  # Deploy to staging on push to main branch.
   push:
     branches:
       - main
     paths:
       - notification/**
-      - deployment/notification/**
-  # Deploy to production on release.
   release:
     types:
       - published
@@ -58,7 +55,9 @@ jobs:
         with:
           context: "{{defaultContext}}:notification"
           push: true
-          tags: ${{ vars.DOCKERHUB_USERNAME }}/telemedicine-notification:${{ needs.set-env.outputs.tag }}
+          tags: |
+            ${{ vars.DOCKERHUB_USERNAME }}/telemedicine-notification:latest
+            ${{ vars.DOCKERHUB_USERNAME }}/telemedicine-notification:${{ needs.set-env.outputs.tag }}
 
   deploy:
     name: Deploy
