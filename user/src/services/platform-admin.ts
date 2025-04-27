@@ -1,5 +1,16 @@
 import * as platformAdminRepository from "@/repositories/platform-admin";
 import * as userRepository from "@/repositories/user";
+import { HTTPException } from "hono/http-exception";
+
+export async function findOneById(id: string) {
+  const platformAdmin = await platformAdminRepository.findOneById(id);
+
+  if (!platformAdmin) {
+    throw new HTTPException(404, { message: "Platform admin not found" });
+  }
+
+  return platformAdmin;
+}
 
 export async function createOne(data: { email: string; password: string }) {
   // 密码加盐。

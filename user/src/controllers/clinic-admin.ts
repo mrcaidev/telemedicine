@@ -13,6 +13,16 @@ import * as v from "valibot";
 
 export const clinicAdminController = new Hono();
 
+clinicAdminController.get(
+  "/:id",
+  validator("param", v.object({ id: uuidSchema })),
+  async (c) => {
+    const { id } = c.req.valid("param");
+    const clinicAdmin = await clinicAdminService.findOneById(id);
+    return c.json({ code: 0, message: "", data: clinicAdmin });
+  },
+);
+
 clinicAdminController.post(
   "/",
   authGuard(["platform_admin"]),

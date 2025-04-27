@@ -4,6 +4,16 @@ import * as userRepository from "@/repositories/user";
 import type { ClinicAdmin, WithFull } from "@/utils/types";
 import { HTTPException } from "hono/http-exception";
 
+export async function findOneById(id: string) {
+  const clinicAdmin = await clinicAdminRepository.findOneById(id);
+
+  if (!clinicAdmin) {
+    throw new HTTPException(404, { message: "Clinic admin not found" });
+  }
+
+  return clinicAdmin;
+}
+
 export async function createOne(
   data: {
     email: string;

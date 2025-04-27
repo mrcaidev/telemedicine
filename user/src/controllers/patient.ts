@@ -1,10 +1,25 @@
-import { emailSchema, otpSchema, passwordSchema } from "@/common/schema";
+import {
+  emailSchema,
+  otpSchema,
+  passwordSchema,
+  uuidSchema,
+} from "@/common/schema";
 import { validator } from "@/middleware/validator";
 import * as patientService from "@/services/patient";
 import { Hono } from "hono";
 import * as v from "valibot";
 
 export const patientController = new Hono();
+
+patientController.get(
+  "/:id",
+  validator("param", v.object({ id: uuidSchema })),
+  async (c) => {
+    const { id } = c.req.valid("param");
+    const patient = await patientService.findOneById(id);
+    return c.json({ code: 0, message: "", data: patient });
+  },
+);
 
 patientController.post(
   "/",

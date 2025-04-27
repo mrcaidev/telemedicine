@@ -2,6 +2,17 @@ import * as patientRepository from "@/repositories/patient";
 import * as userRepository from "@/repositories/user";
 import * as otpVerificationService from "@/services/otp-verification";
 import { signJwt } from "@/utils/jwt";
+import { HTTPException } from "hono/http-exception";
+
+export async function findOneById(id: string) {
+  const patient = await patientRepository.findOneById(id);
+
+  if (!patient) {
+    throw new HTTPException(404, { message: "Platform admin not found" });
+  }
+
+  return patient;
+}
 
 export async function createOne(data: {
   email: string;
