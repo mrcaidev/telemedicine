@@ -1,4 +1,4 @@
-name: Auth CD
+name: Notification CD
 
 on:
   # Deploy to staging on push to main branch.
@@ -6,8 +6,8 @@ on:
     branches:
       - main
     paths:
-      - auth/**
-      - deployment/auth/**
+      - notification/**
+      - deployment/notification/**
   # Deploy to production on release.
   release:
     types:
@@ -56,9 +56,9 @@ jobs:
       - name: Build and push image
         uses: docker/build-push-action@v6
         with:
-          context: "{{defaultContext}}:auth"
+          context: "{{defaultContext}}:notification"
           push: true
-          tags: ${{ vars.DOCKERHUB_USERNAME }}/telemedicine-auth:${{ needs.set-env.outputs.tag }}
+          tags: ${{ vars.DOCKERHUB_USERNAME }}/telemedicine-notification:${{ needs.set-env.outputs.tag }}
 
   deploy:
     name: Deploy
@@ -81,8 +81,8 @@ jobs:
 
       - name: Deploy to Kubernetes
         run: |
-          helm upgrade --install auth ${{ github.workspace }}/deployment/auth \
-            --values ${{ github.workspace }}/deployment/auth/values-${{ needs.set-env.outputs.environment }}.yaml \
-            --set image=${{ vars.DOCKERHUB_USERNAME }}/telemedicine-auth:${{ needs.set-env.outputs.tag }} \
-            --set secrets.JWT_SECRET=${{ secrets.JWT_SECRET }} \
-            --set secrets.POSTGRES_URL=postgresql://${{ secrets.AUTH_POSTGRES_USER }}:${{ secrets.AUTH_POSTGRES_PASSWORD }}@auth-postgres-postgresql.default.svc.cluster.local:5432/${{ secrets.AUTH_POSTGRES_DB }}
+          helm upgrade --install notification ${{ github.workspace }}/deployment/notification \
+            --values ${{ github.workspace }}/deployment/notification/values-${{ needs.set-env.outputs.environment }}.yaml \
+            --set image=${{ vars.DOCKERHUB_USERNAME }}/telemedicine-notification:${{ needs.set-env.outputs.tag }} \
+            --set secrets.RESEND_API_KEY=${{ secrets.RESEND_API_KEY }} \
+            --set secrets.KAFKA_BROKERS=${{ secrets.KAFKA_BROKERS }}
