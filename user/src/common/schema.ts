@@ -45,3 +45,5 @@ export const lastNameSchema = v.pipe(
   v.minLength(1, "Last name should be 1-20 characters long"),
   v.maxLength(20, "Last name should be 1-20 characters long"),
 );
+
+export const genderSchema = v.union([v.literal("male"), v.literal("female")]);

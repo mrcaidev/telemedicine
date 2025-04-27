@@ -21,3 +21,26 @@ export async function findOneById(id: string) {
     clinic: { id: clinicId, name: clinicName },
   } as WithFull<Doctor>;
 }
+
+export async function insertOne(
+  data: Pick<Doctor, "firstName" | "lastName" | "clinic"> & {
+    createdBy: string;
+  },
+) {
+  const [row] = await sql`
+    insert into doctors ${sql({
+      clinic_id: data.clinic.id,
+      first_name: data.firstName,
+      last_name: data.lastName,
+      gender: "male",
+      created_by: data.createdBy,
+    })}
+    returning id, first_name, last_name, avatar_url, gender, description, specialties
+  `;
+
+  if (!row) {
+    throw new Error("failed to insert doctor");
+  }
+
+  return { ...snakeToCamelJson(row), clinic: data.clinic } as Doctor;
+}
