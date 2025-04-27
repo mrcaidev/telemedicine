@@ -6,6 +6,7 @@ services:
     ports:
       - 3000:3000
     environment:
+      - RESEND_API_KEY=mock-api-key
       - KAFKA_BROKERS=kafka-1:9092,kafka-2:9092,kafka-3:9092
     volumes:
       - .:/code

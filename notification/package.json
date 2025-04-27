@@ -10,7 +10,8 @@
   },
   "dependencies": {
     "hono": "^4.7.7",
-    "kafkajs": "^2.2.4"
+    "kafkajs": "^2.2.4",
+    "resend": "^4.4.1"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",

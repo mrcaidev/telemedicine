@@ -1,3 +1,4 @@
+import "@/events/consumer";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { logger } from "hono/logger";
