@@ -1,3 +1,4 @@
+import { uuidSchema } from "@/common/schema";
 import { authGuard } from "@/middleware/auth-guard";
 import { validator } from "@/middleware/validator";
 import * as clinicService from "@/services/clinic";
@@ -5,6 +6,16 @@ import { Hono } from "hono";
 import * as v from "valibot";
 
 export const clinicController = new Hono();
+
+clinicController.get(
+  "/:id",
+  validator("param", v.object({ id: uuidSchema })),
+  async (c) => {
+    const { id } = c.req.valid("param");
+    const clinic = await clinicService.findOneById(id);
+    return c.json({ code: 0, message: "", data: clinic });
+  },
+);
 
 clinicController.post(
   "/",
