@@ -22,8 +22,8 @@ app.get("/readyz", async (c) => {
 });
 
 app.route("/auth-gateway", authGatewayController);
-app.route("/otp", otpVerificationController);
 app.route("/auth", authController);
+app.route("/otp", otpVerificationController);
 app.route("/patients", patientController);
 
 app.onError((error, c) => {
