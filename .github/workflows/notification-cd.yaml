@@ -1,11 +1,11 @@
-name: Web Dashboard CD
+name: Notification CD
 
 on:
   push:
     branches:
       - main
     paths:
-      - web-dashboard/**
+      - notification/**
   release:
     types:
       - published
@@ -53,11 +53,11 @@ jobs:
       - name: Build and push image
         uses: docker/build-push-action@v6
         with:
-          context: "{{defaultContext}}:web-dashboard"
+          context: "{{defaultContext}}:notification"
           push: true
           tags: |
-            ${{ vars.DOCKERHUB_USERNAME }}/telemedicine-web-dashboard:latest
-            ${{ vars.DOCKERHUB_USERNAME }}/telemedicine-web-dashboard:${{ needs.set-env.outputs.tag }}
+            ${{ vars.DOCKERHUB_USERNAME }}/telemedicine-notification:latest
+            ${{ vars.DOCKERHUB_USERNAME }}/telemedicine-notification:${{ needs.set-env.outputs.tag }}
 
   deploy:
     name: Deploy
@@ -80,6 +80,8 @@ jobs:
 
       - name: Deploy to Kubernetes
         run: |
-          helm upgrade --install web-dashboard ${{ github.workspace }}/deployment/web-dashboard \
-            --values ${{ github.workspace }}/deployment/web-dashboard/values-${{ needs.set-env.outputs.environment }}.yaml \
-            --set image=${{ vars.DOCKERHUB_USERNAME }}/telemedicine-web-dashboard:${{ needs.set-env.outputs.tag }}
+          helm upgrade --install notification ${{ github.workspace }}/deployment/notification \
+            --values ${{ github.workspace }}/deployment/notification/values-${{ needs.set-env.outputs.environment }}.yaml \
+            --set image=${{ vars.DOCKERHUB_USERNAME }}/telemedicine-notification:${{ needs.set-env.outputs.tag }} \
+            --set secrets.RESEND_API_KEY=${{ secrets.RESEND_API_KEY }} \
+            --set secrets.KAFKA_BROKERS=${{ secrets.KAFKA_BROKERS }}

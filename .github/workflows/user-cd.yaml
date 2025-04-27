@@ -1,11 +1,11 @@
-name: Web Dashboard CD
+name: User CD
 
 on:
   push:
     branches:
       - main
     paths:
-      - web-dashboard/**
+      - user/**
   release:
     types:
       - published
@@ -53,11 +53,11 @@ jobs:
       - name: Build and push image
         uses: docker/build-push-action@v6
         with:
-          context: "{{defaultContext}}:web-dashboard"
+          context: "{{defaultContext}}:user"
           push: true
           tags: |
-            ${{ vars.DOCKERHUB_USERNAME }}/telemedicine-web-dashboard:latest
-            ${{ vars.DOCKERHUB_USERNAME }}/telemedicine-web-dashboard:${{ needs.set-env.outputs.tag }}
+            ${{ vars.DOCKERHUB_USERNAME }}/telemedicine-user:latest
+            ${{ vars.DOCKERHUB_USERNAME }}/telemedicine-user:${{ needs.set-env.outputs.tag }}
 
   deploy:
     name: Deploy
@@ -80,6 +80,9 @@ jobs:
 
       - name: Deploy to Kubernetes
         run: |
-          helm upgrade --install web-dashboard ${{ github.workspace }}/deployment/web-dashboard \
-            --values ${{ github.workspace }}/deployment/web-dashboard/values-${{ needs.set-env.outputs.environment }}.yaml \
-            --set image=${{ vars.DOCKERHUB_USERNAME }}/telemedicine-web-dashboard:${{ needs.set-env.outputs.tag }}
+          helm upgrade --install user ${{ github.workspace }}/deployment/user \
+            --values ${{ github.workspace }}/deployment/user/values-${{ needs.set-env.outputs.environment }}.yaml \
+            --set image=${{ vars.DOCKERHUB_USERNAME }}/telemedicine-user:${{ needs.set-env.outputs.tag }} \
+            --set secrets.JWT_SECRET=${{ secrets.JWT_SECRET }} \
+            --set secrets.POSTGRES_URL=postgresql://${{ secrets.USER_POSTGRES_USER }}:${{ secrets.USER_POSTGRES_PASSWORD }}@user-postgres-postgresql:5432/${{ secrets.USER_POSTGRES_DB }} \
+            --set secrets.KAFKA_BROKERS=${{ secrets.KAFKA_BROKERS }}

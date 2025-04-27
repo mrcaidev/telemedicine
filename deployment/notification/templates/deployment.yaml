@@ -20,4 +20,12 @@ spec:
           envFrom:
             - secretRef:
                 name: {{ .Release.Name }}
+          livenessProbe:
+            httpGet:
+              path: /livez
+              port: {{ .Values.port }}
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: {{ .Values.port }}
       serviceAccountName: {{ .Release.Name }}

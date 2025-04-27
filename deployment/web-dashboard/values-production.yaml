@@ -1,0 +1,3 @@
+host: dashboard.telemedicine.ink
+minReplicas: 1
+maxReplicas: 5

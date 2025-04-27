@@ -1,19 +1,8 @@
-# Container image: <repository>:<tag>
 image: mrcaidev/telemedicine-web-dashboard
-
-# Hostname that ingress listens on.
-host: dashboard.telemedicine.ink
-
-# Traffic -> Ingress -> Service:<port> -> Pod:<port>
+host: dashboard.localhost
 port: 3000
-
-# Path prefixes in charge.
 paths:
   - /
-
-# Autoscaling range: <minReplicas> - <maxReplicas>
 minReplicas: 1
-maxReplicas: 5
-
-# Secret environment variables.
-secrets:
+maxReplicas: 2
+secrets: {}
