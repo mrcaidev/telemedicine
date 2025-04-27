@@ -19,6 +19,14 @@ export async function createOne(data: {
   password: string;
   otp: string;
 }) {
+  // 如果该邮箱已经注册过了，拒绝再次注册。
+  const existingUser = await userRepository.findOneByEmail(data.email);
+  if (existingUser) {
+    throw new HTTPException(409, {
+      message: "This email has already been registered",
+    });
+  }
+
   // 验证 OTP。
   await otpVerificationService.verifyOtp(data.email, data.otp);
 

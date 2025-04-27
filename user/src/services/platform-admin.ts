@@ -13,6 +13,14 @@ export async function findOneById(id: string) {
 }
 
 export async function createOne(data: { email: string; password: string }) {
+  // 如果该邮箱已经注册过了，拒绝再次注册。
+  const existingUser = await userRepository.findOneByEmail(data.email);
+  if (existingUser) {
+    throw new HTTPException(409, {
+      message: "This email has already been registered",
+    });
+  }
+
   // 密码加盐。
   const passwordHash = await Bun.password.hash(data.password);
 
