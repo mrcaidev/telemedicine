@@ -41,6 +41,6 @@ doctorController.post(
     const data = c.req.valid("json");
     const userId = c.get("userId");
     const doctor = await doctorService.createOne(data, userId);
-    return c.json({ code: 0, message: "", data: doctor });
+    return c.json({ code: 0, message: "", data: doctor }, 201);
   },
 );
