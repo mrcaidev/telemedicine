@@ -2,7 +2,7 @@ import type { Role } from "@/utils/types";
 import { createMiddleware } from "hono/factory";
 import { HTTPException } from "hono/http-exception";
 
-export function roleGuard(roles?: Role[]) {
+export function authGuard(roles?: Role[]) {
   return createMiddleware<{ Variables: { userId: string; userRole: Role } }>(
     (c, next) => {
       // 从请求头中获取用户的 ID 和角色。
