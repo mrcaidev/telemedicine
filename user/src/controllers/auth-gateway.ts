@@ -6,11 +6,11 @@ export const authGatewayController = new Hono();
 authGatewayController.get("/", async (c) => {
   try {
     // JWT 会被放在请求头的 Authorization 字段中，
-    // 以 Bearer 开头，后面跟着 JWT。
+    // 以 "Bearer " 开头，后面跟着 JWT。
     const token = c.req.header("Authorization")?.slice(7);
 
     // 即使没有携带 JWT，也不应该返回 401，而是仍返回 204，
-    // 由各个微服务自行决定是否返回 401。
+    // 由各个端点自行决定是否返回 401。
     if (!token) {
       return c.body(null, 204);
     }
