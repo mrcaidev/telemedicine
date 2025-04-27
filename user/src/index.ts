@@ -3,6 +3,7 @@ import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { logger } from "hono/logger";
 import { isValiError } from "valibot";
+import { otpVerificationController } from "./controllers/otp-verification";
 
 const app = new Hono();
 
@@ -16,6 +17,8 @@ app.get("/readyz", async (c) => {
   await sql`select 1`;
   return c.text("ready");
 });
+
+app.route("/otp", otpVerificationController);
 
 app.onError((error, c) => {
   if (isValiError(error)) {
