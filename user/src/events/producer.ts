@@ -14,5 +14,5 @@ export async function sendEmailRequestedEvent(event: EmailRequestedEvent) {
     topic: "EmailRequested",
     messages: [{ value: JSON.stringify(event) }],
   });
-  console.log("sent EmailRequestedEvent:", JSON.stringify(record));
+  console.log("sent EmailRequested event:", JSON.stringify(record));
 }

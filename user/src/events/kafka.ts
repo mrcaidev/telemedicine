@@ -6,36 +6,12 @@ const kafka = new Kafka({
   brokers: Bun.env.KAFKA_BROKERS.split(","),
   logLevel: logLevel.ERROR,
 });
-console.log("initialized kafka client");
-
-// 确保所有相关主题存在。
-const admin = kafka.admin();
-await admin.connect();
-console.log("connected to kafka as admin");
-
-const topicsCreated = await admin.createTopics({
-  topics: [
-    {
-      topic: "EmailRequested",
-      numPartitions: 3,
-      replicationFactor: 2,
-    },
-  ],
-});
-
-if (topicsCreated) {
-  console.log("created topics");
-} else {
-  console.log("topics already exist");
-}
-
-await admin.disconnect();
-console.log("disconnected from kafka as admin");
+console.log("kafka client initialized");
 
 // 初始化 Kafka 生产者。
 export const producer = kafka.producer();
 await producer.connect();
-console.log("connected to kafka as producer");
+console.log("kafka producer connected");
 
 // 优雅处理错误。
 for (const errorType of ["unhandledRejection", "uncaughtException"]) {
@@ -43,7 +19,7 @@ for (const errorType of ["unhandledRejection", "uncaughtException"]) {
     console.error(error);
     try {
       await producer.disconnect();
-      console.log("disconnected from kafka as producer");
+      console.log("kafka producer disconnected");
       process.exit(0);
     } catch {
       process.exit(1);
@@ -56,7 +32,7 @@ for (const signal of ["SIGTERM", "SIGINT", "SIGUSR2"]) {
   process.once(signal, async () => {
     try {
       await producer.disconnect();
-      console.log("disconnected from kafka as producer");
+      console.log("kafka producer disconnected");
     } finally {
       process.kill(process.pid, signal);
     }
