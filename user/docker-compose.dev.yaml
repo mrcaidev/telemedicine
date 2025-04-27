@@ -7,6 +7,7 @@ services:
       - 3000:3000
     environment:
       - JWT_SECRET=a-string-secret-at-least-256-bits-long
+      - SUPER_ADMIN_TOKEN=i-am-a-super-admin
       - POSTGRES_URL=postgres://dev:dev@postgres:5432/dev
       - KAFKA_BROKERS=kafka-1:9092,kafka-2:9092,kafka-3:9092
     volumes:

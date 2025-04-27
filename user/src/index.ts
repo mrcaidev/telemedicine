@@ -8,6 +8,7 @@ import { authGatewayController } from "./controllers/auth-gateway";
 import { doctorController } from "./controllers/doctor";
 import { otpVerificationController } from "./controllers/otp-verification";
 import { patientController } from "./controllers/patient";
+import { platformAdminController } from "./controllers/platform-admin";
 
 const app = new Hono();
 
@@ -27,6 +28,7 @@ app.route("/auth", authController);
 app.route("/otp", otpVerificationController);
 app.route("/patients", patientController);
 app.route("/doctors", doctorController);
+app.route("/platform-admins", platformAdminController);
 
 app.onError((error, c) => {
   if (isValiError(error)) {

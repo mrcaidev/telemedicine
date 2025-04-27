@@ -1,4 +1,4 @@
-import { snakeToCamelJson } from "@/utils/case";
+import { camelToSnakeJson, snakeToCamelJson } from "@/utils/case";
 import type { PlatformAdmin, WithFull } from "@/utils/types";
 import { sql } from "bun";
 
@@ -15,4 +15,17 @@ export async function findOneById(id: string) {
   }
 
   return snakeToCamelJson(row) as WithFull<PlatformAdmin>;
+}
+
+export async function insertOne(data: Pick<PlatformAdmin, "id">) {
+  const [row] = await sql`
+    insert into platform_admins ${sql(camelToSnakeJson(data))}
+    returning id
+  `;
+
+  if (!row) {
+    throw new Error("failed to insert platform admin");
+  }
+
+  return snakeToCamelJson(row) as PlatformAdmin;
 }
