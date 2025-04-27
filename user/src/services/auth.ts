@@ -7,6 +7,37 @@ import { signJwt } from "@/utils/jwt";
 import type { User } from "@/utils/types";
 import { HTTPException } from "hono/http-exception";
 
+export async function getUserById(id: string) {
+  // 先找到该用户的角色。
+  const user = await userRepository.findOneById(id);
+  if (!user) {
+    throw new HTTPException(404, { message: "User not found" });
+  }
+
+  // 获取其完整信息。
+  let fullUser: User | null;
+  if (user.role === "platform_admin") {
+    fullUser = await platformAdminRepository.findOneById(user.id);
+  } else if (user.role === "clinic_admin") {
+    fullUser = await clinicAdminRepository.findOneById(user.id);
+  } else if (user.role === "doctor") {
+    fullUser = await doctorRepository.findOneById(user.id);
+  } else if (user.role === "patient") {
+    fullUser = await patientRepository.findOneById(user.id);
+  } else {
+    throw new HTTPException(500, {
+      message: `Unknown user role: ${user.role}`,
+    });
+  }
+
+  // 一般不会走到这一步。
+  if (!fullUser) {
+    throw new HTTPException(404, { message: "User not found" });
+  }
+
+  return fullUser;
+}
+
 export async function logInWithEmailAndPassword(
   email: string,
   password: string,
