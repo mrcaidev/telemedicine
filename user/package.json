@@ -1,0 +1,21 @@
+{
+  "name": "user",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun run --hot src/index.ts",
+    "build": "bun build --outdir dist --target bun --minify src/index.ts",
+    "test:unit": "bun test unit.test.ts",
+    "check": "tsc && biome check"
+  },
+  "dependencies": {
+    "hono": "^4.7.7",
+    "kafkajs": "^2.2.4",
+    "valibot": "^1.0.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@types/bun": "^1.2.10",
+    "typescript": "^5.8.3"
+  }
+}
