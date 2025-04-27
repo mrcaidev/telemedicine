@@ -33,3 +33,15 @@ export const otpSchema = v.pipe(
   v.length(6, "OTP should be 6 digits"),
   v.digits("OTP should be 6 digits"),
 );
+
+export const firstNameSchema = v.pipe(
+  v.string(),
+  v.minLength(1, "First name should be 1-20 characters long"),
+  v.maxLength(20, "First name should be 1-20 characters long"),
+);
+
+export const lastNameSchema = v.pipe(
+  v.string(),
+  v.minLength(1, "Last name should be 1-20 characters long"),
+  v.maxLength(20, "Last name should be 1-20 characters long"),
+);
