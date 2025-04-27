@@ -6,6 +6,7 @@ import { isValiError } from "valibot";
 import { authController } from "./controllers/auth";
 import { authGatewayController } from "./controllers/auth-gateway";
 import { otpVerificationController } from "./controllers/otp-verification";
+import { patientController } from "./controllers/patient";
 
 const app = new Hono();
 
@@ -23,6 +24,7 @@ app.get("/readyz", async (c) => {
 app.route("/auth-gateway", authGatewayController);
 app.route("/otp", otpVerificationController);
 app.route("/auth", authController);
+app.route("/patients", patientController);
 
 app.onError((error, c) => {
   if (isValiError(error)) {
