@@ -1,4 +1,4 @@
-image: mrcaidev/telemedicine-user:test
+image: mrcaidev/telemedicine-user
 host: api.localhost
 port: 3000
 paths:

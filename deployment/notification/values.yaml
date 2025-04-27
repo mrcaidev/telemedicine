@@ -1,4 +1,4 @@
-image: mrcaidev/telemedicine-notification:test
+image: mrcaidev/telemedicine-notification
 host: api.localhost
 port: 3000
 paths:
