@@ -6,7 +6,7 @@ import * as v from "valibot";
 export const patientController = new Hono();
 
 patientController.post(
-  "/:id",
+  "/",
   validator(
     "json",
     v.object({

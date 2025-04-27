@@ -27,7 +27,7 @@ export async function findOneById(id: string) {
 
 export async function insertOne(data: Pick<Patient, "id">) {
   const [row] = await sql`
-    insert into patients (${sql(data)})
+    insert into patients ${sql(data)}
     returning
       id,
       nickname,
