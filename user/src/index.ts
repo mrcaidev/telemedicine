@@ -5,6 +5,7 @@ import { logger } from "hono/logger";
 import { isValiError } from "valibot";
 import { authController } from "./controllers/auth";
 import { authGatewayController } from "./controllers/auth-gateway";
+import { doctorController } from "./controllers/doctor";
 import { otpVerificationController } from "./controllers/otp-verification";
 import { patientController } from "./controllers/patient";
 
@@ -25,6 +26,7 @@ app.route("/auth-gateway", authGatewayController);
 app.route("/auth", authController);
 app.route("/otp", otpVerificationController);
 app.route("/patients", patientController);
+app.route("/doctors", doctorController);
 
 app.onError((error, c) => {
   if (isValiError(error)) {
