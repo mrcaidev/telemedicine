@@ -5,6 +5,7 @@ import { logger } from "hono/logger";
 import { isValiError } from "valibot";
 import { authController } from "./controllers/auth";
 import { authGatewayController } from "./controllers/auth-gateway";
+import { clinicController } from "./controllers/clinic";
 import { clinicAdminController } from "./controllers/clinic-admin";
 import { doctorController } from "./controllers/doctor";
 import { otpVerificationController } from "./controllers/otp-verification";
@@ -31,6 +32,7 @@ app.route("/patients", patientController);
 app.route("/doctors", doctorController);
 app.route("/clinic-admins", clinicAdminController);
 app.route("/platform-admins", platformAdminController);
+app.route("/clinics", clinicController);
 
 app.onError((error, c) => {
   if (isValiError(error)) {
