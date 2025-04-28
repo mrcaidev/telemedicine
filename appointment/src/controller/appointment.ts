@@ -89,7 +89,7 @@ appointmentController.post(
       remark,
       c.get("userId"),
     );
-    return c.json({ code: 0, message: "", data: appointment });
+    return c.json({ code: 0, message: "", data: appointment }, 201);
   },
 );
 

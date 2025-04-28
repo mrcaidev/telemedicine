@@ -1,3 +1,4 @@
+import { publishPatientCreatedEvent } from "@/events/producer";
 import * as patientRepository from "@/repositories/patient";
 import * as userRepository from "@/repositories/user";
 import * as otpVerificationService from "@/services/otp-verification";
@@ -42,6 +43,9 @@ export async function createOne(data: {
 
   // 创建病人。
   const patient = await patientRepository.insertOne({ id: user.id });
+
+  // 发布事件。
+  await publishPatientCreatedEvent(patient);
 
   // 颁发 JWT。
   const token = await signJwt({ id: user.id, role: "patient" });

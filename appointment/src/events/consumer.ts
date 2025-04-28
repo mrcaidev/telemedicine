@@ -1,0 +1,64 @@
+import * as doctorRepository from "@/repositories/doctor";
+import * as patientRepository from "@/repositories/patient";
+import { consumer } from "./kafka";
+
+// 订阅主题。
+await consumer.subscribe({ topic: "PatientCreated" });
+console.log("kafka consumer subscribed to PatientCreated topic");
+await consumer.subscribe({ topic: "PatientUpdated" });
+console.log("kafka consumer subscribed to PatientUpdated topic");
+await consumer.subscribe({ topic: "DoctorCreated" });
+console.log("kafka consumer subscribed to DoctorCreated topic");
+await consumer.subscribe({ topic: "DoctorUpdated" });
+console.log("kafka consumer subscribed to DoctorUpdated topic");
+
+// 不断消费消息。
+await consumer.run({
+  eachMessage: async ({ topic, message }) => {
+    const text = message.value?.toString();
+    if (!text) {
+      return;
+    }
+
+    console.log("kafka consumer received message:", text);
+
+    const json = JSON.parse(text);
+    if (!json) {
+      return;
+    }
+
+    if (topic === "PatientCreated") {
+      await consumePatientCreatedEvent(json);
+    } else if (topic === "DoctorCreated") {
+      await consumeDoctorCreatedEvent(json);
+    }
+  },
+});
+console.log("kafka consumer is running");
+
+type PatientCreatedEvent = {
+  id: string;
+  nickname: string | null;
+  avatarUrl: string | null;
+  gender: "male" | "female" | null;
+  birthDate: string | null;
+};
+
+async function consumePatientCreatedEvent(event: PatientCreatedEvent) {
+  await patientRepository.insertOne(event);
+}
+
+type DoctorCreatedEvent = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  avatarUrl: string | null;
+  gender: "male" | "female";
+  description: string;
+  specialties: string[];
+  clinic: { id: string; name: string };
+};
+
+async function consumeDoctorCreatedEvent(event: DoctorCreatedEvent) {
+  await doctorRepository.insertOne(event);
+}

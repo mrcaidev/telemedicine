@@ -3,7 +3,11 @@ import {
   camelToSnakeString,
   snakeToCamelJson,
 } from "@/utils/case";
-import type { Appointment, AppointmentStatus } from "@/utils/types";
+import type {
+  Appointment,
+  AppointmentStatus,
+  FullAppointment,
+} from "@/utils/types";
 import { sql } from "bun";
 
 export async function findAll(options: {
@@ -16,17 +20,38 @@ export async function findAll(options: {
   cursor: string | null;
 }) {
   const rows = await sql`
-    select id, patient_id, doctor_id, start_at, end_at, remark, status, created_at
-    from appointments
+    select a.id, a.start_at, a.end_at, a.remark, a.status, a.created_at, p.id as patient_id, p.nickname as patient_nickname, p.avatar_url as patient_avatar_url, d.id as doctor_id, d.first_name as doctor_first_name, d.last_name as doctor_last_name, d.avatar_url as doctor_avatar_url
+    from appointments a
+    left outer join patients p on a.patient_id = p.id
+    left outer join doctors d on a.doctor_id = d.id
     where true
-    ${options.patientId ? sql`and patient_id = ${options.patientId}` : sql``}
-    ${options.doctorId ? sql`and doctor_id = ${options.doctorId}` : sql``}
-    ${options.status ? sql`and status = ${options.status}` : sql``}
-    ${!options.cursor ? sql`` : options.sortOrder === "asc" ? sql`and ${sql(camelToSnakeString(options.sortBy))} > ${options.cursor}` : sql`and ${sql(camelToSnakeString(options.sortBy))} < ${options.cursor}`}
+    ${options.patientId ? sql`and a.patient_id = ${options.patientId}` : sql``}
+    ${options.doctorId ? sql`and a.doctor_id = ${options.doctorId}` : sql``}
+    ${options.status ? sql`and a.status = ${options.status}` : sql``}
+    ${!options.cursor ? sql`` : options.sortOrder === "asc" ? sql`and ${sql.unsafe(camelToSnakeString(options.sortBy))} > ${options.cursor}` : sql`and ${sql.unsafe(camelToSnakeString(options.sortBy))} < ${options.cursor}`}
     order by ${sql.unsafe(camelToSnakeString(options.sortBy))} ${sql.unsafe(options.sortOrder)}
     limit ${options.limit}
   `;
-  return rows.map(snakeToCamelJson) as Appointment[];
+  // @ts-ignore
+  return rows.map((row) => ({
+    id: row.id,
+    startAt: row.start_at,
+    endAt: row.end_at,
+    remark: row.remark,
+    status: row.status,
+    createdAt: row.created_at,
+    patient: {
+      id: row.patient_id,
+      nickname: row.patient_nickname,
+      avatarUrl: row.patient_avatar_url,
+    },
+    doctor: {
+      id: row.doctor_id,
+      firstName: row.doctor_first_name,
+      lastName: row.doctor_last_name,
+      avatarUrl: row.doctor_avatar_url,
+    },
+  })) as FullAppointment[];
 }
 
 export async function findOneById(id: string) {
@@ -43,6 +68,40 @@ export async function findOneById(id: string) {
   return snakeToCamelJson(row) as Appointment;
 }
 
+export async function findOneFullById(id: string) {
+  const [row] = await sql`
+    select a.id, a.start_at, a.end_at, a.remark, a.status, a.created_at, p.id as patient_id, p.nickname as patient_nickname, p.avatar_url as patient_avatar_url, d.id as doctor_id, d.first_name as doctor_first_name, d.last_name as doctor_last_name, d.avatar_url as doctor_avatar_url
+    from appointments a
+    left outer join patients p on a.patient_id = p.id
+    left outer join doctors d on a.doctor_id = d.id
+    where a.id = ${id}
+  `;
+
+  if (!row) {
+    return null;
+  }
+
+  return {
+    id: row.id,
+    startAt: row.start_at,
+    endAt: row.end_at,
+    remark: row.remark,
+    status: row.status,
+    createdAt: row.created_at,
+    patient: {
+      id: row.patient_id,
+      nickname: row.patient_nickname,
+      avatarUrl: row.patient_avatar_url,
+    },
+    doctor: {
+      id: row.doctor_id,
+      firstName: row.doctor_first_name,
+      lastName: row.doctor_last_name,
+      avatarUrl: row.doctor_avatar_url,
+    },
+  } as FullAppointment;
+}
+
 export async function insertOne(
   data: Pick<
     Appointment,
@@ -50,15 +109,39 @@ export async function insertOne(
   >,
 ) {
   const [row] = await sql`
-    insert into appointments ${sql(camelToSnakeJson(data))}
-    returning id, patient_id, doctor_id, start_at, end_at, remark, status, created_at
+    with a as (
+      insert into appointments ${sql(camelToSnakeJson(data))}
+      returning id, patient_id, doctor_id, start_at, end_at, remark, status, created_at
+    )
+    select a.id, a.start_at, a.end_at, a.remark, a.status, a.created_at, p.id as patient_id, p.nickname as patient_nickname, p.avatar_url as patient_avatar_url, d.id as doctor_id, d.first_name as doctor_first_name, d.last_name as doctor_last_name, d.avatar_url as doctor_avatar_url
+    from a
+    left outer join patients p on a.patient_id = p.id
+    left outer join doctors d on a.doctor_id = d.id
   `;
 
   if (!row) {
     throw new Error("Failed to insert appointment");
   }
 
-  return snakeToCamelJson(row) as Appointment;
+  return {
+    id: row.id,
+    startAt: row.start_at,
+    endAt: row.end_at,
+    remark: row.remark,
+    status: row.status,
+    createdAt: row.created_at,
+    patient: {
+      id: row.patient_id,
+      nickname: row.patient_nickname,
+      avatarUrl: row.patient_avatar_url,
+    },
+    doctor: {
+      id: row.doctor_id,
+      firstName: row.doctor_first_name,
+      lastName: row.doctor_last_name,
+      avatarUrl: row.doctor_avatar_url,
+    },
+  } as FullAppointment;
 }
 
 export async function updateOneById(
@@ -68,15 +151,39 @@ export async function updateOneById(
   >,
 ) {
   const [row] = await sql`
-    update appointments
-    set ${sql(camelToSnakeJson(data))}
-    where id = ${id}
-    returning id, patient_id, doctor_id, start_at, end_at, remark, status, created_at
+    with a as (
+      update appointments
+      set ${sql(camelToSnakeJson(data))}
+      where id = ${id}
+      returning id, patient_id, doctor_id, start_at, end_at, remark, status, created_at
+    )
+    select a.id, a.start_at, a.end_at, a.remark, a.status, a.created_at, p.id as patient_id, p.nickname as patient_nickname, p.avatar_url as patient_avatar_url, d.id as doctor_id, d.first_name as doctor_first_name, d.last_name as doctor_last_name, d.avatar_url as doctor_avatar_url
+    from a
+    left outer join patients p on a.patient_id = p.id
+    left outer join doctors d on a.doctor_id = d.id
   `;
 
   if (!row) {
     throw new Error("Failed to update appointment");
   }
 
-  return snakeToCamelJson(row) as Appointment;
+  return {
+    id: row.id,
+    startAt: row.start_at,
+    endAt: row.end_at,
+    remark: row.remark,
+    status: row.status,
+    createdAt: row.created_at,
+    patient: {
+      id: row.patient_id,
+      nickname: row.patient_nickname,
+      avatarUrl: row.patient_avatar_url,
+    },
+    doctor: {
+      id: row.doctor_id,
+      firstName: row.doctor_first_name,
+      lastName: row.doctor_last_name,
+      avatarUrl: row.doctor_avatar_url,
+    },
+  } as FullAppointment;
 }

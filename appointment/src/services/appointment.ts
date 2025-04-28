@@ -29,13 +29,13 @@ export async function findAll(
 }
 
 export async function findOneById(id: string, userId: string) {
-  const appointment = await appointmentRepository.findOneById(id);
+  const appointment = await appointmentRepository.findOneFullById(id);
 
   if (!appointment) {
     throw new HTTPException(404, { message: "Appointment not found" });
   }
 
-  if (appointment.patientId !== userId && appointment.doctorId !== userId) {
+  if (appointment.patient.id !== userId && appointment.doctor.id !== userId) {
     throw new HTTPException(403, { message: "Permission denied" });
   }
 

@@ -1,5 +1,18 @@
 export type Role = "platform_admin" | "clinic_admin" | "doctor" | "patient";
 
+export type Patient = {
+  id: string;
+  nickname: string | null;
+  avatarUrl: string | null;
+};
+
+export type Doctor = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  avatarUrl: string | null;
+};
+
 export type DoctorAvailability = {
   id: string;
   weekday: number;
@@ -18,4 +31,9 @@ export type Appointment = {
   remark: string;
   status: AppointmentStatus;
   createdAt: string;
+};
+
+export type FullAppointment = Omit<Appointment, "patientId" | "doctorId"> & {
+  patient: Patient;
+  doctor: Doctor;
 };
