@@ -9,7 +9,7 @@ export async function findOneById(id: string) {
   const patient = await patientRepository.findOneById(id);
 
   if (!patient) {
-    throw new HTTPException(404, { message: "Platform admin not found" });
+    throw new HTTPException(404, { message: "Patient not found" });
   }
 
   return patient;
