@@ -11,7 +11,7 @@ create table doctor_availabilities (
 create type appointment_status as enum (
   'normal',
   'to_be_rescheduled',
-  'canceled',
+  'canceled'
 );
 
 create table appointments (
