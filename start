@@ -14,5 +14,12 @@ helm install user-postgres oci://registry-1.docker.io/bitnamicharts/postgresql -
 echo '🚀 Deploying user...'
 helm install user ./deployment/user
 
+echo '🚀 Deploying appointment-postgres...'
+kubectl create configmap appointment-postgres-initdb --from-file=./appointment/initdb
+helm install appointment-postgres oci://registry-1.docker.io/bitnamicharts/postgresql --values ./deployment/appointment-postgres/values.yaml
+
+echo '🚀 Deploying appointment...'
+helm install appointment ./deployment/appointment
+
 echo '🚀 Deploying web-dashboard...'
 helm install web-dashboard ./deployment/web-dashboard

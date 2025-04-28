@@ -1,11 +1,11 @@
-name: Web Dashboard CD
+name: Appointment CD
 
 on:
   push:
     branches:
       - main
     paths:
-      - web-dashboard/**
+      - appointment/**
   release:
     types:
       - published
@@ -53,11 +53,11 @@ jobs:
       - name: Build and push image
         uses: docker/build-push-action@v6
         with:
-          context: "{{defaultContext}}:web-dashboard"
+          context: "{{defaultContext}}:appointment"
           push: true
           tags: |
-            ${{ vars.DOCKERHUB_USERNAME }}/telemedicine-web-dashboard:latest
-            ${{ vars.DOCKERHUB_USERNAME }}/telemedicine-web-dashboard:${{ needs.set-env.outputs.tag }}
+            ${{ vars.DOCKERHUB_USERNAME }}/telemedicine-appointment:latest
+            ${{ vars.DOCKERHUB_USERNAME }}/telemedicine-appointment:${{ needs.set-env.outputs.tag }}
 
   # deploy:
   #   name: Deploy
@@ -80,6 +80,8 @@ jobs:
 
   #     - name: Deploy to Kubernetes
   #       run: |
-  #         helm upgrade --install web-dashboard ${{ github.workspace }}/deployment/web-dashboard \
-  #           --values ${{ github.workspace }}/deployment/web-dashboard/values-${{ needs.set-env.outputs.environment }}.yaml \
-  #           --set image=${{ vars.DOCKERHUB_USERNAME }}/telemedicine-web-dashboard:${{ needs.set-env.outputs.tag }}
+  #         helm upgrade --install appointment ${{ github.workspace }}/deployment/appointment \
+  #           --values ${{ github.workspace }}/deployment/appointment/values-${{ needs.set-env.outputs.environment }}.yaml \
+  #           --set image=${{ vars.DOCKERHUB_USERNAME }}/telemedicine-appointment:${{ needs.set-env.outputs.tag }} \
+  #           --set secrets.POSTGRES_URL=postgresql://${{ secrets.APPOINTMENT_POSTGRES_USER }}:${{ secrets.APPOINTMENT_POSTGRES_PASSWORD }}@appointment-postgres-postgresql:5432/${{ secrets.APPOINTMENT_POSTGRES_DB }} \
+  #           --set secrets.KAFKA_BROKERS=${{ secrets.KAFKA_BROKERS }}

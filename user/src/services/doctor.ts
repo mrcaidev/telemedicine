@@ -1,3 +1,4 @@
+import { publishDoctorCreatedEvent } from "@/events/producer";
 import * as clinicAdminRepository from "@/repositories/clinic-admin";
 import * as doctorRepository from "@/repositories/doctor";
 import * as userRepository from "@/repositories/user";
@@ -57,6 +58,9 @@ export async function createOne(
     clinic,
     createdBy,
   });
+
+  // 发布事件。
+  await publishDoctorCreatedEvent(doctor);
 
   return {
     id: user.id,
