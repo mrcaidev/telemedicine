@@ -56,8 +56,8 @@ jobs:
           context: "{{defaultContext}}:appointment"
           push: true
           tags: |
-            ${{ vars.DOCKERHUB_USERNAME }}/telemedicine-appointment":latest
-            ${{ vars.DOCKERHUB_USERNAME }}/telemedicine-appointment":${{ needs.set-env.outputs.tag }}
+            ${{ vars.DOCKERHUB_USERNAME }}/telemedicine-appointment:latest
+            ${{ vars.DOCKERHUB_USERNAME }}/telemedicine-appointment:${{ needs.set-env.outputs.tag }}
 
   # deploy:
   #   name: Deploy
