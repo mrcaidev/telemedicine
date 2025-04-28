@@ -1,7 +1,76 @@
-import React from 'react'
+"use client";
 
-export default function page() {
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+import { RawPatient } from "@/types/patient";
+
+export default function PatientDetailPage() {
+  const { id } = useParams();
+  const router = useRouter();
+  const [patient, setPatient] = useState<RawPatient | null>(null);
+
+  useEffect(() => {
+    fetch(`/api/doctor/patients/${id}`)
+      .then((res) => res.json())
+      .then((data) => setPatient(data.data.data));
+  }, [id]);
+
+  if (!patient) return <div>Loading...</div>;
+
   return (
-    <div>page</div>
-  )
+    <div className="max-w-xl mx-auto px-4 py-6">
+      <div className="px-4 pt-4 pb-6 space-y-4">
+        {/* 返回按钮 */}
+        <Button
+          variant="outline"
+          onClick={() => router.back()}
+          className="flex items-center cursor-pointer"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back
+        </Button>
+
+        {/* 页面标题 */}
+        <h1 className="text-2xl font-bold">🧑‍⚕️ Patient Detail</h1>
+      </div>
+
+      <div className="space-y-6 border rounded-2xl shadow p-6 bg-white">
+        <div className="flex items-center space-x-4">
+          {patient.avatarUrl ? (
+            <Image
+              src={patient.avatarUrl}
+              alt="Avatar"
+              width={64}
+              height={64}
+              className="rounded-full"
+            />
+          ) : (
+            <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center text-gray-500">
+              N/A
+            </div>
+          )}
+          <div>
+            <div className="text-xl font-semibold">{patient.nickname}</div>
+            <div className="text-sm text-gray-500">{patient.email}</div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <div className="text-gray-500">Gender</div>
+            <div className="font-medium capitalize">{patient.gender}</div>
+          </div>
+          <div>
+            <div className="text-gray-500">Birth Date</div>
+            <div className="font-medium">
+              {patient.birthDate || "Not Provided"}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }

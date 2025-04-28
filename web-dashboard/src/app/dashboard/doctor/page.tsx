@@ -1,6 +1,6 @@
 "use client";
 
-import PendingTasksCard from "@/components/dashboard/pending-tasks-card";
+import ScheduleTasksCard from "@/components/dashboard/schedule-tasks-card";
 import DataStatisticsCard from "@/components/dashboard/data-statistics-card";
 import { RawAppointment } from "@/types/appointment";
 import { useEffect, useState } from "react";
@@ -57,7 +57,7 @@ export default function DoctorDashboard() {
         />
 
         {/* ⚠️ 待处理事项 */}
-        <PendingTasksCard />
+        <ScheduleTasksCard />
 
         {/* 📊 数据统计占位 */}
         <DataStatisticsCard />

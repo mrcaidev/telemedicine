@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-function logout () {
+function logout() {
   localStorage.removeItem("token");
   sessionStorage.clear();
 
@@ -25,7 +25,7 @@ export default function AuthMenu() {
 
   if (!session) {
     return (
-      <Button asChild>
+      <Button asChild className="cursor-pointer">
         <Link href="/login">Sign In</Link>
       </Button>
     );
@@ -50,10 +50,15 @@ export default function AuthMenu() {
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-40 mt-2">
-        <DropdownMenuItem asChild>
+        <DropdownMenuItem asChild className="cursor-pointer">
           <Link href={dashboardUrl}>Dashboard</Link>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => {logout}}>
+        <DropdownMenuItem
+          className="cursor-pointer"
+          onClick={() => {
+            logout;
+          }}
+        >
           Sign Out
         </DropdownMenuItem>
       </DropdownMenuContent>

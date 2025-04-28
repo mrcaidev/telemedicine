@@ -23,13 +23,13 @@ export default function Homebar() {
 
         {/* Desktop Nav */}
         <nav className="hidden md:flex space-x-4">
-          <Link href="/about" className="text-gray-700 hover:text-blue-600">
+          <Link href="/about" className="text-gray-700 hover:text-blue-600 cursor-pointer">
             About us
           </Link>
-          <Link href="/services" className="text-gray-700 hover:text-blue-600">
+          <Link href="/services" className="text-gray-700 hover:text-blue-600 cursor-pointer">
             Service Support
           </Link>
-          <Link href="/contact" className="text-gray-700 hover:text-blue-600">
+          <Link href="/contact" className="text-gray-700 hover:text-blue-600 cursor-pointer">
             Contact us
           </Link>
         </nav>
@@ -50,19 +50,19 @@ export default function Homebar() {
         <div className="md:hidden px-4 pb-4 space-y-2 bg-white shadow">
           <Link
             href="/about"
-            className="block text-gray-700 hover:text-blue-600"
+            className="block text-gray-700 hover:text-blue-600 cursor-pointer"
           >
             About us
           </Link>
           <Link
             href="/services"
-            className="block text-gray-700 hover:text-blue-600"
+            className="block text-gray-700 hover:text-blue-600 cursor-pointer"
           >
             Service Support
           </Link>
           <Link
             href="/contact"
-            className="block text-gray-700 hover:text-blue-600"
+            className="block text-gray-700 hover:text-blue-600 cursor-pointer"
           >
             Contact us
           </Link>
