@@ -3,6 +3,7 @@ import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { logger } from "hono/logger";
 import { isValiError } from "valibot";
+import { appointmentController } from "./controller/apppintment";
 import { doctorAvailabilityController } from "./controller/doctor-availability";
 
 const app = new Hono();
@@ -18,6 +19,7 @@ app.get("/readyz", async (c) => {
   return c.text("ready");
 });
 
+app.route("/appointments", appointmentController);
 app.route("/doctor-availabilities", doctorAvailabilityController);
 
 app.onError((error, c) => {
