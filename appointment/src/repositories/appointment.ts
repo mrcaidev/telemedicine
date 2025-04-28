@@ -1,4 +1,4 @@
-import { snakeToCamelJson } from "@/utils/case";
+import { camelToSnakeJson, snakeToCamelJson } from "@/utils/case";
 import type { Appointment, AppointmentStatus } from "@/utils/types";
 import { sql } from "bun";
 
@@ -23,4 +23,22 @@ export async function findAll(options: {
     limit ${options.limit}
   `;
   return rows.map(snakeToCamelJson) as Appointment[];
+}
+
+export async function insertOne(
+  data: Pick<
+    Appointment,
+    "patientId" | "doctorId" | "startAt" | "endAt" | "remark"
+  >,
+) {
+  const [row] = await sql`
+    insert into appointments ${sql(camelToSnakeJson(data))}
+    returning id, patient_id, doctor_id, start_at, end_at, remark, status, created_at
+  `;
+
+  if (!row) {
+    throw new Error("Failed to insert appointment");
+  }
+
+  return snakeToCamelJson(row) as Appointment;
 }

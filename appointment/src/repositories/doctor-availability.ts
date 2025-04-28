@@ -11,6 +11,20 @@ export async function findAllByDoctorId(doctorId: string) {
   return rows.map(snakeToCamelJson) as DoctorAvailability[];
 }
 
+export async function findOneById(id: string) {
+  const [row] = await sql`
+    select id, doctor_id, weekday, start_time, end_time
+    from doctor_availabilities
+    where id = ${id}
+  `;
+
+  if (!row) {
+    return null;
+  }
+
+  return snakeToCamelJson(row) as DoctorAvailability & { doctorId: string };
+}
+
 export async function hasConflict(
   availability: Pick<
     DoctorAvailability,
