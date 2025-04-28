@@ -45,7 +45,11 @@ type PatientCreatedEvent = {
 };
 
 async function consumePatientCreatedEvent(event: PatientCreatedEvent) {
-  await patientRepository.insertOne(event);
+  await patientRepository.insertOne({
+    id: event.id,
+    nickname: event.nickname,
+    avatarUrl: event.avatarUrl,
+  });
 }
 
 type DoctorCreatedEvent = {
@@ -60,5 +64,10 @@ type DoctorCreatedEvent = {
 };
 
 async function consumeDoctorCreatedEvent(event: DoctorCreatedEvent) {
-  await doctorRepository.insertOne(event);
+  await doctorRepository.insertOne({
+    id: event.id,
+    firstName: event.firstName,
+    lastName: event.lastName,
+    avatarUrl: event.avatarUrl,
+  });
 }
