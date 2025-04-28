@@ -6,13 +6,11 @@ export type Patient = {
   avatarUrl: string | null;
   gender: "male" | "female" | null;
   birthDate: string | null;
-  createdAt: string;
 };
 
 export type Clinic = {
   id: string;
   name: string;
-  createdAt: string;
 };
 
 export type Doctor = {
@@ -26,15 +24,14 @@ export type Doctor = {
   description: string;
   specialties: string[];
   clinic: Clinic;
-  createdAt: string;
 };
 
 export type AppointmentStatus = "normal" | "to_be_rescheduled" | "cancelled";
 
 export type Appointment = {
   id: string;
-  patient: Patient;
-  doctor: Doctor;
+  patient: Pick<Patient, "id" | "nickname" | "avatarUrl">;
+  doctor: Pick<Doctor, "id" | "firstName" | "lastName" | "avatarUrl">;
   startAt: string;
   endAt: string;
   remark: string;
@@ -47,5 +44,4 @@ export type DoctorAvailability = {
   weekday: number;
   startTime: string;
   endTime: string;
-  createdAt: string;
 };

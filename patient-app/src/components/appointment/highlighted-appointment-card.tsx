@@ -36,9 +36,6 @@ export function HighlightedAppointmentCard({ appointment }: Props) {
             <Text className="font-medium line-clamp-1">
               Dr. {doctor.firstName} {doctor.lastName}
             </Text>
-            <Muted className="text-sm line-clamp-1">
-              {doctor.specialties.join(", ") || "..."}
-            </Muted>
           </View>
           <StatusBadge status={getAppointmentRealtimeStatus(appointment)} />
         </View>
@@ -73,7 +70,6 @@ export function HighlightedAppointmentSkeleton() {
         <Skeleton className="size-12 rounded-full" />
         <View className="gap-1.5 mr-auto">
           <Skeleton className="w-32 h-5" />
-          <Skeleton className="w-20 h-4" />
         </View>
         <Skeleton className="self-start w-20 h-6 rounded-full" />
       </View>

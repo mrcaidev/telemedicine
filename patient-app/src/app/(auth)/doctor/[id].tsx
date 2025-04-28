@@ -258,13 +258,7 @@ function BookButton({ availability }: { availability: DoctorAvailability }) {
   const book = () => {
     mutate(
       {
-        doctorId: doctor.id,
-        startAt: dayjs(
-          `${date.format("YYYY-MM-DD")} ${availability.startTime}`,
-        ).toISOString(),
-        endAt: dayjs(
-          `${date.format("YYYY-MM-DD")} ${availability.endTime}`,
-        ).toISOString(),
+        availabilityId: availability.id,
         remark,
       },
       {

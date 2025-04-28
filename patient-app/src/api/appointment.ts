@@ -57,12 +57,7 @@ export function useBookAppointmentMutation() {
   return useMutation<
     Appointment,
     Error,
-    {
-      doctorId: string;
-      startAt: string;
-      endAt: string;
-      remark: string;
-    }
+    { availabilityId: string; remark: string }
   >({
     mutationFn: async (variables) => {
       return await request.post("/appointments", variables);
