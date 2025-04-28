@@ -57,6 +57,18 @@ appointmentController.get(
   },
 );
 
+appointmentController.get(
+  "/:id",
+  authGuard(["patient", "doctor"]),
+  validator("param", v.object({ id: uuidSchema })),
+  async (c) => {
+    const { id } = c.req.valid("param");
+    const userId = c.get("userId");
+    const appointment = await appointmentService.findOneById(id, userId);
+    return c.json({ code: 0, message: "", data: appointment });
+  },
+);
+
 appointmentController.post(
   "/",
   authGuard(["patient"]),

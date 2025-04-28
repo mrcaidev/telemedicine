@@ -28,6 +28,20 @@ export async function findAll(
   return { appointments, nextCursor } as const;
 }
 
+export async function findOneById(id: string, userId: string) {
+  const appointment = await appointmentRepository.findOneById(id);
+
+  if (!appointment) {
+    throw new HTTPException(404, { message: "Appointment not found" });
+  }
+
+  if (appointment.patientId !== userId && appointment.doctorId !== userId) {
+    throw new HTTPException(403, { message: "Permission denied" });
+  }
+
+  return appointment;
+}
+
 export async function createOne(
   availabilityId: string,
   remark: string,

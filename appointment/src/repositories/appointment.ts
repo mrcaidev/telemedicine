@@ -29,6 +29,20 @@ export async function findAll(options: {
   return rows.map(snakeToCamelJson) as Appointment[];
 }
 
+export async function findOneById(id: string) {
+  const [row] = await sql`
+    select id, patient_id, doctor_id, start_at, end_at, remark, status, created_at
+    from appointments
+    where id = ${id}
+  `;
+
+  if (!row) {
+    return null;
+  }
+
+  return snakeToCamelJson(row) as Appointment;
+}
+
 export async function insertOne(
   data: Pick<
     Appointment,

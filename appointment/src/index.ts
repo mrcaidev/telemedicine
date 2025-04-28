@@ -4,7 +4,7 @@ import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { logger } from "hono/logger";
 import { isValiError } from "valibot";
-import { appointmentController } from "./controller/apppintment";
+import { appointmentController } from "./controller/appointment";
 import { doctorAvailabilityController } from "./controller/doctor-availability";
 
 const app = new Hono();
