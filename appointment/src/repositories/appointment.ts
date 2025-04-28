@@ -60,3 +60,23 @@ export async function insertOne(
 
   return snakeToCamelJson(row) as Appointment;
 }
+
+export async function updateOneById(
+  id: string,
+  data: Partial<
+    Pick<Appointment, "doctorId" | "startAt" | "endAt" | "status" | "remark">
+  >,
+) {
+  const [row] = await sql`
+    update appointments
+    set ${sql(camelToSnakeJson(data))}
+    where id = ${id}
+    returning id, patient_id, doctor_id, start_at, end_at, remark, status, created_at
+  `;
+
+  if (!row) {
+    throw new Error("Failed to update appointment");
+  }
+
+  return snakeToCamelJson(row) as Appointment;
+}

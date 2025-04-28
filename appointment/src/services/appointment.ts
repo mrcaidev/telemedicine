@@ -83,3 +83,45 @@ function computeNextDateOfWeekday(weekday: number) {
 function dateToIso(date: Dayjs, time: string) {
   return dayjs(`${date.format("YYYY-MM-DD")} ${time}`).toISOString();
 }
+
+export async function cancelOneById(id: string, userId: string) {
+  const appointment = await appointmentRepository.findOneById(id);
+
+  if (!appointment) {
+    throw new HTTPException(404, { message: "Appointment not found" });
+  }
+
+  if (appointment.patientId !== userId) {
+    throw new HTTPException(403, { message: "Permission denied" });
+  }
+
+  if (dayjs().isAfter(appointment.startAt)) {
+    throw new HTTPException(422, {
+      message: "This appointment has already started",
+    });
+  }
+
+  return await appointmentRepository.updateOneById(id, { status: "cancelled" });
+}
+
+export async function requestRescheduleOneById(id: string, userId: string) {
+  const appointment = await appointmentRepository.findOneById(id);
+
+  if (!appointment) {
+    throw new HTTPException(404, { message: "Appointment not found" });
+  }
+
+  if (appointment.doctorId !== userId) {
+    throw new HTTPException(403, { message: "Permission denied" });
+  }
+
+  if (dayjs().isAfter(appointment.startAt)) {
+    throw new HTTPException(422, {
+      message: "This appointment has already started",
+    });
+  }
+
+  return await appointmentRepository.updateOneById(id, {
+    status: "to_be_rescheduled",
+  });
+}
