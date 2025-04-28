@@ -9,6 +9,9 @@ const nextConfig: NextConfig = {
   // typescript: {
   //   ignoreBuildErrors: true, // ✅ 忽略 ts 报错（包括 any）
   // },
+  images: {
+    domains: ['avatars.githubusercontent.com'], 
+  },
 };
 
 export default nextConfig;

@@ -1,11 +1,10 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card";
-import SearchBar from "@/components/search/search-bar";
-import AISummaryEntry from "@/components//smart-system/ai-summary-entry";
-import TodayAppointmentsCard from "@/components/appointments/today-appointments-card";
+import PendingTasksCard from "@/components/dashboard/pending-tasks-card";
+import DataStatisticsCard from "@/components/dashboard/data-statistics-card";
 import { RawAppointment } from "@/types/appointment";
 import { useEffect, useState } from "react";
+import DashboardAppointmentCard from "@/components/dashboard/dashboard-appointment-card";
 
 function filterAppointments(appointments: RawAppointment[]) {
   const today = new Date().toISOString().split("T")[0];
@@ -15,59 +14,53 @@ function filterAppointments(appointments: RawAppointment[]) {
   });
 }
 
+function sortAndLimitAppointments(appointments: RawAppointment[], limit = 5) {
+  return [...appointments]
+    .sort(
+      (a, b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime()
+    )
+    .slice(0, limit);
+}
+
 export default function DoctorDashboard() {
-  const [appointments, setAppointments] = useState<RawAppointment[]>([]);
+  const [todayAppointments, setTodayAppointments] = useState<RawAppointment[]>(
+    []
+  );
+  const [allAppointments, setAllAppointments] = useState<RawAppointment[]>([]);
 
   useEffect(() => {
     fetch("/api/doctor/appointments")
       .then((res) => res.json())
       .then((data) => {
-        console.log("Fetched appointments:", data.data.appointments);
-        const filtered = filterAppointments(data.data.appointments);
-        setAppointments(filtered);
+        const appts = data.data.appointments;
+        setTodayAppointments(filterAppointments(appts));
+        setAllAppointments(sortAndLimitAppointments(appts));
       })
       .catch((err) => console.error("Fetch error:", err));
   }, []);
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex flex-col md:flex-row items-center gap-4 mb-6">
-        <div className="flex-1">
-          <SearchBar />
-        </div>
-        <div>
-          <AISummaryEntry />
-        </div>
-      </div>
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* 今日预约速览 */}
-        <TodayAppointmentsCard appointments={appointments} />
+        {/* 📅 今日预约速览 */}
+        <DashboardAppointmentCard
+          title="📅 Today Appointments"
+          appointments={todayAppointments}
+          timeFormat="time"
+        />
 
-        {/* 病人病历摘要 */}
-        <Card>
-          <CardContent className="p-4">
-            <h2 className="text-xl font-semibold mb-2">📝 Patient Medical Record Summary</h2>
-            <p className="text-gray-500">No summary data available</p>
+        {/* 📋 所有预约入口 */}
+        <DashboardAppointmentCard
+          title="📋 All Appointments"
+          appointments={allAppointments}
+          timeFormat="datetime"
+        />
 
-          </CardContent>
-        </Card>
+        {/* ⚠️ 待处理事项 */}
+        <PendingTasksCard />
 
-        {/* 待处理事项 */}
-        <Card>
-          <CardContent className="p-4">
-            <h2 className="text-xl font-semibold mb-2">📋 Pending Tasks</h2>
-            <p className="text-gray-500">No pending tasks</p>
-          </CardContent>
-        </Card>
-
-        {/* 数据统计占位 */}
-        <Card>
-          <CardContent className="p-4">
-            <h2 className="text-xl font-semibold mb-2">📊 Data Statistics</h2>
-            <p className="text-gray-500">No visualization data available</p>
-          </CardContent>
-        </Card>
+        {/* 📊 数据统计占位 */}
+        <DataStatisticsCard />
       </div>
     </div>
   );

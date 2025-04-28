@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Globe, LogOut, User } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
-import Sheetbar from "@/components/nav/Sheetbar";
+import Sheetbar from "@/components/nav/sheetbar";
 import Link from "next/link";
 
 export default function Navbar() {

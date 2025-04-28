@@ -1,5 +1,4 @@
-import Navbar from "@/components/nav/Navbar";
-import DoctorSidebar from "@/components/nav/DoctorSidebar";
+import Navbar from "@/components/nav/navbar";
 import type { Metadata } from "next";
 import ProtectedRoute from "@/components/auth/protected-route";
 
@@ -14,12 +13,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <ProtectedRoute>
         <div className="flex flex-col min-h-screen">
           <Navbar />
-          <div className="flex flex-1">
-            <div className="w-56 shrink-0 h-screen sticky top-0">
-              <DoctorSidebar />
-            </div>
-            <main className="flex-1 p-6 bg-gray-50 overflow-y-auto">{children}</main>
-          </div>
+          <main className="flex-1 p-6 bg-gray-50 overflow-y-auto">
+            {children}
+          </main>
         </div>
       </ProtectedRoute>
     </>

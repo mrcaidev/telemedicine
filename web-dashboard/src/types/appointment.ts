@@ -1,11 +1,16 @@
 export interface RawAppointment {
   id: string;
   patient: {
+    id: string;
     nickname: string;
-    gender: "Male" | "Female" | string;
-    email?: string;
+    avatarUrl?: string;
   };
-  doctor: any;
+  doctor: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    avatarUrl?: string;
+  };
   startAt: string;
   endAt: string;
   remark: string;
