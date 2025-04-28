@@ -2,8 +2,8 @@ create table doctor_availabilities (
   id uuid default gen_random_uuid() primary key,
   doctor_id uuid not null,
   weekday integer not null check (weekday >= 0 and weekday <= 6),
-  start_time time not null,
-  end_time time not null,
+  start_time text not null,
+  end_time text not null,
   created_at timestamptz default now() not null,
   created_by uuid not null
 );
