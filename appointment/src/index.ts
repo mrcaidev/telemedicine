@@ -1,3 +1,4 @@
+import "@/events/consumer";
 import "@/utils/dayjs";
 import { sql } from "bun";
 import { Hono } from "hono";
