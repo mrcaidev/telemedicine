@@ -1,4 +1,8 @@
-import { camelToSnakeJson, snakeToCamelJson } from "@/utils/case";
+import {
+  camelToSnakeJson,
+  camelToSnakeString,
+  snakeToCamelJson,
+} from "@/utils/case";
 import type { Appointment, AppointmentStatus } from "@/utils/types";
 import { sql } from "bun";
 
@@ -18,8 +22,8 @@ export async function findAll(options: {
     ${options.patientId ? sql`and patient_id = ${options.patientId}` : sql``}
     ${options.doctorId ? sql`and doctor_id = ${options.doctorId}` : sql``}
     ${options.status ? sql`and status = ${options.status}` : sql``}
-    ${!options.cursor ? sql`` : options.sortOrder === "asc" ? sql`and ${sql(options.sortBy)} > ${options.cursor}` : sql`and ${sql(options.sortBy)} < ${options.cursor}`}
-    order by ${options.sortBy} ${sql.unsafe(options.sortOrder)}
+    ${!options.cursor ? sql`` : options.sortOrder === "asc" ? sql`and ${sql(camelToSnakeString(options.sortBy))} > ${options.cursor}` : sql`and ${sql(camelToSnakeString(options.sortBy))} < ${options.cursor}`}
+    order by ${sql.unsafe(camelToSnakeString(options.sortBy))} ${sql.unsafe(options.sortOrder)}
     limit ${options.limit}
   `;
   return rows.map(snakeToCamelJson) as Appointment[];
