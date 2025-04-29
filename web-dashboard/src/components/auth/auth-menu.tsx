@@ -45,7 +45,7 @@ export default function AuthMenu() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Avatar className="h-9 w-9 cursor-pointer border">
-          <AvatarImage src={user?.avatar || ""} />
+          <AvatarImage src={user?.avatarUrl || ""} />
           <AvatarFallback>{user?.name?.charAt(0) || "U"}</AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
@@ -56,7 +56,7 @@ export default function AuthMenu() {
         <DropdownMenuItem
           className="cursor-pointer"
           onClick={() => {
-            logout;
+            logout();
           }}
         >
           Sign Out

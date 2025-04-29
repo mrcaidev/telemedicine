@@ -33,10 +33,10 @@ const BACKEND_API =
         return {
           id: data.id,
           email: data.email,
-          name: `${data.firstName ?? ""} ${data.lastName ?? ""}`,
+          name: `${data.firstName ?? "peter"} ${data.lastName ?? "griffin"}`,
           role: data.role,
           token: data.token,
-          avatar: data.avatarUrl ?? null,
+          avatarUrl: data.avatarUrl ?? "/d.png",
         };
       },
     }),
@@ -47,7 +47,7 @@ const BACKEND_API =
         token.id = user.id;
         token.role = user.role;
         token.accessToken = user.token;
-        token.avatar = user.avatar;
+        token.avatarUrl = user.avatarUrl;
       }
       return token;
     },
@@ -56,7 +56,7 @@ const BACKEND_API =
         session.user.id = token.id as string;
         session.user.role = token.role as "doctor" | "clinic_admin" | "platform_admin";
         session.user.token = token.accessToken as string;
-        session.user.avatar = token.avatar as string | null;
+        session.user.avatarUrl = token.avatarUrl as string | null;
       }
       return session;
     },

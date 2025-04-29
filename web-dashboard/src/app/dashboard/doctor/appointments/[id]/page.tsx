@@ -85,12 +85,12 @@ export default function AppointmentDetailPage() {
             className="flex items-center gap-3 cursor-pointer hover:opacity-80"
           >
             <img
-              src={appointment.patient.avatarUrl || "/default-avatar.png"}
-              alt={appointment.patient.nickname}
+              src={appointment.patient.avatarUrl || "/p.png"}
+              alt={appointment.patient.nickname || "Anonymous"}
               className="w-10 h-10 rounded-full object-cover"
             />
             <div className="text-sm">
-              <p className="font-medium">{appointment.patient.nickname}</p>
+              <p className="font-medium">{appointment.patient.nickname || "Anonymous"}</p>
             </div>
           </div>
 

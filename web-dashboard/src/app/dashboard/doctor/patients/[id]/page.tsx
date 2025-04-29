@@ -39,21 +39,15 @@ export default function PatientDetailPage() {
 
       <div className="space-y-6 border rounded-2xl shadow p-6 bg-white">
         <div className="flex items-center space-x-4">
-          {patient.avatarUrl ? (
-            <Image
-              src={patient.avatarUrl}
-              alt="Avatar"
-              width={64}
-              height={64}
-              className="rounded-full"
-            />
-          ) : (
-            <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center text-gray-500">
-              N/A
-            </div>
-          )}
+          <Image
+            src={patient.avatarUrl || "/p.png"}
+            alt="Avatar"
+            width={64}
+            height={64}
+            className="rounded-full"
+          />
           <div>
-            <div className="text-xl font-semibold">{patient.nickname}</div>
+            <div className="text-xl font-semibold">{patient.nickname || "Anonymous"}</div>
             <div className="text-sm text-gray-500">{patient.email}</div>
           </div>
         </div>

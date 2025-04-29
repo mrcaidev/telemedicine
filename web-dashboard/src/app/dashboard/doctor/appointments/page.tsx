@@ -63,13 +63,30 @@ export default function DoctorAppointmentsPage() {
   }, [hasMore, loading]);
 
   const filteredAppointments = appointments.filter((appt) => {
+    if (!appt.patient) return false;
+    if (!appt.patient.nickname) {
+      appt.patient.nickname = "Anonymous";
+    }
     const nameMatch = appt.patient.nickname
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
 
     const startTime = new Date(appt.startAt);
-    const startOk = startDate ? startTime >= new Date(startDate) : true;
-    const endOk = endDate ? startTime <= new Date(endDate) : true;
+
+    let startOk = true;
+    let endOk = true;
+
+    if (startDate) {
+      const startDateObj = new Date(startDate);
+      startOk = startTime >= startDateObj;
+    }
+    if (endDate) {
+      const endDateObj = new Date(endDate);
+      if (startDate && startDate === endDate) {
+        endDateObj.setHours(23, 59, 59, 999);
+      }
+      endOk = startTime <= endDateObj;
+    }
 
     return nameMatch && startOk && endOk;
   });
@@ -77,7 +94,11 @@ export default function DoctorAppointmentsPage() {
   return (
     <div className="p-6 max-w-3xl mx-auto">
       {/* 返回按钮 */}
-      <Button variant="outline" onClick={() => router.back()} className="mb-6 cursor-pointer">
+      <Button
+        variant="outline"
+        onClick={() => router.back()}
+        className="mb-6 cursor-pointer"
+      >
         <ArrowLeft className="w-4 h-4 mr-2" />
         Back
       </Button>
@@ -117,12 +138,12 @@ export default function DoctorAppointmentsPage() {
               <div className="flex justify-between items-center mb-2">
                 <div className="flex items-center gap-3">
                   <img
-                    src={appt.patient.avatarUrl || "/default-avatar.png"}
-                    alt={appt.patient.nickname}
+                    src={appt.patient.avatarUrl || "/p.png"}
+                    alt={appt.patient.nickname || "Anonymous"}
                     className="w-10 h-10 rounded-full object-cover"
                   />
                   <p className="font-semibold text-lg">
-                    {appt.patient.nickname}
+                    {appt.patient.nickname || "Anonymous"}
                   </p>
                 </div>
                 {/* 右侧：状态 */}

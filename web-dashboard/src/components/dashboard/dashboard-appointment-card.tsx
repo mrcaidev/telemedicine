@@ -80,13 +80,15 @@ export default function DashboardAppointmentCard({
                 <li key={appt.id} className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <Image
-                      src={appt.patient.avatarUrl || "/default-avatar.png"}
-                      alt={appt.patient.nickname}
+                      src={appt.patient.avatarUrl || "/p.png"}
+                      alt={appt.patient.nickname || "Anonymous"}
                       width={32}
                       height={32}
                       className="rounded-full object-cover"
                     />
-                    <span className="font-medium">{appt.patient.nickname}</span>
+                    <span className="font-medium">
+                      {appt.patient.nickname || "Anonymous"}
+                    </span>
                   </div>
                   <div className="text-right text-xs text-gray-600">
                     <p>{timeStr}</p>

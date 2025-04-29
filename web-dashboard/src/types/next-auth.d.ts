@@ -8,7 +8,7 @@ declare module "next-auth" {
       name?: string | null;
       role: "doctor" | "clinic_admin" | "platform_admin";
       token: string;
-      avatar?: string | null;
+      avatarUrl?: string | null;
       clinicId?: string | null;
     };
   }
@@ -18,7 +18,7 @@ declare module "next-auth" {
     email: string;
     role: "doctor" | "clinic_admin" | "platform_admin";
     token: string;
-    avatar?: string | null;
+    avatarUrl?: string | null;
     clinicId?: string | null;
   }
 
@@ -26,7 +26,7 @@ declare module "next-auth" {
     id: string;
     role: "doctor" | "clinic_admin" | "platform_admin";
     accessToken: string;
-    avatar?: string | null;
+    avatarUrl?: string | null;
     clinicId?: string | null;
   }
 }

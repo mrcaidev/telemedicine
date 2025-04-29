@@ -38,7 +38,7 @@ export default function Navbar() {
               variant="ghost"
               size="sm"
               onClick={() => alert(`Profile: ${user.name}`)}
-              className="px-2 cursor-pointer hover:text-blue-600"
+              className="cursor-pointer hover:text-blue-600"
             >
               <User className="w-4 h-4" />
               {user.name ?? "User"}
