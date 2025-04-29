@@ -1,3 +1,12 @@
+import {
+  bccSchema,
+  ccSchema,
+  contentSchema,
+  idSchema,
+  scheduledAtSchema,
+  subjectSchema,
+  toSchema,
+} from "@/common/schemas";
 import { validator } from "@/middleware/validator";
 import * as scheduledEmailService from "@/services/scheduled-email";
 import { Hono } from "hono";
@@ -10,15 +19,12 @@ scheduledEmailController.post(
   validator(
     "json",
     v.object({
-      subject: v.string("subject should be a string"),
-      to: v.array(v.string(), "to should be an array of strings"),
-      cc: v.array(v.string(), "cc should be an array of strings"),
-      bcc: v.array(v.string(), "bcc should be an array of strings"),
-      content: v.string("content should be a string"),
-      scheduledAt: v.pipe(
-        v.string("scheduledAt should be an ISO 8601 timestamp"),
-        v.isoTimestamp("scheduledAt should be an ISO 8601 timestamp"),
-      ),
+      subject: subjectSchema,
+      to: toSchema,
+      cc: ccSchema,
+      bcc: bccSchema,
+      content: contentSchema,
+      scheduledAt: scheduledAtSchema,
     }),
   ),
   async (c) => {
@@ -30,24 +36,8 @@ scheduledEmailController.post(
 
 scheduledEmailController.post(
   "/:id/reschedule",
-  validator(
-    "param",
-    v.object({
-      id: v.pipe(
-        v.string("id should be a uuid"),
-        v.uuid("id should be a uuid"),
-      ),
-    }),
-  ),
-  validator(
-    "json",
-    v.object({
-      scheduledAt: v.pipe(
-        v.string("scheduledAt should be an ISO 8601 timestamp"),
-        v.isoTimestamp("scheduledAt should be an ISO 8601 timestamp"),
-      ),
-    }),
-  ),
+  validator("param", v.object({ id: idSchema })),
+  validator("json", v.object({ scheduledAt: scheduledAtSchema })),
   async (c) => {
     const { id } = c.req.valid("param");
     const { scheduledAt } = c.req.valid("json");
@@ -58,15 +48,7 @@ scheduledEmailController.post(
 
 scheduledEmailController.post(
   "/:id/cancel",
-  validator(
-    "param",
-    v.object({
-      id: v.pipe(
-        v.string("id should be a uuid"),
-        v.uuid("id should be a uuid"),
-      ),
-    }),
-  ),
+  validator("param", v.object({ id: idSchema })),
   async (c) => {
     const { id } = c.req.valid("param");
     await scheduledEmailService.cancel(id);
