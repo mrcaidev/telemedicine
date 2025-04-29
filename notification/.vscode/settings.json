@@ -5,6 +5,6 @@
   },
   "editor.defaultFormatter": "biomejs.biome",
   "[dockerfile][dockercompose]": {
-    "editor.defaultFormatter": "ms-azuretools.vscode-docker"
+    "editor.defaultFormatter": "ms-azuretools.vscode-containers"
   }
 }
