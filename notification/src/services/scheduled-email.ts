@@ -6,7 +6,7 @@ export async function schedule(email: Email, scheduledAt: string) {
   if (!SHOULD_REALLY_SEND) {
     const mockId = crypto.randomUUID();
     console.log(
-      `scheduled email ${mockId} at ${new Date(scheduledAt).toLocaleString()}:`,
+      `scheduled email ${mockId} at ${scheduledAt}:`,
       JSON.stringify(email),
     );
     return mockId;
@@ -31,9 +31,7 @@ export async function schedule(email: Email, scheduledAt: string) {
 
 export async function reschedule(id: string, scheduledAt: string) {
   if (!SHOULD_REALLY_SEND) {
-    console.log(
-      `rescheduled email ${id} at ${new Date(scheduledAt).toLocaleString()}`,
-    );
+    console.log(`rescheduled email ${id} at ${scheduledAt}`);
     return;
   }
 
