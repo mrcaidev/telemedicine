@@ -18,7 +18,7 @@ mock.module("kafkajs", () => ({
 
 mock.module("resend", () => ({
   Resend: class {
-    email = new (class {
+    emails = new (class {
       send() {}
       update() {}
       cancel() {}
