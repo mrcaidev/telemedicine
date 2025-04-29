@@ -10,7 +10,7 @@ const menu = [
   { label: "Home", href: "/dashboard/doctor" },
   { label: "Appointments", href: "/dashboard/doctor/appointments" },
   { label: "Patients", href: "/dashboard/doctor/patients" },
-  { label: "Settings", href: "/dashboard/doctor/settings" },
+  // { label: "Settings", href: "/dashboard/doctor/settings" },
 ]
 
 export default function Sheetbar() {
