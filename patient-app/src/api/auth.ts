@@ -1,5 +1,6 @@
 import { tokenStore } from "@/utils/secure-store";
 import type { Patient } from "@/utils/types";
+import type { User as GoogleUser } from "@react-native-google-signin/google-signin";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { request } from "./request";
 
@@ -22,6 +23,22 @@ export function useLogInWithEmailMutation() {
   >({
     mutationFn: async (variables) => {
       return await request.post("/auth/login", variables);
+    },
+    onSuccess: async ({ token, ...me }) => {
+      await tokenStore.set(token);
+
+      queryClient.cancelQueries({ queryKey: ["me"] });
+      queryClient.setQueryData(["me"], me);
+    },
+  });
+}
+
+export function useLogInWithGoogleMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation<Patient & { token: string }, Error, GoogleUser["user"]>({
+    mutationFn: async (variables) => {
+      return await request.post("/oauth/google/login", variables);
     },
     onSuccess: async ({ token, ...me }) => {
       await tokenStore.set(token);
