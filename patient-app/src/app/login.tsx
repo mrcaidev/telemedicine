@@ -1,12 +1,14 @@
 import { useLogInWithEmailMutation } from "@/api/auth";
+import { ContinueWithGoogleButton } from "@/components/continue-with-google-button";
 import { Spinner } from "@/components/spinner";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 import { Text } from "@/components/ui/text";
-import { Small } from "@/components/ui/typography";
+import { Muted, Small } from "@/components/ui/typography";
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { Link, useRouter } from "expo-router";
 import { LogInIcon } from "lucide-react-native";
@@ -45,6 +47,15 @@ export default function LogInPage() {
     <View className="grow justify-center p-6">
       <Text className="mb-1 text-3xl font-bold">Welcome back</Text>
       <Text className="mb-6">Log in to your account to continue 👋</Text>
+      <View>
+        <ContinueWithGoogleButton />
+      </View>
+      <View className="relative my-6">
+        <Separator />
+        <Muted className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 px-2 bg-background text-sm">
+          or
+        </Muted>
+      </View>
       <View className="gap-4">
         <FormProvider {...form}>
           <EmailInput />

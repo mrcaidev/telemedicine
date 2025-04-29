@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "hono": "^4.7.7",
+    "jose": "^6.0.10",
     "kafkajs": "^2.2.4",
     "valibot": "^1.0.0"
   },

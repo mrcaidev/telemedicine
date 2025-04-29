@@ -54,3 +54,8 @@ export type OtpVerification = {
   sentAt: string;
   verifiedAt: string | null;
 };
+
+export type GoogleIdentity = {
+  id: string;
+  googleId: string;
+};
