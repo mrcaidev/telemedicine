@@ -17,7 +17,22 @@ export async function findOneById(id: string) {
   return snakeToCamelJson(row) as WithFull<Patient>;
 }
 
-export async function insertOne(data: Pick<Patient, "id">) {
+export async function findOneByEmail(email: string) {
+  const [row] = await sql`
+    select u.id, u.role, u.email, p.nickname, p.avatar_url, p.gender, p.birth_date
+    from patients p
+    left outer join users u on p.id = u.id
+    where u.email = ${email} and u.deleted_at is null
+  `;
+
+  if (!row) {
+    return null;
+  }
+
+  return snakeToCamelJson(row) as WithFull<Patient>;
+}
+
+export async function insertOne(data: Pick<Patient, "id"> & Partial<Patient>) {
   const [row] = await sql`
     insert into patients ${sql(camelToSnakeJson(data))}
     returning id, nickname, avatar_url, gender, birth_date

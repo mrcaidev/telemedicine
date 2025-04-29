@@ -8,6 +8,7 @@ import { authGatewayController } from "./controllers/auth-gateway";
 import { clinicController } from "./controllers/clinic";
 import { clinicAdminController } from "./controllers/clinic-admin";
 import { doctorController } from "./controllers/doctor";
+import { oauthController } from "./controllers/oauth";
 import { otpVerificationController } from "./controllers/otp-verification";
 import { patientController } from "./controllers/patient";
 import { platformAdminController } from "./controllers/platform-admin";
@@ -27,6 +28,7 @@ app.get("/readyz", async (c) => {
 
 app.route("/auth-gateway", authGatewayController);
 app.route("/auth", authController);
+app.route("/oauth", oauthController);
 app.route("/otp", otpVerificationController);
 app.route("/patients", patientController);
 app.route("/doctors", doctorController);
