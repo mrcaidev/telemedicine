@@ -5,6 +5,7 @@ import {
   isSuccessResponse,
   statusCodes,
 } from "@react-native-google-signin/google-signin";
+import { useRouter } from "expo-router";
 import { Alert } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { Spinner } from "./spinner";
@@ -19,6 +20,8 @@ GoogleSignin.configure({
 export function ContinueWithGoogleButton() {
   const { mutate, isPending } = useLogInWithGoogleMutation();
 
+  const router = useRouter();
+
   const continueWithGoogle = async () => {
     try {
       // 确保 Google Play 服务可用。
@@ -32,8 +35,25 @@ export function ContinueWithGoogleButton() {
         return;
       }
 
-      // 登录成功，将 Google 那边的用户资料交给后端，兑换成本平台的用户资料。
-      mutate(res.data.user);
+      // 如果成功了，却没有 ID 令牌，大概率是 scope 配置错误。
+      if (!res.data.idToken) {
+        Alert.alert(
+          "Error",
+          "Unknown error occurred when continuing with Google",
+          [{ text: "OK" }],
+        );
+        return;
+      }
+
+      // 登录成功，将 ID 令牌发给后端，兑换成本平台的用户资料。
+      mutate(
+        { idToken: res.data.idToken },
+        {
+          onSuccess: () => {
+            router.navigate("/");
+          },
+        },
+      );
     } catch (error) {
       // 错误可能与 Google 登录无关，比如网络错误。
       if (!isErrorWithCode(error)) {
