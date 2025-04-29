@@ -1,0 +1,19 @@
+image: mrcaidev/telemedicine-user
+host: api.localhost
+port: 3000
+paths:
+  - /auth
+  - /oauth
+  - /otp
+  - /patients
+  - /doctors
+  - /clinic-admins
+  - /platform-admins
+  - /clinics
+minReplicas: 1
+maxReplicas: 2
+secrets:
+  JWT_SECRET: a-string-secret-at-least-256-bits-long
+  SUPER_ADMIN_TOKEN: i-am-a-super-admin
+  POSTGRES_URL: postgres://dev:dev@user-postgres-postgresql:5432/dev
+  KAFKA_BROKERS: kafka:9092

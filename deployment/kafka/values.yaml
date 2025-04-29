@@ -1,0 +1,14 @@
+listeners:
+  client:
+    protocol: PLAINTEXT
+
+provisioning:
+  enabled: true
+  numPartitions: 3
+  replicationFactor: 2
+  topics:
+    - name: EmailRequested
+    - name: PatientCreated
+    - name: PatientUpdated
+    - name: DoctorCreated
+    - name: DoctorCpdated

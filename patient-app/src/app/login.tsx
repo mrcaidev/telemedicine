@@ -1,6 +1,15 @@
 import { useLogInWithEmailMutation } from "@/api/auth";
+import { Spinner } from "@/components/spinner";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Icon } from "@/components/ui/icon";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Text } from "@/components/ui/text";
+import { Small } from "@/components/ui/typography";
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { Link, useRouter } from "expo-router";
+import { LogInIcon } from "lucide-react-native";
 import {
   Controller,
   FormProvider,
@@ -8,15 +17,6 @@ import {
   useFormContext,
 } from "react-hook-form";
 import { View } from "react-native";
-import {
-  Button,
-  Checkbox,
-  Divider,
-  HelperText,
-  Text,
-  TextInput,
-  useTheme,
-} from "react-native-paper";
 import * as v from "valibot";
 
 const formSchema = v.object({
@@ -31,8 +31,8 @@ const formSchema = v.object({
 
 type FormSchema = v.InferOutput<typeof formSchema>;
 
-export default function LoginPage() {
-  const form = useForm<FormSchema>({
+export default function LogInPage() {
+  const form = useForm({
     defaultValues: {
       email: "",
       password: "",
@@ -42,50 +42,40 @@ export default function LoginPage() {
   });
 
   return (
-    <View style={{ flexGrow: 1, justifyContent: "center", padding: 24 }}>
-      <Text style={{ marginBottom: 8, fontSize: 28, fontWeight: "bold" }}>
-        Welcome back
-      </Text>
-      <Text style={{ marginBottom: 20 }}>
-        Log in to your account to continue 👋
-      </Text>
-      <FormProvider {...form}>
-        <EmailInput />
-        <PasswordInput />
-        <AcceptCheckbox />
-        <LogInWithEmailButton />
-      </FormProvider>
-      <Divider style={{ marginTop: 24, marginBottom: 16 }} />
+    <View className="grow justify-center p-6">
+      <Text className="mb-1 text-3xl font-bold">Welcome back</Text>
+      <Text className="mb-6">Log in to your account to continue 👋</Text>
+      <View className="gap-4">
+        <FormProvider {...form}>
+          <EmailInput />
+          <PasswordInput />
+          <AcceptCheckbox />
+          <LogInWithEmailButton />
+        </FormProvider>
+      </View>
       <RegisterPrompt />
     </View>
   );
 }
 
 function EmailInput() {
-  const { control } = useFormContext<FormSchema>();
-
   return (
     <Controller
-      control={control}
       name="email"
       render={({ field, fieldState }) => (
-        <View>
-          <TextInput
+        <View className="gap-1">
+          <Label>Email</Label>
+          <Input
             {...field}
             onChangeText={field.onChange}
-            error={fieldState.invalid}
-            mode="outlined"
-            label="Email"
             placeholder="you@example.com"
             keyboardType="email-address"
             textContentType="emailAddress"
           />
-          {fieldState.error ? (
-            <HelperText type="error" padding="none">
+          {fieldState.error && (
+            <Small className="text-destructive">
               {fieldState.error.message}
-            </HelperText>
-          ) : (
-            <View style={{ height: 8 }} />
+            </Small>
           )}
         </View>
       )}
@@ -94,30 +84,22 @@ function EmailInput() {
 }
 
 function PasswordInput() {
-  const { control } = useFormContext<FormSchema>();
-
   return (
     <Controller
-      control={control}
       name="password"
       render={({ field, fieldState }) => (
-        <View>
-          <TextInput
+        <View className="gap-1">
+          <Label>Password</Label>
+          <Input
             {...field}
             onChangeText={field.onChange}
-            error={fieldState.invalid}
-            mode="outlined"
-            label="Password"
-            placeholder="8-20 characters"
             textContentType="password"
             secureTextEntry
           />
-          {fieldState.error ? (
-            <HelperText type="error" padding="none">
+          {fieldState.error && (
+            <Small className="text-destructive">
               {fieldState.error.message}
-            </HelperText>
-          ) : (
-            <View style={{ height: 8 }} />
+            </Small>
           )}
         </View>
       )}
@@ -126,38 +108,32 @@ function PasswordInput() {
 }
 
 function AcceptCheckbox() {
-  const { control, setValue } = useFormContext<FormSchema>();
-
-  const theme = useTheme();
-
   return (
     <Controller
-      control={control}
       name="accepted"
       render={({ field, fieldState }) => (
-        <View>
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <View className="gap-1">
+          <View className="flex-row items-center gap-2">
             <Checkbox
-              status={field.value ? "checked" : "unchecked"}
-              onPress={() => setValue("accepted", !field.value)}
+              {...field}
+              checked={field.value}
+              onCheckedChange={field.onChange}
             />
-            <Text style={{ fontSize: 12 }}>
+            <Label>
               I accept&nbsp;
-              <Link href="/terms" style={{ color: theme.colors.primary }}>
+              <Link href="/terms" className="text-primary">
                 Terms of Service
               </Link>
               &nbsp;and&nbsp;
-              <Link href="/privacy" style={{ color: theme.colors.primary }}>
+              <Link href="/privacy" className="text-primary">
                 Privacy Policy
               </Link>
-            </Text>
+            </Label>
           </View>
-          {fieldState.error ? (
-            <HelperText type="error" padding="none">
+          {fieldState.error && (
+            <Small className="text-destructive">
               {fieldState.error.message}
-            </HelperText>
-          ) : (
-            <View style={{ height: 8 }} />
+            </Small>
           )}
         </View>
       )}
@@ -175,35 +151,26 @@ function LogInWithEmailButton() {
   const logIn = handleSubmit((variables) => {
     mutate(variables, {
       onSuccess: () => {
-        router.push("/");
+        router.navigate("/");
       },
     });
   });
 
   return (
-    <Button
-      mode="contained"
-      icon="login"
-      loading={isPending}
-      disabled={isPending}
-      onPress={logIn}
-    >
-      Login
+    <Button disabled={isPending} onPress={logIn}>
+      {isPending ? <Spinner /> : <Icon as={LogInIcon} />}
+      <Text>Log in</Text>
     </Button>
   );
 }
 
 function RegisterPrompt() {
-  const theme = useTheme();
-
   return (
-    <View style={{ alignItems: "center" }}>
-      <Text>
-        Doesn&apos;t have an account?&nbsp;
-        <Link href="/register" style={{ color: theme.colors.primary }}>
-          Register
-        </Link>
-      </Text>
-    </View>
+    <Text className="mt-4 text-center">
+      Doesn&apos;t have an account?&nbsp;
+      <Link href="/register" className="text-primary">
+        Register
+      </Link>
+    </Text>
   );
 }

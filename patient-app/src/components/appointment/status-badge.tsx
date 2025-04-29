@@ -1,69 +1,66 @@
-import type { Appointment } from "@/utils/types";
-import { StyleSheet, View } from "react-native";
-import { Icon, Text } from "react-native-paper";
+import { AppointmentRealtimeStatus } from "@/utils/appointment";
+import {
+  CheckCheckIcon,
+  CheckIcon,
+  HourglassIcon,
+  RotateCwIcon,
+  XIcon,
+} from "lucide-react-native";
+import { View } from "react-native";
+import { Icon } from "../ui/icon";
+import { Text } from "../ui/text";
+import { cn } from "../ui/utils";
 
 type Props = {
-  appointment: Appointment;
+  status: (typeof AppointmentRealtimeStatus)[keyof typeof AppointmentRealtimeStatus];
 };
 
-export function StatusBadge({ appointment }: Props) {
-  if (appointment.status === "to_be_rescheduled") {
-    return (
-      <View style={{ ...styles.badge, backgroundColor: "#fff085" }}>
-        <Icon source="reload" size={12} />
-        <Text style={{ fontSize: 12 }}>rescheduling</Text>
-      </View>
-    );
-  }
-
-  if (appointment.status === "cancelled") {
-    return (
-      <View style={{ ...styles.badge, backgroundColor: "#ffc9c9" }}>
-        <Icon source="cancel" size={12} />
-        <Text style={{ fontSize: 12 }}>cancelled</Text>
-      </View>
-    );
-  }
-
-  if (
-    new Date().getTime() <
-    new Date(`${appointment.date} ${appointment.startTime}`).getTime()
-  ) {
-    return (
-      <View style={{ ...styles.badge, backgroundColor: "#b9f8cf" }}>
-        <Icon source="check" size={12} />
-        <Text style={{ fontSize: 12 }}>confirmed</Text>
-      </View>
-    );
-  }
-
-  if (
-    new Date().getTime() <
-    new Date(`${appointment.date} ${appointment.endTime}`).getTime()
-  ) {
-    return (
-      <View style={{ ...styles.badge, backgroundColor: "#bedbff" }}>
-        <Icon source="timer-sand-complete" size={12} />
-        <Text style={{ fontSize: 12 }}>ongoing</Text>
-      </View>
-    );
-  }
+export function StatusBadge({ status }: Props) {
+  const { badgeClassName, icon, text } = (() => {
+    if (status === AppointmentRealtimeStatus.ToBeRescheduled) {
+      return {
+        badgeClassName: "bg-yellow-200",
+        icon: RotateCwIcon,
+        text: "rescheduling",
+      };
+    }
+    if (status === AppointmentRealtimeStatus.Cancelled) {
+      return {
+        badgeClassName: "bg-red-200",
+        icon: XIcon,
+        text: "cancelled",
+      };
+    }
+    if (status === AppointmentRealtimeStatus.Confirmed) {
+      return {
+        badgeClassName: "bg-green-200",
+        icon: CheckIcon,
+        text: "confirmed",
+      };
+    }
+    if (status === AppointmentRealtimeStatus.Ongoing) {
+      return {
+        badgeClassName: "bg-blue-200",
+        icon: HourglassIcon,
+        text: "ongoing",
+      };
+    }
+    return {
+      badgeClassName: "bg-gray-200",
+      icon: CheckCheckIcon,
+      text: "completed",
+    };
+  })();
 
   return (
-    <View style={{ ...styles.badge, backgroundColor: "#e2e8f0" }}>
-      <Icon source="check-all" size={12} />
-      <Text style={{ fontSize: 12 }}>completed</Text>
+    <View
+      className={cn(
+        "flex-row items-center gap-1 px-2 py-1 rounded-full",
+        badgeClassName,
+      )}
+    >
+      <Icon as={icon} size={12} />
+      <Text className="text-xs">{text}</Text>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  badge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 3,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-});

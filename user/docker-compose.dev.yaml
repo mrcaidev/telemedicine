@@ -1,0 +1,86 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - 3000:3000
+    environment:
+      - JWT_SECRET=a-string-secret-at-least-256-bits-long
+      - SUPER_ADMIN_TOKEN=i-am-a-super-admin
+      - POSTGRES_URL=postgres://dev:dev@postgres:5432/dev
+      - KAFKA_BROKERS=kafka-1:9092,kafka-2:9092,kafka-3:9092
+    volumes:
+      - .:/code
+      - /code/node_modules
+    depends_on:
+      - postgres
+    restart: always
+
+  postgres:
+    image: postgres
+    environment:
+      - POSTGRES_USER=dev
+      - POSTGRES_PASSWORD=dev
+      - POSTGRES_DB=dev
+    volumes:
+      - ./initdb:/docker-entrypoint-initdb.d
+      - postgres-data:/var/lib/postgresql/data
+    restart: always
+
+  kafka-1:
+    image: apache/kafka-native
+    environment:
+      - KAFKA_NODE_ID=1
+      - KAFKA_PROCESS_ROLES=broker,controller
+      - KAFKA_LISTENERS=CONTROLLER://:9091,DOCKER://:9092
+      - KAFKA_ADVERTISED_LISTENERS=DOCKER://kafka-1:9092
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,DOCKER:PLAINTEXT
+      - KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CONTROLLER_QUORUM_VOTERS=1@kafka-1:9091,2@kafka-2:9091,3@kafka-3:9091
+      - KAFKA_INTER_BROKER_LISTENER_NAME=DOCKER
+      - KAFKA_NUM_PARTITIONS=3
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=2
+    volumes:
+      - kafka-1-data:/var/lib/kafka/data
+    restart: always
+
+  kafka-2:
+    image: apache/kafka-native
+    environment:
+      - KAFKA_NODE_ID=2
+      - KAFKA_PROCESS_ROLES=broker,controller
+      - KAFKA_LISTENERS=CONTROLLER://:9091,DOCKER://:9092
+      - KAFKA_ADVERTISED_LISTENERS=DOCKER://kafka-2:9092
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,DOCKER:PLAINTEXT
+      - KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CONTROLLER_QUORUM_VOTERS=1@kafka-1:9091,2@kafka-2:9091,3@kafka-3:9091
+      - KAFKA_INTER_BROKER_LISTENER_NAME=DOCKER
+      - KAFKA_NUM_PARTITIONS=3
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=2
+    volumes:
+      - kafka-2-data:/var/lib/kafka/data
+    restart: always
+
+  kafka-3:
+    image: apache/kafka-native
+    environment:
+      - KAFKA_NODE_ID=3
+      - KAFKA_PROCESS_ROLES=broker,controller
+      - KAFKA_LISTENERS=CONTROLLER://:9091,DOCKER://:9092
+      - KAFKA_ADVERTISED_LISTENERS=DOCKER://kafka-3:9092
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,DOCKER:PLAINTEXT
+      - KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CONTROLLER_QUORUM_VOTERS=1@kafka-1:9091,2@kafka-2:9091,3@kafka-3:9091
+      - KAFKA_INTER_BROKER_LISTENER_NAME=DOCKER
+      - KAFKA_NUM_PARTITIONS=3
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=2
+    volumes:
+      - kafka-3-data:/var/lib/kafka/data
+    restart: always
+
+volumes:
+  postgres-data:
+  kafka-1-data:
+  kafka-2-data:
+  kafka-3-data:

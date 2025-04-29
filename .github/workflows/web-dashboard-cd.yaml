@@ -1,14 +1,11 @@
 name: Web Dashboard CD
 
 on:
-  # Deploy to staging on push to main branch.
   push:
     branches:
       - main
     paths:
       - web-dashboard/**
-      - deployment/web-dashboard/**
-  # Deploy to production on release.
   release:
     types:
       - published
@@ -58,29 +55,31 @@ jobs:
         with:
           context: "{{defaultContext}}:web-dashboard"
           push: true
-          tags: ${{ vars.DOCKERHUB_USERNAME }}/telemedicine-web-dashboard:${{ needs.set-env.outputs.tag }}
+          tags: |
+            ${{ vars.DOCKERHUB_USERNAME }}/telemedicine-web-dashboard:latest
+            ${{ vars.DOCKERHUB_USERNAME }}/telemedicine-web-dashboard:${{ needs.set-env.outputs.tag }}
 
-  deploy:
-    name: Deploy
-    needs:
-      - set-env
-      - build-push
-    runs-on: ubuntu-latest
-    environment: ${{ needs.set-env.outputs.environment }}
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
+  # deploy:
+  #   name: Deploy
+  #   needs:
+  #     - set-env
+  #     - build-push
+  #   runs-on: ubuntu-latest
+  #   environment: ${{ needs.set-env.outputs.environment }}
+  #   steps:
+  #     - name: Check out repository
+  #       uses: actions/checkout@v4
 
-      - name: Log in to DigitalOcean
-        uses: digitalocean/action-doctl@v2
-        with:
-          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+  #     - name: Log in to DigitalOcean
+  #       uses: digitalocean/action-doctl@v2
+  #       with:
+  #         token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
 
-      - name: Connect to Kubernetes
-        run: doctl kubernetes cluster kubeconfig save --expiry-seconds 600 ${{ vars.K8S_CLUSTER_NAME }}
+  #     - name: Connect to Kubernetes
+  #       run: doctl kubernetes cluster kubeconfig save --expiry-seconds 600 ${{ vars.K8S_CLUSTER_NAME }}
 
-      - name: Deploy to Kubernetes
-        run: |
-          helm upgrade --install web-dashboard ${{ github.workspace }}/deployment/web-dashboard \
-            --values ${{ github.workspace }}/deployment/web-dashboard/values-${{ needs.set-env.outputs.environment }}.yaml \
-            --set image=${{ vars.DOCKERHUB_USERNAME }}/telemedicine-web-dashboard:${{ needs.set-env.outputs.tag }}
+  #     - name: Deploy to Kubernetes
+  #       run: |
+  #         helm upgrade --install web-dashboard ${{ github.workspace }}/deployment/web-dashboard \
+  #           --values ${{ github.workspace }}/deployment/web-dashboard/values-${{ needs.set-env.outputs.environment }}.yaml \
+  #           --set image=${{ vars.DOCKERHUB_USERNAME }}/telemedicine-web-dashboard:${{ needs.set-env.outputs.tag }}
