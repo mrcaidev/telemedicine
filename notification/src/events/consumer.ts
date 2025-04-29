@@ -1,7 +1,8 @@
-import { resend } from "@/utils/resend";
+import { SHOULD_REALLY_SEND, resend } from "@/utils/resend";
+import type { Email } from "@/utils/types";
 import { consumer } from "./kafka";
 
-// 订阅 EmailRequested 主题。
+// 消费者订阅主题。
 await consumer.subscribe({ topic: "EmailRequested" });
 console.log("kafka consumer subscribed to EmailRequested topic");
 
@@ -12,15 +13,11 @@ await consumer.run({
     if (!text) {
       return;
     }
-
-    console.log("kafka consumer received message:", text);
-
     const json = JSON.parse(text);
     if (!json) {
       return;
     }
 
-    // 处理 EmailRequested 事件。
     if (topic === "EmailRequested") {
       await consumeEmailRequestedEvent(json);
     }
@@ -28,30 +25,21 @@ await consumer.run({
 });
 console.log("kafka consumer is running");
 
-type EmailRequestedEvent = {
-  subject: string;
-  to: string[];
-  cc: string[];
-  bcc: string[];
-  content: string;
-  scheduledAt: string | null;
-};
+type EmailRequestedEvent = Email;
 
 async function consumeEmailRequestedEvent(event: EmailRequestedEvent) {
-  if (Bun.env.NODE_ENV !== "production") {
-    console.log("skip sending email in non-production environment");
-    console.log("email:", JSON.stringify(event));
+  if (!SHOULD_REALLY_SEND) {
+    console.log("sent email:", JSON.stringify(event));
     return;
   }
 
   const { data, error } = await resend.emails.send({
+    subject: event.subject,
     from: "Telemedicine <notification@telemedicine.ink>",
     to: event.to,
     cc: event.cc,
     bcc: event.bcc,
-    subject: event.subject,
     text: event.content,
-    ...(event.scheduledAt ? { scheduledAt: event.scheduledAt } : {}),
   });
 
   if (error) {
@@ -59,5 +47,5 @@ async function consumeEmailRequestedEvent(event: EmailRequestedEvent) {
     return;
   }
 
-  console.log("sent email:", data?.id);
+  console.log("sent email:", data!.id);
 }
