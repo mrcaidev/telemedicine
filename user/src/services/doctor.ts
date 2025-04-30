@@ -59,13 +59,10 @@ export async function createOne(
     createdBy,
   });
 
-  // 发布事件。
-  await publishDoctorCreatedEvent(doctor);
-
-  return {
+  const fullDoctor: WithFull<Doctor> = {
     id: user.id,
-    role: user.role,
     email: user.email,
+    role: user.role,
     clinic,
     firstName: doctor.firstName,
     lastName: doctor.lastName,
@@ -73,5 +70,10 @@ export async function createOne(
     description: doctor.description,
     gender: doctor.gender,
     specialties: doctor.specialties,
-  } as WithFull<Doctor>;
+  };
+
+  // 发布事件。
+  await publishDoctorCreatedEvent(fullDoctor);
+
+  return fullDoctor;
 }

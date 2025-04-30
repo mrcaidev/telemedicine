@@ -4,6 +4,7 @@ import * as patientRepository from "@/repositories/patient";
 import * as userRepository from "@/repositories/user";
 import { verifyGoogleIdToken } from "@/utils/id-token";
 import { signJwt } from "@/utils/jwt";
+import type { Patient, WithFull } from "@/utils/types";
 import { HTTPException } from "hono/http-exception";
 
 export async function logInWithGoogle(idToken: string) {
@@ -65,11 +66,7 @@ export async function logInWithGoogle(idToken: string) {
     googleId: idTokenPayload.sub,
   });
 
-  // 发布事件。
-  await publishPatientCreatedEvent(patient);
-
-  const token = await signJwt({ id: user.id, role: user.role });
-  return {
+  const fullPatient: WithFull<Patient> = {
     id: user.id,
     role: user.role,
     email: user.email,
@@ -77,6 +74,11 @@ export async function logInWithGoogle(idToken: string) {
     avatarUrl: patient.avatarUrl,
     gender: patient.gender,
     birthDate: patient.birthDate,
-    token,
   };
+
+  // 发布事件。
+  await publishPatientCreatedEvent(fullPatient);
+
+  const token = await signJwt({ id: user.id, role: user.role });
+  return { ...fullPatient, token };
 }

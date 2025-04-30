@@ -1,5 +1,8 @@
 import * as appointmentRepository from "@/repositories/appointment";
 import * as doctorAvailabilityRepository from "@/repositories/doctor-availability";
+import * as emailScheduleRepository from "@/repositories/email-schedule";
+import * as patientRepository from "@/repositories/patient";
+import { requestNotification } from "@/utils/request";
 import type { AppointmentStatus, Role } from "@/utils/types";
 import dayjs, { type Dayjs } from "dayjs";
 import { HTTPException } from "hono/http-exception";
@@ -68,6 +71,28 @@ export async function createOne(
     remark,
   });
 
+  const patient = await patientRepository.findOneById(patientId);
+
+  if (!patient) {
+    throw new HTTPException(404, { message: "Patient not found" });
+  }
+
+  const scheduledAt = date.subtract(1, "day").toISOString();
+  const emailId = await requestNotification.post<string>("/scheduled-emails", {
+    subject: "Appointment Reminder",
+    to: [patient.email],
+    cc: [],
+    bcc: [],
+    content: `Hi, ${patient.nickname ?? patient.email}!\nPlease be reminded that you have an appointment tomorrow:\nDate: ${date.format("dddd, LL")}`,
+    scheduledAt,
+  });
+
+  await emailScheduleRepository.insertOne({
+    appointmentId: appointment.id,
+    emailId,
+    scheduledAt,
+  });
+
   return appointment;
 }
 
@@ -95,10 +120,25 @@ export async function cancelOneById(id: string, userId: string) {
     throw new HTTPException(403, { message: "Permission denied" });
   }
 
+  if (appointment.status === "cancelled") {
+    throw new HTTPException(409, {
+      message: "This appointment is already cancelled",
+    });
+  }
+
   if (dayjs().isAfter(appointment.startAt)) {
     throw new HTTPException(422, {
       message: "This appointment has already started",
     });
+  }
+
+  // 如果还没有到达定时邮件的发送时间，就撤销定时邮件。
+  const emailSchedule =
+    await emailScheduleRepository.findOneByAppointmentId(id);
+  if (emailSchedule && dayjs().isBefore(emailSchedule.scheduledAt)) {
+    await requestNotification.post(
+      `/scheduled-emails/${emailSchedule.emailId}/cancel`,
+    );
   }
 
   return await appointmentRepository.updateOneById(id, { status: "cancelled" });

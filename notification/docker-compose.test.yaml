@@ -2,11 +2,9 @@ services:
   api:
     build:
       context: .
-      dockerfile: Dockerfile.dev
-    ports:
-      - 3000:3000
+      dockerfile: Dockerfile.test
     environment:
-      - RESEND_API_KEY=dev
+      - RESEND_API_KEY=re_test
       - KAFKA_BROKERS=kafka:9092
     volumes:
       - .:/code
@@ -14,7 +12,6 @@ services:
     depends_on:
       init-kafka:
         condition: service_completed_successfully
-    restart: always
 
   init-kafka:
     image: bitnami/kafka
@@ -37,15 +34,9 @@ services:
       - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=BROKER
       - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
       - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka:9093
-    volumes:
-      - kafka-data:/bitnami/kafka
     healthcheck:
       test: [ "CMD", "kafka-topics.sh", "--bootstrap-server", "kafka:9092", "--list" ]
       interval: 30s
       timeout: 10s
       start_period: 30s
       start_interval: 5s
-    restart: always
-
-volumes:
-  kafka-data:

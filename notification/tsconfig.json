@@ -13,7 +13,10 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "noUncheckedSideEffectImports": true,
-    "paths": { "@/*": ["./src/*"] },
+    "paths": {
+      "@/*": ["./src/*"],
+      "~/*": ["./tests/*"]
+    },
     "resolveJsonModule": true,
     "noEmit": true,
     "allowJs": true,
