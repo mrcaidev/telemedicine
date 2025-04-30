@@ -41,6 +41,8 @@ console.log("kafka consumer is running");
 
 type PatientCreatedEvent = {
   id: string;
+  role: "patient";
+  email: string;
   nickname: string | null;
   avatarUrl: string | null;
   gender: "male" | "female" | null;
@@ -50,6 +52,7 @@ type PatientCreatedEvent = {
 async function consumePatientCreatedEvent(event: PatientCreatedEvent) {
   await patientRepository.insertOne({
     id: event.id,
+    email: event.email,
     nickname: event.nickname,
     avatarUrl: event.avatarUrl,
   });

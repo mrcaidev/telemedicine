@@ -1,5 +1,8 @@
 import * as appointmentRepository from "@/repositories/appointment";
 import * as doctorAvailabilityRepository from "@/repositories/doctor-availability";
+import * as emailScheduleRepository from "@/repositories/email-schedule";
+import * as patientRepository from "@/repositories/patient";
+import { requestNotification } from "@/utils/request";
 import type { AppointmentStatus, Role } from "@/utils/types";
 import dayjs, { type Dayjs } from "dayjs";
 import { HTTPException } from "hono/http-exception";
@@ -66,6 +69,26 @@ export async function createOne(
     startAt,
     endAt,
     remark,
+  });
+
+  const patient = await patientRepository.findOneById(patientId);
+
+  if (!patient) {
+    throw new HTTPException(404, { message: "Patient not found" });
+  }
+
+  const emailId = await requestNotification.post<string>("/scheduled-emails", {
+    subject: "Appointment Reminder",
+    to: [patient.email],
+    cc: [],
+    bcc: [],
+    content: `Hi, ${patient.nickname}!\nPlease be reminded that you have an appointment tomorrow:\nDate: ${date.format("dddd, LL")}`,
+  });
+
+  await emailScheduleRepository.insertOne({
+    appointmentId: appointment.id,
+    emailId,
+    scheduledAt: date.subtract(1, "day").toISOString(),
   });
 
   return appointment;

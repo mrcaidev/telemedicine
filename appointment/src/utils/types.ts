@@ -37,3 +37,9 @@ export type FullAppointment = Omit<Appointment, "patientId" | "doctorId"> & {
   patient: Patient;
   doctor: Doctor;
 };
+
+export type EmailSchedule = {
+  appointmentId: string;
+  emailId: string;
+  scheduledAt: string;
+};
