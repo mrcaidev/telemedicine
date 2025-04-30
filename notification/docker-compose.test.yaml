@@ -16,7 +16,7 @@ services:
   init-kafka:
     image: bitnami/kafka
     init: true
-    command: [ "bash", "-c", "/init/create-topics.sh" ]
+    command: [ "bash", "-c", "/init/init.sh" ]
     volumes:
       - ./init/kafka:/init
     depends_on:

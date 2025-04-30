@@ -14,11 +14,12 @@ services:
     depends_on:
       init-kafka:
         condition: service_completed_successfully
+    restart: always
 
   init-kafka:
     image: bitnami/kafka
     init: true
-    command: [ "bash", "-c", "/init/create-topics.sh" ]
+    command: [ "bash", "-c", "/init/init.sh" ]
     volumes:
       - ./init/kafka:/init
     depends_on:
@@ -44,6 +45,7 @@ services:
       timeout: 10s
       start_period: 30s
       start_interval: 5s
+    restart: always
 
 volumes:
   kafka-data:
