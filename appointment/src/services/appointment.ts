@@ -77,18 +77,20 @@ export async function createOne(
     throw new HTTPException(404, { message: "Patient not found" });
   }
 
+  const scheduledAt = date.subtract(1, "day").toISOString();
   const emailId = await requestNotification.post<string>("/scheduled-emails", {
     subject: "Appointment Reminder",
     to: [patient.email],
     cc: [],
     bcc: [],
     content: `Hi, ${patient.nickname}!\nPlease be reminded that you have an appointment tomorrow:\nDate: ${date.format("dddd, LL")}`,
+    scheduledAt,
   });
 
   await emailScheduleRepository.insertOne({
     appointmentId: appointment.id,
     emailId,
-    scheduledAt: date.subtract(1, "day").toISOString(),
+    scheduledAt,
   });
 
   return appointment;
