@@ -19,39 +19,3 @@ export async function POST(
     },
   });
 }
-
-export async function PUT(
-  pathname: string,
-  data: unknown = {},
-  init: RequestInit = {},
-) {
-  return await app.request(pathname, {
-    method: "PUT",
-    body: JSON.stringify(data),
-    ...init,
-    headers: {
-      "Content-Type": "application/json",
-      ...init.headers,
-    },
-  });
-}
-
-export async function PATCH(
-  pathname: string,
-  data: unknown = {},
-  init: RequestInit = {},
-) {
-  return await app.request(pathname, {
-    method: "PATCH",
-    body: JSON.stringify(data),
-    ...init,
-    headers: {
-      "Content-Type": "application/json",
-      ...init.headers,
-    },
-  });
-}
-
-export async function DELETE(pathname: string, init: RequestInit = {}) {
-  return await app.request(pathname, { method: "DELETE", ...init });
-}

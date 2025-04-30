@@ -9,17 +9,23 @@ console.log("kafka consumer subscribed to EmailRequested topic");
 // 不断消费消息。
 await consumer.run({
   eachMessage: async ({ topic, message }) => {
-    const text = message.value?.toString();
-    if (!text) {
-      return;
-    }
-    const json = JSON.parse(text);
-    if (!json) {
-      return;
-    }
+    try {
+      const text = message.value?.toString();
+      if (!text) {
+        return;
+      }
 
-    if (topic === "EmailRequested") {
-      await consumeEmailRequestedEvent(json);
+      const json = JSON.parse(text);
+      if (!json) {
+        return;
+      }
+
+      if (topic === "EmailRequested") {
+        await consumeEmailRequestedEvent(json);
+      }
+    } catch (error) {
+      console.error(error);
+      return;
     }
   },
 });
