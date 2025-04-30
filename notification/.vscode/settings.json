@@ -1,9 +1,9 @@
 {
   "editor.codeActionsOnSave": {
     "source.fixAll.biome": "explicit",
-    "source.removeUnusedImports": "explicit",
     "source.organizeImports": "never",
-    "source.organizeImports.biome": "explicit"
+    "source.organizeImports.biome": "explicit",
+    "source.removeUnusedImports": "explicit"
   },
   "editor.defaultFormatter": "biomejs.biome",
   "[dockerfile][dockercompose]": {
