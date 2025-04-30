@@ -3,6 +3,7 @@ import * as patientRepository from "@/repositories/patient";
 import * as userRepository from "@/repositories/user";
 import * as otpVerificationService from "@/services/otp-verification";
 import { signJwt } from "@/utils/jwt";
+import type { Patient, WithFull } from "@/utils/types";
 import { HTTPException } from "hono/http-exception";
 
 export async function findOneById(id: string) {
@@ -44,20 +45,21 @@ export async function createOne(data: {
   // 创建病人。
   const patient = await patientRepository.insertOne({ id: user.id });
 
-  // 发布事件。
-  await publishPatientCreatedEvent(patient);
-
-  // 颁发 JWT。
-  const token = await signJwt({ id: user.id, role: "patient" });
-
-  return {
+  const fullPatient: WithFull<Patient> = {
     id: user.id,
-    role: user.role,
     email: user.email,
+    role: user.role,
     nickname: patient.nickname,
     avatarUrl: patient.avatarUrl,
     gender: patient.gender,
     birthDate: patient.birthDate,
-    token,
   };
+
+  // 发布事件。
+  await publishPatientCreatedEvent(fullPatient);
+
+  // 颁发 JWT。
+  const token = await signJwt({ id: user.id, role: "patient" });
+
+  return { ...fullPatient, token };
 }
