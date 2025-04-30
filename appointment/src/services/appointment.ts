@@ -120,6 +120,12 @@ export async function cancelOneById(id: string, userId: string) {
     throw new HTTPException(403, { message: "Permission denied" });
   }
 
+  if (appointment.status === "cancelled") {
+    throw new HTTPException(409, {
+      message: "This appointment is already cancelled",
+    });
+  }
+
   if (dayjs().isAfter(appointment.startAt)) {
     throw new HTTPException(422, {
       message: "This appointment has already started",
