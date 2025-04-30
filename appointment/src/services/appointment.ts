@@ -124,6 +124,15 @@ export async function cancelOneById(id: string, userId: string) {
     });
   }
 
+  // 如果还没有到达定时邮件的发送时间，就撤销定时邮件。
+  const emailSchedule =
+    await emailScheduleRepository.findOneByAppointmentId(id);
+  if (emailSchedule && dayjs().isBefore(emailSchedule.scheduledAt)) {
+    await requestNotification.post(
+      `/scheduled-emails/${emailSchedule.emailId}/cancel`,
+    );
+  }
+
   return await appointmentRepository.updateOneById(id, { status: "cancelled" });
 }
 
