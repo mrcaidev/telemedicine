@@ -1,0 +1,42 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    environment:
+      - RESEND_API_KEY=re_test
+      - KAFKA_BROKERS=kafka:9092
+    volumes:
+      - .:/code
+      - /code/node_modules
+    depends_on:
+      init-kafka:
+        condition: service_completed_successfully
+
+  init-kafka:
+    image: bitnami/kafka
+    init: true
+    command: [ "bash", "-c", "/init/create-topics.sh" ]
+    volumes:
+      - ./init/kafka:/init
+    depends_on:
+      kafka:
+        condition: service_healthy
+
+  kafka:
+    image: bitnami/kafka
+    environment:
+      - KAFKA_CFG_NODE_ID=1
+      - KAFKA_CFG_PROCESS_ROLES=broker,controller
+      - KAFKA_CFG_LISTENERS=BROKER://:9092,CONTROLLER://:9093
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=BROKER:PLAINTEXT,CONTROLLER:PLAINTEXT
+      - KAFKA_CFG_ADVERTISED_LISTENERS=BROKER://kafka:9092
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=BROKER
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka:9093
+    healthcheck:
+      test: [ "CMD", "kafka-topics.sh", "--bootstrap-server", "kafka:9092", "--list" ]
+      interval: 30s
+      timeout: 10s
+      start_period: 30s
+      start_interval: 5s
