@@ -83,7 +83,7 @@ export async function createOne(
     to: [patient.email],
     cc: [],
     bcc: [],
-    content: `Hi, ${patient.nickname}!\nPlease be reminded that you have an appointment tomorrow:\nDate: ${date.format("dddd, LL")}`,
+    content: `Hi, ${patient.nickname ?? patient.email}!\nPlease be reminded that you have an appointment tomorrow:\nDate: ${date.format("dddd, LL")}`,
     scheduledAt,
   });
 
