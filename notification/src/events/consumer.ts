@@ -1,4 +1,4 @@
-import { SHOULD_REALLY_SEND, resend } from "@/utils/resend";
+import { SHOULD_ACTUALLY_SEND, resend } from "@/utils/resend";
 import type { Email } from "@/utils/types";
 import { consumer } from "./kafka";
 
@@ -9,23 +9,18 @@ console.log("kafka consumer subscribed to EmailRequested topic");
 // 不断消费消息。
 await consumer.run({
   eachMessage: async ({ topic, message }) => {
-    try {
-      const text = message.value?.toString();
-      if (!text) {
-        return;
-      }
-
-      const json = JSON.parse(text);
-      if (!json) {
-        return;
-      }
-
-      if (topic === "EmailRequested") {
-        await consumeEmailRequestedEvent(json);
-      }
-    } catch (error) {
-      console.error(error);
+    const text = message.value?.toString();
+    if (!text) {
       return;
+    }
+
+    const json = JSON.parse(text);
+    if (!json) {
+      return;
+    }
+
+    if (topic === "EmailRequested") {
+      await consumeEmailRequestedEvent(json);
     }
   },
 });
@@ -34,7 +29,7 @@ console.log("kafka consumer is running");
 type EmailRequestedEvent = Email;
 
 async function consumeEmailRequestedEvent(event: EmailRequestedEvent) {
-  if (!SHOULD_REALLY_SEND) {
+  if (!SHOULD_ACTUALLY_SEND) {
     console.log("sent email:", JSON.stringify(event));
     return;
   }

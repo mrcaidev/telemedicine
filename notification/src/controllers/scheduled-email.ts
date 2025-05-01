@@ -14,6 +14,7 @@ import * as v from "valibot";
 
 export const scheduledEmailController = new Hono();
 
+// POST /scheduled-emails
 scheduledEmailController.post(
   "/",
   validator(
@@ -34,6 +35,7 @@ scheduledEmailController.post(
   },
 );
 
+// POST /scheduled-emails/{id}/reschedule
 scheduledEmailController.post(
   "/:id/reschedule",
   validator("param", v.object({ id: idSchema })),
@@ -46,6 +48,7 @@ scheduledEmailController.post(
   },
 );
 
+// POST /scheduled-emails/{id}/cancel
 scheduledEmailController.post(
   "/:id/cancel",
   validator("param", v.object({ id: idSchema })),
