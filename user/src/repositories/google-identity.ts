@@ -16,14 +16,14 @@ export async function findOneByGoogleId(googleId: string) {
   return snakeToCamelJson(row) as GoogleIdentity;
 }
 
-export async function insertOne(data: GoogleIdentity) {
+export async function createOne(data: GoogleIdentity) {
   const [row] = await sql`
     insert into google_identities ${sql(camelToSnakeJson(data))}
     returning id, google_id
   `;
 
   if (!row) {
-    throw new Error("failed to insert google identity");
+    throw new Error("failed to create google identity");
   }
 
   return snakeToCamelJson(row) as GoogleIdentity;

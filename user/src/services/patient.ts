@@ -1,19 +1,23 @@
 import { publishPatientCreatedEvent } from "@/events/producer";
-import * as patientRepository from "@/repositories/patient";
-import * as userRepository from "@/repositories/user";
+import * as accountRepository from "@/repositories/account";
+import * as patientProfileRepository from "@/repositories/patient-profile";
 import * as otpVerificationService from "@/services/otp-verification";
 import { signJwt } from "@/utils/jwt";
-import type { Patient, WithFull } from "@/utils/types";
+import type { Patient } from "@/utils/types";
 import { HTTPException } from "hono/http-exception";
 
 export async function findOneById(id: string) {
-  const patient = await patientRepository.findOneById(id);
-
-  if (!patient) {
-    throw new HTTPException(404, { message: "Patient not found" });
+  const account = await accountRepository.findOneById(id);
+  if (!account) {
+    throw new HTTPException(404, { message: "This patient does not exist" });
   }
 
-  return patient;
+  const profile = await patientProfileRepository.findOneById(id);
+  if (!profile) {
+    throw new HTTPException(404, { message: "This patient does not exist" });
+  }
+
+  return { ...account, ...profile } as Patient;
 }
 
 export async function createOne(data: {
@@ -21,9 +25,9 @@ export async function createOne(data: {
   password: string;
   otp: string;
 }) {
-  // 如果该邮箱已经注册过了，拒绝再次注册。
-  const existingUser = await userRepository.findOneByEmail(data.email);
-  if (existingUser) {
+  // 如果该邮箱已经注册过了，就拒绝再次注册。
+  const existingAccount = await accountRepository.findOneByEmail(data.email);
+  if (existingAccount) {
     throw new HTTPException(409, {
       message: "This email has already been registered",
     });
@@ -35,31 +39,23 @@ export async function createOne(data: {
   // 密码加盐。
   const passwordHash = await Bun.password.hash(data.password);
 
-  // 创建用户。
-  const user = await userRepository.insertOne({
+  // 创建账户。
+  const account = await accountRepository.createOne({
     role: "patient",
     email: data.email,
     passwordHash,
   });
 
-  // 创建病人。
-  const patient = await patientRepository.insertOne({ id: user.id });
+  // 创建资料。
+  const profile = await patientProfileRepository.createOne({ id: account.id });
 
-  const fullPatient: WithFull<Patient> = {
-    id: user.id,
-    email: user.email,
-    role: user.role,
-    nickname: patient.nickname,
-    avatarUrl: patient.avatarUrl,
-    gender: patient.gender,
-    birthDate: patient.birthDate,
-  };
+  const patient = { ...account, ...profile };
 
   // 发布事件。
-  await publishPatientCreatedEvent(fullPatient);
+  await publishPatientCreatedEvent(patient);
 
   // 颁发 JWT。
-  const token = await signJwt({ id: user.id, role: "patient" });
+  const token = await signJwt(account);
 
-  return { ...fullPatient, token };
+  return { ...patient, token } as Patient & { token: string };
 }

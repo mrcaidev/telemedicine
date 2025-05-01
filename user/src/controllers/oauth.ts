@@ -11,6 +11,6 @@ oauthController.post(
   async (c) => {
     const { idToken } = c.req.valid("json");
     const patientWithToken = await oauthService.logInWithGoogle(idToken);
-    return c.json({ code: 0, message: "", data: patientWithToken });
+    return c.json({ code: 0, message: "", data: patientWithToken }, 201);
   },
 );
