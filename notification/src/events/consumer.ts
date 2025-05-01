@@ -2,9 +2,9 @@ import { SHOULD_ACTUALLY_SEND, resend } from "@/utils/resend";
 import type { Email } from "@/utils/types";
 import { consumer } from "./kafka";
 
-// 消费者订阅主题。
-await consumer.subscribe({ topic: "EmailRequested" });
-console.log("kafka consumer subscribed to EmailRequested topic");
+// 订阅主题。
+await consumer.subscribe({ topics: ["EmailRequested"] });
+console.log("kafka consumer subscribed to topics");
 
 // 不断消费消息。
 await consumer.run({
