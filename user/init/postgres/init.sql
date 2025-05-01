@@ -74,4 +74,4 @@ create table google_identities (
   id uuid primary key references patients(id),
   google_id text not null unique,
   linked_at timestamptz default now() not null
-)
+);
