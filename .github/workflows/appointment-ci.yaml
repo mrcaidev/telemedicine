@@ -33,5 +33,5 @@ jobs:
       - name: Run integration tests
         run: |
           docker compose -f docker-compose.test.yaml up -d --build
-          docker exec notification-api-1 bun test --coverage
+          docker exec appointment-api-1 bun test --coverage
           docker compose -f docker-compose.test.yaml down -v
