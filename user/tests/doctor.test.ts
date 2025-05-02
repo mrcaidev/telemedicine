@@ -50,7 +50,7 @@ describe("GET /doctors/{id}", () => {
 
 describe("POST /doctors", () => {
   it("creates doctor if ok", async () => {
-    publishDoctorCreatedEventSpy.mockImplementationOnce(async () => {});
+    publishDoctorCreatedEventSpy.mockResolvedValueOnce();
     const res = await POST(
       "/doctors",
       {

@@ -93,7 +93,7 @@ describe("POST /patients", () => {
       insert into otp_verifications (email, otp) values
       ('patient2@example.com', '123456');
     `;
-    publishPatientCreatedEventSpy.mockImplementationOnce(async () => {});
+    publishPatientCreatedEventSpy.mockResolvedValueOnce();
     const res = await POST("/patients", {
       email: "patient2@example.com",
       password: mockData.password,
