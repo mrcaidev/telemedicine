@@ -1,15 +1,15 @@
 import { describe, expect, it } from "bun:test";
-import { sign } from "hono/jwt";
+import { signJwt } from "@/utils/jwt";
 import { GET } from "./utils/request";
 
 describe("GET /auth-gateway", () => {
   it("sets auth headers if ok", async () => {
     const account = {
       id: crypto.randomUUID(),
-      role: "patient",
+      role: "patient" as const,
       email: "me@example.com",
     };
-    const token = await sign(account, Bun.env.JWT_SECRET);
+    const token = await signJwt(account);
     const res = await GET("/auth-gateway", {
       headers: { Authorization: `Bearer ${token}` },
     });
