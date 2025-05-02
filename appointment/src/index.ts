@@ -3,27 +3,22 @@ import "@/utils/dayjs";
 import { sql } from "bun";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
-import { logger } from "hono/logger";
 import { isValiError } from "valibot";
-import { appointmentController } from "./controller/appointment";
-import { doctorAvailabilityController } from "./controller/doctor-availability";
 
 const app = new Hono();
 
-app.use(logger());
-
+// Liveness 探针。
 app.get("/livez", (c) => {
   return c.text("live");
 });
 
+// Readiness 探针。
 app.get("/readyz", async (c) => {
   await sql`select 1`;
   return c.text("ready");
 });
 
-app.route("/appointments", appointmentController);
-app.route("/doctor-availabilities", doctorAvailabilityController);
-
+// 集中处理错误。
 app.onError((error, c) => {
   if (isValiError(error)) {
     return c.json({ code: 400, message: error.message, data: null }, 400);
@@ -37,7 +32,7 @@ app.onError((error, c) => {
   }
 
   console.error(error);
-  return c.json({ code: 500, message: "Unknown error", data: null }, 500);
+  return c.json({ code: 500, message: "Server error", data: null }, 500);
 });
 
 export default app;
