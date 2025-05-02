@@ -13,7 +13,7 @@ export async function findAll(
     sortBy: "startAt" | "endAt";
     sortOrder: "asc" | "desc";
     limit: number;
-    cursor: string | null;
+    cursor: string;
   },
   actor: Actor,
 ) {

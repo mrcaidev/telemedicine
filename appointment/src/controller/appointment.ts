@@ -39,13 +39,11 @@ appointmentController.get(
         "10",
       ),
       cursor: v.optional(
-        v.nullable(
-          v.pipe(
-            v.string(),
-            v.isoTimestamp("cursor should be an ISO 8601 timestamp"),
-          ),
+        v.pipe(
+          v.string(),
+          v.isoTimestamp("cursor should be an ISO 8601 timestamp"),
         ),
-        null,
+        new Date().toISOString(),
       ),
     }),
   ),

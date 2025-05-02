@@ -18,7 +18,7 @@ export async function findAll(query: {
   sortBy: "startAt" | "endAt";
   sortOrder: "asc" | "desc";
   limit: number;
-  cursor: string | null;
+  cursor: string;
 }) {
   const rows = await sql`
     select a.id, a.start_at, a.end_at, a.remark, a.status, a.created_at, p.id as patient_id, p.nickname as patient_nickname, p.avatar_url as patient_avatar_url, d.id as doctor_id, d.first_name as doctor_first_name, d.last_name as doctor_last_name, d.avatar_url as doctor_avatar_url
