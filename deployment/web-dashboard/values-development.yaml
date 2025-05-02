@@ -1,3 +1,0 @@
-host: dashboard.localhost
-minReplicas: 1
-maxReplicas: 2

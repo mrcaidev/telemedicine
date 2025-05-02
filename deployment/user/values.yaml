@@ -1,6 +1,8 @@
 image: mrcaidev/telemedicine-user
 host: api.localhost
 port: 3000
+livenessProbe: /livez
+readinessProbe: /readyz
 paths:
   - /auth
   - /oauth
