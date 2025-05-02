@@ -16,6 +16,6 @@ export async function findOneByAppointmentId(appointmentId: string) {
   return snakeToCamelJson(row) as EmailSchedule;
 }
 
-export async function insertOne(data: EmailSchedule) {
+export async function createOne(data: EmailSchedule) {
   await sql`insert into email_schedules ${sql(camelToSnakeJson(data))}`;
 }

@@ -1,21 +1,30 @@
-import * as platformAdminRepository from "@/repositories/platform-admin";
-import * as userRepository from "@/repositories/user";
+import * as accountRepository from "@/repositories/account";
+import * as platformAdminProfileRepository from "@/repositories/platform-admin-profile";
+import type { PlatformAdmin } from "@/utils/types";
 import { HTTPException } from "hono/http-exception";
 
 export async function findOneById(id: string) {
-  const platformAdmin = await platformAdminRepository.findOneById(id);
-
-  if (!platformAdmin) {
-    throw new HTTPException(404, { message: "Platform admin not found" });
+  const account = await accountRepository.findOneById(id);
+  if (!account) {
+    throw new HTTPException(404, {
+      message: "This platform admin does not exist",
+    });
   }
 
-  return platformAdmin;
+  const profile = await platformAdminProfileRepository.findOneById(id);
+  if (!profile) {
+    throw new HTTPException(404, {
+      message: "This platform admin does not exist",
+    });
+  }
+
+  return { ...account, ...profile } as PlatformAdmin;
 }
 
 export async function createOne(data: { email: string; password: string }) {
-  // 如果该邮箱已经注册过了，拒绝再次注册。
-  const existingUser = await userRepository.findOneByEmail(data.email);
-  if (existingUser) {
+  // 如果该邮箱已经注册过了，就拒绝再次注册。
+  const existingAccount = await accountRepository.findOneByEmail(data.email);
+  if (existingAccount) {
     throw new HTTPException(409, {
       message: "This email has already been registered",
     });
@@ -24,15 +33,17 @@ export async function createOne(data: { email: string; password: string }) {
   // 密码加盐。
   const passwordHash = await Bun.password.hash(data.password);
 
-  // 创建用户。
-  const user = await userRepository.insertOne({
+  // 创建账户。
+  const account = await accountRepository.createOne({
     role: "platform_admin",
     email: data.email,
     passwordHash,
   });
 
-  // 创建平台管理员。
-  await platformAdminRepository.insertOne({ id: user.id });
+  // 创建资料。
+  const profile = await platformAdminProfileRepository.createOne({
+    id: account.id,
+  });
 
-  return { id: user.id, role: user.role, email: user.email };
+  return { ...account, ...profile } as PlatformAdmin;
 }

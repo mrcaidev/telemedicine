@@ -1,4 +1,4 @@
-import { emailSchema, passwordSchema, uuidSchema } from "@/common/schema";
+import { emailSchema, idSchema, passwordSchema } from "@/common/schema";
 import { validator } from "@/middleware/validator";
 import * as platformAdminService from "@/services/platform-admin";
 import { Hono } from "hono";
@@ -9,7 +9,8 @@ export const platformAdminController = new Hono();
 
 platformAdminController.get(
   "/:id",
-  validator("param", v.object({ id: uuidSchema })),
+  bearerAuth({ token: Bun.env.SUPER_ADMIN_TOKEN }),
+  validator("param", v.object({ id: idSchema })),
   async (c) => {
     const { id } = c.req.valid("param");
     const platformAdmin = await platformAdminService.findOneById(id);

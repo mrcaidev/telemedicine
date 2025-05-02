@@ -1,17 +1,25 @@
+import * as accountRepository from "@/repositories/account";
 import * as clinicRepository from "@/repositories/clinic";
-import * as clinicAdminRepository from "@/repositories/clinic-admin";
-import * as userRepository from "@/repositories/user";
-import type { ClinicAdmin, WithFull } from "@/utils/types";
+import * as clinicAdminProfileRepository from "@/repositories/clinic-admin-profile";
+import type { Account, ClinicAdmin } from "@/utils/types";
 import { HTTPException } from "hono/http-exception";
 
 export async function findOneById(id: string) {
-  const clinicAdmin = await clinicAdminRepository.findOneById(id);
-
-  if (!clinicAdmin) {
-    throw new HTTPException(404, { message: "Clinic admin not found" });
+  const account = await accountRepository.findOneById(id);
+  if (!account) {
+    throw new HTTPException(404, {
+      message: "This clinic admin does not exist",
+    });
   }
 
-  return clinicAdmin;
+  const fullProfile = await clinicAdminProfileRepository.findOneFullById(id);
+  if (!fullProfile) {
+    throw new HTTPException(404, {
+      message: "This clinic admin does not exist",
+    });
+  }
+
+  return { ...account, ...fullProfile } as ClinicAdmin;
 }
 
 export async function createOne(
@@ -22,11 +30,11 @@ export async function createOne(
     firstName: string;
     lastName: string;
   },
-  createdBy: string,
+  actor: Account,
 ) {
-  // 如果该邮箱已经注册过了，拒绝再次注册。
-  const existingUser = await userRepository.findOneByEmail(data.email);
-  if (existingUser) {
+  // 如果该邮箱已经注册过了，就拒绝再次注册。
+  const existingAccount = await accountRepository.findOneByEmail(data.email);
+  if (existingAccount) {
     throw new HTTPException(409, {
       message: "This email has already been registered",
     });
@@ -35,34 +43,29 @@ export async function createOne(
   // 密码加盐。
   const passwordHash = await Bun.password.hash(data.password);
 
-  // 检索出诊所。
+  // 查指定的诊所。
   const clinic = await clinicRepository.findOneById(data.clinicId);
   if (!clinic) {
-    throw new HTTPException(404, { message: "Clinic not found" });
+    throw new HTTPException(404, { message: "This clinic does not exist" });
   }
 
-  // 创建用户。
-  const user = await userRepository.insertOne({
+  // 创建账户。
+  const account = await accountRepository.createOne({
     role: "clinic_admin",
     email: data.email,
     passwordHash,
   });
 
-  // 创建诊所管理员。
-  const clinicAdmin = await clinicAdminRepository.insertOne({
-    id: user.id,
+  // 创建资料。
+  const profile = await clinicAdminProfileRepository.createOne({
+    id: account.id,
     firstName: data.firstName,
     lastName: data.lastName,
-    clinic,
-    createdBy,
+    clinicId: data.clinicId,
+    createdBy: actor.id,
   });
 
-  return {
-    id: user.id,
-    role: user.role,
-    email: user.email,
-    clinic,
-    firstName: clinicAdmin.firstName,
-    lastName: clinicAdmin.lastName,
-  } as WithFull<ClinicAdmin>;
+  const { clinicId, ...clinicAdmin } = { ...account, clinic, ...profile };
+
+  return clinicAdmin as ClinicAdmin;
 }

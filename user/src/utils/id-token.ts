@@ -1,4 +1,4 @@
-import { type JWTPayload, createLocalJWKSet, jwtVerify } from "jose";
+import { createLocalJWKSet, jwtVerify } from "jose";
 
 // https://www.googleapis.com/oauth2/v3/certs
 const jwks = createLocalJWKSet({
@@ -22,7 +22,8 @@ const jwks = createLocalJWKSet({
   ],
 });
 
-type GoogleIdTokenPayload = Required<JWTPayload> & {
+type GoogleIdTokenPayload = {
+  sub: string;
   email: string;
   email_verified: boolean;
   name: string | null;
@@ -34,11 +35,7 @@ type GoogleIdTokenPayload = Required<JWTPayload> & {
 export async function verifyGoogleIdToken(idToken: string) {
   const { payload } = await jwtVerify<GoogleIdTokenPayload>(idToken, jwks, {
     issuer: ["https://accounts.google.com", "accounts.google.com"],
-    audience: [
-      Bun.env.GOOGLE_WEB_CLIENT_ID,
-      Bun.env.GOOGLE_ANDROID_CLIENT_ID,
-      Bun.env.GOOGLE_IOS_CLIENT_ID,
-    ],
+    audience: Bun.env.GOOGLE_OAUTH_CLIENT_IDS.split(","),
   });
   return payload;
 }

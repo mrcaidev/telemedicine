@@ -7,8 +7,10 @@ provisioning:
   numPartitions: 3
   replicationFactor: 2
   topics:
-    - name: EmailRequested
     - name: PatientCreated
     - name: PatientUpdated
+    - name: PatientDeleted
     - name: DoctorCreated
-    - name: DoctorCpdated
+    - name: DoctorUpdated
+    - name: DoctorDeleted
+    - name: EmailRequested

@@ -1,4 +1,4 @@
-FROM oven/bun AS build
+FROM oven/bun AS builder
 WORKDIR /code
 COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile
@@ -7,6 +7,6 @@ RUN bun run build
 
 FROM oven/bun:alpine
 WORKDIR /app
-COPY --from=build /code/dist .
+COPY --from=builder /code/dist .
 ENV NODE_ENV=production
 CMD ["bun", "run", "index.js"]

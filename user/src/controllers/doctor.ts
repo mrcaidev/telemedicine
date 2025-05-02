@@ -1,10 +1,9 @@
 import {
   emailSchema,
   firstNameSchema,
-  genderSchema,
+  idSchema,
   lastNameSchema,
   passwordSchema,
-  uuidSchema,
 } from "@/common/schema";
 import { authGuard } from "@/middleware/auth-guard";
 import { validator } from "@/middleware/validator";
@@ -16,7 +15,7 @@ export const doctorController = new Hono();
 
 doctorController.get(
   "/:id",
-  validator("param", v.object({ id: uuidSchema })),
+  validator("param", v.object({ id: idSchema })),
   async (c) => {
     const { id } = c.req.valid("param");
     const doctor = await doctorService.findOneById(id);
@@ -34,13 +33,12 @@ doctorController.post(
       password: passwordSchema,
       firstName: firstNameSchema,
       lastName: lastNameSchema,
-      gender: genderSchema,
     }),
   ),
   async (c) => {
     const data = c.req.valid("json");
-    const userId = c.get("userId");
-    const doctor = await doctorService.createOne(data, userId);
+    const actor = c.get("actor");
+    const doctor = await doctorService.createOne(data, actor);
     return c.json({ code: 0, message: "", data: doctor }, 201);
   },
 );

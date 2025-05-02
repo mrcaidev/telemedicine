@@ -183,7 +183,7 @@ describe("POST /scheduled-emails", () => {
     });
     const res = await POST("/scheduled-emails", {
       subject: "subject",
-      to: ["me@example"],
+      to: ["me@example.com"],
       cc: [],
       bcc: [],
       content: "content",
@@ -196,7 +196,7 @@ describe("POST /scheduled-emails", () => {
     expect(sendSpy).toHaveBeenNthCalledWith(1, {
       subject: "subject",
       from: "Telemedicine <notification@telemedicine.ink>",
-      to: ["me@example"],
+      to: ["me@example.com"],
       cc: [],
       bcc: [],
       text: "content",

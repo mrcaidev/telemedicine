@@ -8,12 +8,12 @@ const kafka = new Kafka({
 });
 console.log("kafka client initialized");
 
-// 初始化 Kafka 生产者。
+// 初始化生产者。
 export const producer = kafka.producer();
 await producer.connect();
 console.log("kafka producer connected");
 
-// 初始化 Kafka 消费者。
+// 初始化消费者。
 export const consumer = kafka.consumer({ groupId: "notification" });
 await consumer.connect();
 console.log("kafka consumer connected");

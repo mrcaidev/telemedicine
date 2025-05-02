@@ -1,18 +1,22 @@
 import { publishDoctorCreatedEvent } from "@/events/producer";
-import * as clinicAdminRepository from "@/repositories/clinic-admin";
-import * as doctorRepository from "@/repositories/doctor";
-import * as userRepository from "@/repositories/user";
-import type { Doctor, Gender, WithFull } from "@/utils/types";
+import * as accountRepository from "@/repositories/account";
+import * as clinicAdminProfileRepository from "@/repositories/clinic-admin-profile";
+import * as doctorProfileRepository from "@/repositories/doctor-profile";
+import type { Account, Doctor } from "@/utils/types";
 import { HTTPException } from "hono/http-exception";
 
 export async function findOneById(id: string) {
-  const doctor = await doctorRepository.findOneById(id);
-
-  if (!doctor) {
-    throw new HTTPException(404, { message: "Doctor not found" });
+  const account = await accountRepository.findOneById(id);
+  if (!account) {
+    throw new HTTPException(404, { message: "This doctor does not exist" });
   }
 
-  return doctor;
+  const fullProfile = await doctorProfileRepository.findOneFullById(id);
+  if (!fullProfile) {
+    throw new HTTPException(404, { message: "This doctor does not exist" });
+  }
+
+  return { ...account, ...fullProfile } as Doctor;
 }
 
 export async function createOne(
@@ -21,13 +25,12 @@ export async function createOne(
     password: string;
     firstName: string;
     lastName: string;
-    gender: Gender;
   },
-  createdBy: string,
+  actor: Account,
 ) {
-  // 如果该邮箱已经注册过了，拒绝再次注册。
-  const existingUser = await userRepository.findOneByEmail(data.email);
-  if (existingUser) {
+  // 如果该邮箱已经注册过了，就拒绝再次注册。
+  const existingAccount = await accountRepository.findOneByEmail(data.email);
+  if (existingAccount) {
     throw new HTTPException(409, {
       message: "This email has already been registered",
     });
@@ -36,44 +39,34 @@ export async function createOne(
   // 密码加盐。
   const passwordHash = await Bun.password.hash(data.password);
 
-  // 医生的诊所继承自创建他的诊所管理员。
-  const clinicAdmin = await clinicAdminRepository.findOneById(createdBy);
-  if (!clinicAdmin) {
-    throw new HTTPException(404, { message: "Clinic admin not found" });
+  // 医生的诊所信息继承自创建他的诊所管理员，也就是继承自当前用户。
+  const clinicAdminFullProfile =
+    await clinicAdminProfileRepository.findOneFullById(actor.id);
+  if (!clinicAdminFullProfile) {
+    throw new HTTPException(404, { message: "This clinic does not exist" });
   }
-  const clinic = clinicAdmin.clinic;
+  const clinic = clinicAdminFullProfile.clinic;
 
-  // 创建用户。
-  const user = await userRepository.insertOne({
+  // 创建账户。
+  const account = await accountRepository.createOne({
     role: "doctor",
     email: data.email,
     passwordHash,
   });
 
-  // 创建医生。
-  const doctor = await doctorRepository.insertOne({
-    id: user.id,
+  // 创建资料。
+  const profile = await doctorProfileRepository.createOne({
+    id: account.id,
     firstName: data.firstName,
     lastName: data.lastName,
-    clinic,
-    createdBy,
+    clinicId: clinic.id,
+    createdBy: actor.id,
   });
 
-  const fullDoctor: WithFull<Doctor> = {
-    id: user.id,
-    email: user.email,
-    role: user.role,
-    clinic,
-    firstName: doctor.firstName,
-    lastName: doctor.lastName,
-    avatarUrl: doctor.avatarUrl,
-    description: doctor.description,
-    gender: doctor.gender,
-    specialties: doctor.specialties,
-  };
+  const { clinicId, ...doctor } = { ...account, clinic, ...profile };
 
   // 发布事件。
-  await publishDoctorCreatedEvent(fullDoctor);
+  await publishDoctorCreatedEvent(doctor);
 
-  return fullDoctor;
+  return doctor as Doctor;
 }

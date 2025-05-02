@@ -1,7 +1,7 @@
 import { sign, verify } from "hono/jwt";
-import type { User } from "./types";
+import type { Account } from "./types";
 
-type Payload = Pick<User, "id" | "role">;
+type Payload = Account;
 
 const JWT_SECRET = Bun.env.JWT_SECRET;
 
@@ -10,6 +10,6 @@ export async function signJwt(payload: Payload) {
 }
 
 export async function verifyJwt(token: string) {
-  const { id, role } = await verify(token, JWT_SECRET);
-  return { id, role } as Payload;
+  const { id, role, email } = await verify(token, JWT_SECRET);
+  return { id, role, email } as Payload;
 }

@@ -1,9 +1,10 @@
-import { SHOULD_REALLY_SEND, resend } from "@/utils/resend";
+import { SHOULD_ACTUALLY_SEND, resend } from "@/utils/resend";
 import type { Email } from "@/utils/types";
 import { HTTPException } from "hono/http-exception";
 
+// 创建定时邮件。
 export async function schedule(email: Email, scheduledAt: string) {
-  if (!SHOULD_REALLY_SEND) {
+  if (!SHOULD_ACTUALLY_SEND) {
     const mockId = crypto.randomUUID();
     console.log(
       `scheduled email ${mockId} at ${scheduledAt}:`,
@@ -29,8 +30,9 @@ export async function schedule(email: Email, scheduledAt: string) {
   return data!.id;
 }
 
+// 更改定时邮件的发送时间。
 export async function reschedule(id: string, scheduledAt: string) {
-  if (!SHOULD_REALLY_SEND) {
+  if (!SHOULD_ACTUALLY_SEND) {
     console.log(`rescheduled email ${id} at ${scheduledAt}`);
     return;
   }
@@ -42,8 +44,9 @@ export async function reschedule(id: string, scheduledAt: string) {
   }
 }
 
+// 取消定时邮件。
 export async function cancel(id: string) {
-  if (!SHOULD_REALLY_SEND) {
+  if (!SHOULD_ACTUALLY_SEND) {
     console.log(`cancelled email ${id}`);
     return;
   }

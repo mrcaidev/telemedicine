@@ -1,8 +1,39 @@
-create type user_role as enum (
+create type account_role as enum (
   'platform_admin',
   'clinic_admin',
   'doctor',
   'patient'
+);
+
+create table accounts (
+  id uuid default gen_random_uuid() primary key,
+  role account_role not null,
+  email text not null,
+  password_hash text default null,
+  created_at timestamptz default now() not null,
+  deleted_at timestamptz default null
+);
+
+create table platform_admin_profiles (
+  id uuid primary key references accounts(id)
+);
+
+create table clinics (
+  id uuid default gen_random_uuid() primary key,
+  name text not null,
+  created_at timestamptz default now() not null,
+  created_by uuid not null references platform_admin_profiles(id),
+  deleted_at timestamptz default null,
+  deleted_by uuid default null references platform_admin_profiles(id)
+);
+
+create table clinic_admin_profiles (
+  id uuid primary key references accounts(id),
+  clinic_id uuid not null references clinics(id),
+  first_name text not null,
+  last_name text not null,
+  created_by uuid not null references platform_admin_profiles(id),
+  deleted_by uuid default null references platform_admin_profiles(id)
 );
 
 create type gender as enum (
@@ -10,52 +41,21 @@ create type gender as enum (
   'female'
 );
 
-create table users (
-  id uuid default gen_random_uuid() primary key,
-  role user_role not null,
-  email text not null,
-  password_hash text default null,
-  created_at timestamptz default now() not null,
-  deleted_at timestamptz default null
-);
-
-create table platform_admins (
-  id uuid primary key references users(id)
-);
-
-create table clinics (
-  id uuid default gen_random_uuid() primary key,
-  name text not null,
-  created_at timestamptz default now() not null,
-  created_by uuid not null references platform_admins(id),
-  deleted_at timestamptz default null,
-  deleted_by uuid default null references platform_admins(id)
-);
-
-create table clinic_admins (
-  id uuid primary key references users(id),
-  clinic_id uuid not null references clinics(id),
-  first_name text not null,
-  last_name text not null,
-  created_by uuid not null references platform_admins(id),
-  deleted_by uuid default null references platform_admins(id)
-);
-
-create table doctors (
-  id uuid primary key references users(id),
+create table doctor_profiles (
+  id uuid primary key references accounts(id),
   clinic_id uuid not null references clinics(id),
   first_name text not null,
   last_name text not null,
   avatar_url text default null,
-  gender gender not null,
+  gender gender default 'male' not null,
   description text default '' not null,
   specialties text[] default '{}' not null,
-  created_by uuid not null references clinic_admins(id),
-  deleted_by uuid default null references clinic_admins(id)
+  created_by uuid not null references clinic_admin_profiles(id),
+  deleted_by uuid default null references clinic_admin_profiles(id)
 );
 
-create table patients (
-  id uuid primary key references users(id),
+create table patient_profiles (
+  id uuid primary key references accounts(id),
   nickname text default null,
   avatar_url text default null,
   gender gender default null,
@@ -71,7 +71,7 @@ create table otp_verifications (
 );
 
 create table google_identities (
-  id uuid primary key references patients(id),
+  id uuid primary key references patient_profiles(id),
   google_id text not null unique,
   linked_at timestamptz default now() not null
-)
+);

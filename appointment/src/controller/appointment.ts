@@ -1,4 +1,4 @@
-import { uuidSchema } from "@/common/schema";
+import { idSchema, remarkSchema } from "@/common/schema";
 import { authGuard } from "@/middleware/auth-guard";
 import { validator } from "@/middleware/validator";
 import * as appointmentService from "@/services/appointment";
@@ -16,7 +16,7 @@ appointmentController.get(
       sortBy: v.optional(
         v.union(
           [v.literal("startAt"), v.literal("endAt")],
-          "Unsupported sortBy value",
+          "sortBy should be either 'startAt' or 'endAt'",
         ),
         "endAt",
       ),
@@ -31,28 +31,26 @@ appointmentController.get(
         v.pipe(
           v.string(),
           v.transform(Number),
-          v.number("Limit should be a integer between 1 and 100"),
-          v.integer("Limit should be a integer between 1 and 100"),
-          v.minValue(1, "Limit should be a integer between 1 and 100"),
-          v.maxValue(100, "Limit should be a integer between 1 and 100"),
+          v.number("limit should be an integer between 1 and 100"),
+          v.integer("limit should be an integer between 1 and 100"),
+          v.minValue(1, "limit should be an integer between 1 and 100"),
+          v.maxValue(100, "limit should be an integer between 1 and 100"),
         ),
         "10",
       ),
       cursor: v.optional(
-        v.nullable(
-          v.pipe(
-            v.string(),
-            v.isoTimestamp("Cursor should be a valid ISO timestamp"),
-          ),
+        v.pipe(
+          v.string(),
+          v.isoTimestamp("cursor should be an ISO 8601 timestamp"),
         ),
-        null,
+        new Date().toISOString(),
       ),
     }),
   ),
   async (c) => {
-    const options = c.req.valid("query");
-    const user = { id: c.get("userId"), role: c.get("userRole") };
-    const page = await appointmentService.findAll(options, user);
+    const query = c.req.valid("query");
+    const actor = c.get("actor");
+    const page = await appointmentService.findAll(query, actor);
     return c.json({ code: 0, message: "", data: page });
   },
 );
@@ -60,11 +58,11 @@ appointmentController.get(
 appointmentController.get(
   "/:id",
   authGuard(["patient", "doctor"]),
-  validator("param", v.object({ id: uuidSchema })),
+  validator("param", v.object({ id: idSchema })),
   async (c) => {
     const { id } = c.req.valid("param");
-    const userId = c.get("userId");
-    const appointment = await appointmentService.findOneById(id, userId);
+    const actor = c.get("actor");
+    const appointment = await appointmentService.findOneById(id, actor);
     return c.json({ code: 0, message: "", data: appointment });
   },
 );
@@ -74,21 +72,12 @@ appointmentController.post(
   authGuard(["patient"]),
   validator(
     "json",
-    v.object({
-      availabilityId: uuidSchema,
-      remark: v.pipe(
-        v.string(),
-        v.maxLength(200, "Remark should be no more than 200 characters"),
-      ),
-    }),
+    v.object({ availabilityId: idSchema, remark: remarkSchema }),
   ),
   async (c) => {
-    const { availabilityId, remark } = c.req.valid("json");
-    const appointment = await appointmentService.createOne(
-      availabilityId,
-      remark,
-      c.get("userId"),
-    );
+    const data = c.req.valid("json");
+    const actor = c.get("actor");
+    const appointment = await appointmentService.createOne(data, actor);
     return c.json({ code: 0, message: "", data: appointment }, 201);
   },
 );
@@ -96,11 +85,11 @@ appointmentController.post(
 appointmentController.post(
   "/:id/cancel",
   authGuard(["patient"]),
-  validator("param", v.object({ id: uuidSchema })),
+  validator("param", v.object({ id: idSchema })),
   async (c) => {
     const { id } = c.req.valid("param");
-    const userId = c.get("userId");
-    const appointment = await appointmentService.cancelOneById(id, userId);
+    const actor = c.get("actor");
+    const appointment = await appointmentService.cancelOneById(id, actor);
     return c.json({ code: 0, message: "", data: appointment });
   },
 );
@@ -108,13 +97,13 @@ appointmentController.post(
 appointmentController.post(
   "/:id/request-reschedule",
   authGuard(["doctor"]),
-  validator("param", v.object({ id: uuidSchema })),
+  validator("param", v.object({ id: idSchema })),
   async (c) => {
     const { id } = c.req.valid("param");
-    const userId = c.get("userId");
+    const actor = c.get("actor");
     const appointment = await appointmentService.requestRescheduleOneById(
       id,
-      userId,
+      actor,
     );
     return c.json({ code: 0, message: "", data: appointment });
   },

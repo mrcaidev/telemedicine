@@ -16,6 +16,6 @@ export async function findOneById(id: string) {
   return snakeToCamelJson(row) as Doctor;
 }
 
-export async function insertOne(data: Doctor) {
+export async function createOne(data: Doctor) {
   await sql`insert into doctors ${sql(camelToSnakeJson(data))}`;
 }
