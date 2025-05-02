@@ -67,6 +67,9 @@ const mockPatient: Patient = {
 };
 
 export const mockData = {
+  superAdminAuthHeaders: {
+    Authorization: `Bearer ${Bun.env.SUPER_ADMIN_TOKEN}`,
+  },
   platformAdmin: mockPlatformAdmin,
   platformAdminAuthHeaders: {
     "X-User-Id": mockPlatformAdmin.id,
