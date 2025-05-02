@@ -4,6 +4,8 @@ import { sql } from "bun";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { isValiError } from "valibot";
+import { appointmentController } from "./controller/appointment";
+import { doctorAvailabilityController } from "./controller/doctor-availability";
 
 const app = new Hono();
 
@@ -17,6 +19,10 @@ app.get("/readyz", async (c) => {
   await sql`select 1`;
   return c.text("ready");
 });
+
+// 注册所有 API。
+app.route("/appointments", appointmentController);
+app.route("/doctor-availabilities", doctorAvailabilityController);
 
 // 集中处理错误。
 app.onError((error, c) => {

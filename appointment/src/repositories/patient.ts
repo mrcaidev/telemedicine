@@ -4,6 +4,20 @@ import { sql } from "bun";
 
 export async function findOneById(id: string) {
   const [row] = await sql`
+    select id, nickname, avatar_url
+    from patients
+    where id = ${id}
+  `;
+
+  if (!row) {
+    return null;
+  }
+
+  return snakeToCamelJson(row) as Patient;
+}
+
+export async function findOneWithEmailById(id: string) {
+  const [row] = await sql`
     select id, email, nickname, avatar_url
     from patients
     where id = ${id}
@@ -16,6 +30,6 @@ export async function findOneById(id: string) {
   return snakeToCamelJson(row) as Patient & { email: string };
 }
 
-export async function insertOne(data: Patient & { email: string }) {
+export async function createOne(data: Patient & { email: string }) {
   await sql`insert into patients ${sql(camelToSnakeJson(data))}`;
 }
