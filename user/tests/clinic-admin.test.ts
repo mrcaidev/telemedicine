@@ -27,7 +27,7 @@ describe("GET /clinic-admins/{id}", () => {
     expect(json).toEqual(errorResponseTemplate);
   });
 
-  it("returns 403 if user is a clinic admin", async () => {
+  it("returns 403 if user is clinic admin", async () => {
     const res = await GET(`/clinic-admins/${mockData.clinicAdmin.id}`, {
       headers: mockData.clinicAdminAuthHeaders,
     });
@@ -36,7 +36,7 @@ describe("GET /clinic-admins/{id}", () => {
     expect(json).toEqual(errorResponseTemplate);
   });
 
-  it("returns 403 if user is a doctor", async () => {
+  it("returns 403 if user is doctor", async () => {
     const res = await GET(`/clinic-admins/${mockData.clinicAdmin.id}`, {
       headers: mockData.doctorAuthHeaders,
     });
@@ -45,7 +45,7 @@ describe("GET /clinic-admins/{id}", () => {
     expect(json).toEqual(errorResponseTemplate);
   });
 
-  it("returns 403 if user is a patient", async () => {
+  it("returns 403 if user is patient", async () => {
     const res = await GET(`/clinic-admins/${mockData.clinicAdmin.id}`, {
       headers: mockData.patientAuthHeaders,
     });

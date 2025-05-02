@@ -1,7 +1,6 @@
 import {
   emailSchema,
   firstNameSchema,
-  genderSchema,
   idSchema,
   lastNameSchema,
   passwordSchema,
@@ -34,7 +33,6 @@ doctorController.post(
       password: passwordSchema,
       firstName: firstNameSchema,
       lastName: lastNameSchema,
-      gender: genderSchema,
     }),
   ),
   async (c) => {
