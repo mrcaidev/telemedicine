@@ -4,6 +4,7 @@ import {
   otpSchema,
   passwordSchema,
 } from "@/common/schema";
+import { authGuard } from "@/middleware/auth-guard";
 import { validator } from "@/middleware/validator";
 import * as patientService from "@/services/patient";
 import { Hono } from "hono";
@@ -13,6 +14,7 @@ export const patientController = new Hono();
 
 patientController.get(
   "/:id",
+  authGuard(["doctor"]),
   validator("param", v.object({ id: idSchema })),
   async (c) => {
     const { id } = c.req.valid("param");
