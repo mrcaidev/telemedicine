@@ -15,7 +15,7 @@ export const clinicAdminController = new Hono();
 
 clinicAdminController.get(
   "/:id",
-  authGuard(["platform_admin", "clinic_admin"]),
+  authGuard(["platform_admin"]),
   validator("param", v.object({ id: idSchema })),
   async (c) => {
     const { id } = c.req.valid("param");
