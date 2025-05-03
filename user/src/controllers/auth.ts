@@ -25,3 +25,9 @@ authController.post(
     return c.json({ code: 0, message: "", data: userWithToken }, 201);
   },
 );
+
+authController.post("/logout", authGuard(), async (c) => {
+  const actor = c.get("actor");
+  await authService.logOut(actor);
+  return c.json({ code: 0, message: "", data: null });
+});

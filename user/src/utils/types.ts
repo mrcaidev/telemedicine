@@ -86,4 +86,17 @@ export type GoogleIdentity = {
   googleId: string;
 };
 
+export type AuditLog = {
+  id: string;
+  userId: string;
+  action:
+    | "register_with_email_and_password"
+    | "log_in_with_email_and_password"
+    | "register_with_google"
+    | "link_to_google"
+    | "log_in_with_google"
+    | "log_out";
+  createdAt: string;
+};
+
 export type PartiallyRequired<T, K extends keyof T> = Pick<T, K> & Partial<T>;

@@ -1,4 +1,5 @@
 import * as accountRepository from "@/repositories/account";
+import * as auditLogRepository from "@/repositories/audit-log";
 import * as platformAdminProfileRepository from "@/repositories/platform-admin-profile";
 import type { PlatformAdmin } from "@/utils/types";
 import { HTTPException } from "hono/http-exception";
@@ -43,6 +44,12 @@ export async function createOne(data: { email: string; password: string }) {
   // 创建资料。
   const profile = await platformAdminProfileRepository.createOne({
     id: account.id,
+  });
+
+  // 记录到审计日志。
+  await auditLogRepository.createOne({
+    userId: account.id,
+    action: "register_with_email_and_password",
   });
 
   return { ...account, ...profile } as PlatformAdmin;

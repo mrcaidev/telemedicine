@@ -1,5 +1,6 @@
 import { publishDoctorCreatedEvent } from "@/events/producer";
 import * as accountRepository from "@/repositories/account";
+import * as auditLogRepository from "@/repositories/audit-log";
 import * as clinicAdminProfileRepository from "@/repositories/clinic-admin-profile";
 import * as doctorProfileRepository from "@/repositories/doctor-profile";
 import type { Account, Doctor } from "@/utils/types";
@@ -67,6 +68,12 @@ export async function createOne(
 
   // 发布事件。
   await publishDoctorCreatedEvent(doctor);
+
+  // 记录到审计日志。
+  await auditLogRepository.createOne({
+    userId: account.id,
+    action: "register_with_email_and_password",
+  });
 
   return doctor as Doctor;
 }

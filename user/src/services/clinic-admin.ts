@@ -1,4 +1,5 @@
 import * as accountRepository from "@/repositories/account";
+import * as auditLogRepository from "@/repositories/audit-log";
 import * as clinicRepository from "@/repositories/clinic";
 import * as clinicAdminProfileRepository from "@/repositories/clinic-admin-profile";
 import type { Account, ClinicAdmin } from "@/utils/types";
@@ -63,6 +64,12 @@ export async function createOne(
     lastName: data.lastName,
     clinicId: data.clinicId,
     createdBy: actor.id,
+  });
+
+  // 记录到审计日志。
+  await auditLogRepository.createOne({
+    userId: account.id,
+    action: "register_with_email_and_password",
   });
 
   const { clinicId, ...clinicAdmin } = { ...account, clinic, ...profile };

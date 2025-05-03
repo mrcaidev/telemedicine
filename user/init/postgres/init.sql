@@ -75,3 +75,10 @@ create table google_identities (
   google_id text not null unique,
   linked_at timestamptz default now() not null
 );
+
+create table audit_logs (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid not null references accounts(id),
+  action text not null,
+  created_at timestamptz default now() not null
+);

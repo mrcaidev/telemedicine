@@ -32,6 +32,7 @@ afterAll(async () => {
   console.log("kafka producer disconnected");
 
   await sql`
+    delete from audit_logs;
     delete from otp_verifications;
     delete from google_identities;
     delete from patient_profiles;

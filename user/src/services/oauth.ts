@@ -1,5 +1,6 @@
 import { publishPatientCreatedEvent } from "@/events/producer";
 import * as accountRepository from "@/repositories/account";
+import * as auditLogRepository from "@/repositories/audit-log";
 import * as googleIdentityRepository from "@/repositories/google-identity";
 import * as patientProfileRepository from "@/repositories/patient-profile";
 import { verifyGoogleIdToken } from "@/utils/id-token";
@@ -30,6 +31,11 @@ export async function logInWithGoogle(idToken: string) {
       throw new HTTPException(404, { message: "This patient does not exist" });
     }
 
+    await auditLogRepository.createOne({
+      userId: account.id,
+      action: "log_in_with_google",
+    });
+
     const token = await signJwt(account);
 
     return { ...account, ...profile, token } as Patient & { token: string };
@@ -48,6 +54,12 @@ export async function logInWithGoogle(idToken: string) {
       googleId: idTokenPayload.sub,
     });
 
+    // 记录到审计日志。
+    await auditLogRepository.createOne({
+      userId: existingAccount.id,
+      action: "link_to_google",
+    });
+
     const profile = await patientProfileRepository.findOneById(
       existingAccount.id,
     );
@@ -56,6 +68,12 @@ export async function logInWithGoogle(idToken: string) {
     }
 
     const token = await signJwt(existingAccount);
+
+    // 记录到审计日志。
+    await auditLogRepository.createOne({
+      userId: existingAccount.id,
+      action: "log_in_with_google",
+    });
 
     return { ...existingAccount, ...profile, token } as Patient & {
       token: string;
@@ -81,12 +99,24 @@ export async function logInWithGoogle(idToken: string) {
     googleId: idTokenPayload.sub,
   });
 
+  // 记录到审计日志。
+  await auditLogRepository.createOne({
+    userId: account.id,
+    action: "register_with_google",
+  });
+
   const patient = { ...account, ...profile };
 
   // 发布事件。
   await publishPatientCreatedEvent(patient);
 
   const token = await signJwt(account);
+
+  // 记录到审计日志。
+  await auditLogRepository.createOne({
+    userId: account.id,
+    action: "log_in_with_google",
+  });
 
   return { ...patient, token } as Patient & { token: string };
 }
