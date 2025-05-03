@@ -81,6 +81,13 @@ export async function logInWithEmailAndPassword(
   return { ...account, ...fullProfile, token } as User & { token: string };
 }
 
+export async function logOut(actor: Account) {
+  // 记录到审计日志。
+  await auditLogRepository.createOne({ userId: actor.id, action: "log_out" });
+
+  // TODO：未来可以做 active token 管理。
+}
+
 async function findFullProfileByAccount(
   account: Account,
 ): Promise<UserFullProfile | null> {

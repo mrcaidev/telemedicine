@@ -181,3 +181,23 @@ describe("POST /auth/login", () => {
     expect(json).toEqual(errorResponseTemplate);
   });
 });
+
+describe("POST /auth/logout", () => {
+  it("returns 200 if ok", async () => {
+    const res = await POST(
+      "/auth/logout",
+      {},
+      { headers: mockData.platformAdminAuthHeaders },
+    );
+    const json = await res.json();
+    expect(res.status).toEqual(200);
+    expect(json).toEqual({ ...successResponseTemplate, data: null });
+  });
+
+  it("returns 401 if user has not logged in", async () => {
+    const res = await POST("/auth/logout", {});
+    const json = await res.json();
+    expect(res.status).toEqual(401);
+    expect(json).toEqual(errorResponseTemplate);
+  });
+});
