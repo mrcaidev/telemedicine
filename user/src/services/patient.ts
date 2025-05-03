@@ -1,5 +1,6 @@
 import { publishPatientCreatedEvent } from "@/events/producer";
 import * as accountRepository from "@/repositories/account";
+import * as auditLogRepository from "@/repositories/audit-log";
 import * as patientProfileRepository from "@/repositories/patient-profile";
 import * as otpVerificationService from "@/services/otp-verification";
 import { signJwt } from "@/utils/jwt";
@@ -49,6 +50,12 @@ export async function createOne(data: {
   // 创建资料。
   const profile = await patientProfileRepository.createOne({ id: account.id });
 
+  // 记录到审计日志。
+  await auditLogRepository.createOne({
+    userId: account.id,
+    action: "register_with_email_and_password",
+  });
+
   const patient = { ...account, ...profile };
 
   // 发布事件。
@@ -56,6 +63,12 @@ export async function createOne(data: {
 
   // 颁发 JWT。
   const token = await signJwt(account);
+
+  // 记录到审计日志。
+  await auditLogRepository.createOne({
+    userId: account.id,
+    action: "log_in_with_email_and_password",
+  });
 
   return { ...patient, token } as Patient & { token: string };
 }

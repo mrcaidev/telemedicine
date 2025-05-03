@@ -1,4 +1,5 @@
 import * as accountRepository from "@/repositories/account";
+import * as auditLogRepository from "@/repositories/audit-log";
 import * as clinicAdminProfileRepository from "@/repositories/clinic-admin-profile";
 import * as doctorProfileRepository from "@/repositories/doctor-profile";
 import * as patientProfileRepository from "@/repositories/patient-profile";
@@ -70,6 +71,12 @@ export async function logInWithEmailAndPassword(
 
   // 颁发 JWT。
   const token = await signJwt(account);
+
+  // 记录到审计日志。
+  await auditLogRepository.createOne({
+    userId: account.id,
+    action: "log_in_with_email_and_password",
+  });
 
   return { ...account, ...fullProfile, token } as User & { token: string };
 }
