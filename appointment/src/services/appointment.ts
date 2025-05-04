@@ -176,6 +176,13 @@ export async function requestRescheduleOneById(id: string, actor: Actor) {
     throw new HTTPException(403, { message: "Permission denied" });
   }
 
+  // 只有正常状态的预约才能请求重排。
+  if (appointment.status !== "normal") {
+    throw new HTTPException(409, {
+      message: "This appointment cannot be resheduled",
+    });
+  }
+
   // 如果已经开始了，就不允许重排。
   if (dayjs().isAfter(appointment.startAt)) {
     throw new HTTPException(422, {
