@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
 import { Muted } from "@/components/ui/typography";
+import type { ChatEvaluation } from "@/utils/types";
+import { LinearGradient } from "expo-linear-gradient";
 import { Link, useLocalSearchParams } from "expo-router";
 import {
   BotIcon,
@@ -112,6 +114,11 @@ function ChatInterface() {
           <AssistantMessage key={index}>{message.content}</AssistantMessage>
         ),
       )}
+      {session.evaluation && (
+        <View className="py-4">
+          <EvaluationCard evaluation={session.evaluation} />
+        </View>
+      )}
     </ScrollView>
   );
 }
@@ -174,4 +181,40 @@ function SendMessageForm() {
       </View>
     </View>
   );
+}
+
+function EvaluationCard({ evaluation }: { evaluation: ChatEvaluation }) {
+  return (
+    <LinearGradient
+      colors={["#f0fdfa", "#cbfbf1"]}
+      className="gap-3 p-5 rounded-md border border-teal-100/50 overflow-hidden"
+    >
+      <Text className="text-lg font-bold">🩺&nbsp;&nbsp;Evaluation Result</Text>
+      <View className="gap-1">
+        <Text className="font-medium">💊&nbsp;&nbsp;Symptom</Text>
+        <Text>{evaluation.symptom}</Text>
+      </View>
+      <View className="gap-1">
+        <Text className="font-medium">🚨&nbsp;&nbsp;Urgency</Text>
+        <Text>{translateUrgency(evaluation.urgency)}</Text>
+      </View>
+      <View className="gap-1">
+        <Text className="font-medium">🔎&nbsp;&nbsp;Suggestion</Text>
+        <Text className="leading-snug">{evaluation.suggestion}</Text>
+      </View>
+    </LinearGradient>
+  );
+}
+
+function translateUrgency(urgency: number) {
+  switch (urgency) {
+    case 1:
+      return "Critical";
+    case 2:
+      return "Urgent";
+    case 3:
+      return "Minor";
+    default:
+      return "Unknown";
+  }
 }
