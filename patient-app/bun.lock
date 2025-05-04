@@ -11,6 +11,7 @@
         "@rn-primitives/alert-dialog": "^1.1.0",
         "@rn-primitives/avatar": "^1.1.0",
         "@rn-primitives/checkbox": "^1.1.0",
+        "@rn-primitives/dialog": "^1.1.0",
         "@rn-primitives/label": "^1.1.0",
         "@rn-primitives/portal": "^1.1.0",
         "@rn-primitives/separator": "^1.1.0",
@@ -558,6 +559,8 @@
     "@rn-primitives/avatar": ["@rn-primitives/avatar@1.1.0", "", { "dependencies": { "@rn-primitives/hooks": "1.1.0", "@rn-primitives/slot": "1.1.0", "@rn-primitives/types": "1.1.0" }, "peerDependencies": { "react": "*", "react-native": "*", "react-native-web": "*" }, "optionalPeers": ["react-native", "react-native-web"] }, "sha512-GqhsQHeY7OP9oe3MZkl1Z0IbhIiuQX4+FxafoRK/Aes2m5386nMGK0NBaZBJy06WnFQBN52C8yq+LYv27sA86A=="],
 
     "@rn-primitives/checkbox": ["@rn-primitives/checkbox@1.1.0", "", { "dependencies": { "@radix-ui/react-checkbox": "^1.1.1", "@rn-primitives/hooks": "1.1.0", "@rn-primitives/slot": "1.1.0", "@rn-primitives/types": "1.1.0" }, "peerDependencies": { "react": "*", "react-native": "*", "react-native-web": "*" }, "optionalPeers": ["react-native", "react-native-web"] }, "sha512-drIWeB41LOkkGDHUKM++7e5vuODB6KeX7qJR3JfYoF0FDRGMG23f3cCo6cQy6DNgsjBctGPpTojQQxuLjuuTWg=="],
+
+    "@rn-primitives/dialog": ["@rn-primitives/dialog@1.1.0", "", { "dependencies": { "@radix-ui/react-dialog": "^1.1.1", "@rn-primitives/hooks": "1.1.0", "@rn-primitives/slot": "1.1.0", "@rn-primitives/types": "1.1.0" }, "peerDependencies": { "@rn-primitives/portal": "*", "react": "*", "react-native": "*", "react-native-web": "*" }, "optionalPeers": ["react-native", "react-native-web"] }, "sha512-ZEq0eayERy9Nwys9GFAM2Q1UHu/JOBuSSCSLXUXtAn26SAdFfKn2KAWZwCxQXGW2Kph9GV9B/Vm6X5vCe8Ct2w=="],
 
     "@rn-primitives/hooks": ["@rn-primitives/hooks@1.1.0", "", { "dependencies": { "@rn-primitives/types": "1.1.0" }, "peerDependencies": { "react": "*", "react-native": "*", "react-native-web": "*" }, "optionalPeers": ["react-native", "react-native-web"] }, "sha512-+WP4i395UDXZueL6PE0PiyLgheD4EbZ0ONgVaHjbrWjGKalfXuCyVNeaN79y3Aw9sY+SYQm7P9RckBAgi0C5xQ=="],
 
