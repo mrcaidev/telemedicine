@@ -114,7 +114,7 @@ export async function requestRescheduleOneById(id: string, actor: Actor) {
   // 只有正常状态的预约才能请求重排。
   if (appointment.status !== "normal") {
     throw new HTTPException(409, {
-      message: "This appointment cannot be resheduled",
+      message: "This appointment cannot be rescheduled",
     });
   }
 
