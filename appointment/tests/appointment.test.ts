@@ -7,6 +7,8 @@ import {
   mock,
   spyOn,
 } from "bun:test";
+import { consumeAppointmentBookedEvent } from "@/events/consumer";
+import * as producer from "@/events/producer";
 import { requestNotification } from "@/utils/request";
 import {
   appointmentTemplate,
@@ -16,6 +18,10 @@ import {
 } from "./utils/data";
 import { GET, POST } from "./utils/request";
 
+const publishAppointmentBookedEventSpy = spyOn(
+  producer,
+  "publishAppointmentBookedEvent",
+).mockImplementation(consumeAppointmentBookedEvent);
 const requestNotificationPostSpy = spyOn(requestNotification, "post");
 
 afterEach(() => {
@@ -220,6 +226,7 @@ describe("POST /appointments", () => {
       ...successResponseTemplate,
       data: { ...appointmentTemplate, remark: "" },
     });
+    expect(publishAppointmentBookedEventSpy).toHaveBeenCalledTimes(1);
     expect(requestNotificationPostSpy).toHaveBeenCalledTimes(1);
     expect(requestNotificationPostSpy).toHaveBeenNthCalledWith(
       1,
