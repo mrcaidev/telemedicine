@@ -77,20 +77,8 @@ appointmentController.post(
   async (c) => {
     const data = c.req.valid("json");
     const actor = c.get("actor");
-    const appointment = await appointmentService.createOne(data, actor);
+    const appointment = await appointmentService.bookOne(data, actor);
     return c.json({ code: 0, message: "", data: appointment }, 201);
-  },
-);
-
-appointmentController.post(
-  "/:id/cancel",
-  authGuard(["patient"]),
-  validator("param", v.object({ id: idSchema })),
-  async (c) => {
-    const { id } = c.req.valid("param");
-    const actor = c.get("actor");
-    const appointment = await appointmentService.cancelOneById(id, actor);
-    return c.json({ code: 0, message: "", data: appointment });
   },
 );
 
@@ -105,6 +93,18 @@ appointmentController.post(
       id,
       actor,
     );
+    return c.json({ code: 0, message: "", data: appointment });
+  },
+);
+
+appointmentController.post(
+  "/:id/cancel",
+  authGuard(["patient"]),
+  validator("param", v.object({ id: idSchema })),
+  async (c) => {
+    const { id } = c.req.valid("param");
+    const actor = c.get("actor");
+    const appointment = await appointmentService.cancelOneById(id, actor);
     return c.json({ code: 0, message: "", data: appointment });
   },
 );
