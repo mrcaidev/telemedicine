@@ -1,4 +1,4 @@
-import { useSessionQuery } from "@/api/session";
+import { useSendMessageMutation, useSessionQuery } from "@/api/session";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
@@ -12,7 +12,7 @@ import {
   HistoryIcon,
   RotateCwIcon,
 } from "lucide-react-native";
-import { type PropsWithChildren, useRef } from "react";
+import { type PropsWithChildren, useRef, useState } from "react";
 import { ScrollView, View } from "react-native";
 
 export default function ChatSessionPage() {
@@ -35,12 +35,7 @@ export default function ChatSessionPage() {
         </View>
       </View>
       <ChatInterface />
-      <View className="flex-row items-center gap-2 px-6 pb-2">
-        <Input placeholder="I don't feel well today..." className="grow" />
-        <Button variant="secondary" size="icon">
-          <Icon as={CornerDownLeftIcon} size={18} />
-        </Button>
-      </View>
+      <SendMessageForm />
     </View>
   );
 }
@@ -138,6 +133,44 @@ function AssistantMessage({ children }: PropsWithChildren) {
         <Text className="text-secondary-foreground leading-snug">
           {children}
         </Text>
+      </View>
+    </View>
+  );
+}
+
+function SendMessageForm() {
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const { mutate, isPending } = useSendMessageMutation(id);
+
+  const [content, setContent] = useState("");
+
+  const sendMessage = () => {
+    mutate({ content });
+    setContent("");
+  };
+
+  return (
+    <View className="gap-2">
+      {isPending && (
+        <View className="self-center">
+          <Muted className="text-sm">Assistant is thinking...</Muted>
+        </View>
+      )}
+      <View className="flex-row items-center gap-2 px-6 pb-2">
+        <Input
+          value={content}
+          onChangeText={setContent}
+          placeholder="Ask the assistant..."
+          className="grow"
+        />
+        <Button
+          variant="secondary"
+          size="icon"
+          onPress={sendMessage}
+          disabled={!content || isPending}
+        >
+          <Icon as={CornerDownLeftIcon} size={18} />
+        </Button>
       </View>
     </View>
   );
