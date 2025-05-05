@@ -9,7 +9,7 @@
   "githubUrl": "https://github.com/mrcaidev/telemedicine",
   "orientation": "portrait",
   "userInterfaceStyle": "light",
-  "backgroundColor": "#f0fdfa",
+  "backgroundColor": "#ffffff",
   "primaryColor": "#009689",
   "icon": "src/assets/images/icon.png",
   "scheme": "telemedicine",
@@ -24,9 +24,15 @@
     [
       "expo-splash-screen",
       {
-        "backgroundColor": "#f0fdfa",
+        "backgroundColor": "#ffffff",
         "image": "src/assets/images/splash.png",
         "imageWidth": 200
+      }
+    ],
+    [
+      "@react-native-google-signin/google-signin",
+      {
+        "iosUrlScheme": "com.googleusercontent.apps.234782665622-ml21883i8km05ls3t6eschrapvqb6rge"
       }
     ]
   ],
@@ -36,11 +42,14 @@
     "package": "ink.telemedicine.patient",
     "adaptiveIcon": {
       "foregroundImage": "src/assets/images/adaptive-icon.png",
-      "backgroundColor": "#f0fdfa"
+      "backgroundColor": "#ffffff"
     }
   },
   "ios": {
-    "bundleIdentifier": "ink.telemedicine.patient"
+    "bundleIdentifier": "ink.telemedicine.patient",
+    "config": {
+      "usesNonExemptEncryption": false
+    }
   },
   "experiments": {
     "typedRoutes": true

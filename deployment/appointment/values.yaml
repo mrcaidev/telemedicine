@@ -1,0 +1,13 @@
+image: mrcaidev/telemedicine-appointment
+host: api.localhost
+port: 3000
+livenessProbe: /livez
+readinessProbe: /readyz
+paths:
+  - /appointments
+  - /doctor-availabilities
+minReplicas: 1
+maxReplicas: 2
+secrets:
+  POSTGRES_URL: postgres://dev:dev@appointment-postgres-postgresql:5432/dev
+  KAFKA_BROKERS: kafka:9092

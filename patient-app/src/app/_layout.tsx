@@ -1,13 +1,14 @@
-import { PaperProvider } from "@/providers/paper";
-import { QueryProvider } from "@/providers/query";
+import { QueryProvider } from "@/api/query-provider";
+import "@/global.css";
+import "@/utils/datetime";
+import { PortalHost } from "@rn-primitives/portal";
 import { Slot } from "expo-router";
 
 export default function RootLayout() {
   return (
     <QueryProvider>
-      <PaperProvider>
-        <Slot />
-      </PaperProvider>
+      <Slot />
+      <PortalHost />
     </QueryProvider>
   );
 }

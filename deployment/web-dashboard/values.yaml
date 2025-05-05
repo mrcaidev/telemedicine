@@ -1,0 +1,9 @@
+image: mrcaidev/telemedicine-web-dashboard
+host: dashboard.localhost
+port: 3000
+paths:
+  - /
+minReplicas: 1
+maxReplicas: 2
+secrets:
+  NEXT_PUBLIC_API_BASE_URL: http://api.localhost

@@ -1,0 +1,8 @@
+primary:
+  initdb:
+    scriptsConfigMap: user-postgres-initdb
+
+auth:
+  username: dev
+  password: dev
+  database: dev

@@ -1,33 +1,25 @@
-import { useRouter } from "expo-router";
+import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/icon";
+import { Text } from "@/components/ui/text";
+import { Muted } from "@/components/ui/typography";
+import { useGoBack } from "@/hooks/use-go-back";
+import { ArrowLeftIcon } from "lucide-react-native";
 import { View } from "react-native";
-import { Button, Text } from "react-native-paper";
 
 export default function NotFoundPage() {
-  const router = useRouter();
-
-  const goHome = () => {
-    router.push("/");
-  };
+  const goBack = useGoBack();
 
   return (
-    <View
-      style={{
-        flexGrow: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        padding: 24,
-      }}
-    >
-      <Text style={{ fontSize: 112, fontWeight: "bold" }}>404</Text>
-      <Text style={{ marginBottom: 16, fontSize: 20, fontWeight: "medium" }}>
-        Oops! Page not found
-      </Text>
-      <Text style={{ marginBottom: 24, textAlign: "center" }}>
+    <View className="grow items-center justify-center p-6">
+      <Text className="text-[112px] font-bold">404</Text>
+      <Text className="mb-3 text-2xl font-medium">Oops! Page not found</Text>
+      <Muted className="mb-6 text-center">
         It seems like the page you are looking for does not exist or might have
         been removed.
-      </Text>
-      <Button mode="contained" icon="home" onPress={goHome}>
-        Take me home
+      </Muted>
+      <Button onPress={goBack}>
+        <Icon as={ArrowLeftIcon} />
+        <Text>Go back</Text>
       </Button>
     </View>
   );

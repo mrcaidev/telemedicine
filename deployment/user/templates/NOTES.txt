@@ -1,0 +1,3 @@
+{{- range .Values.paths }}
+- http{{ if hasSuffix "localhost" $.Values.host | not }}s{{ end }}://{{ $.Values.host }}{{ . }}
+{{- end }}
