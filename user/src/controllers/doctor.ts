@@ -14,6 +14,46 @@ import * as v from "valibot";
 export const doctorController = new Hono();
 
 doctorController.get(
+  "/search",
+  validator(
+    "query",
+    v.object({
+      q: v.pipe(
+        v.string(),
+        v.minLength(1, "q should be between 1-50 characters"),
+        v.maxLength(50, "q should be between 1-50 characters"),
+      ),
+      limit: v.optional(
+        v.pipe(
+          v.string(),
+          v.transform(Number),
+          v.number("limit should be an integer between 1-30"),
+          v.integer("limit should be an integer between 1-30"),
+          v.minValue(1, "limit should be an integer between 1-30"),
+          v.maxValue(30, "limit should be an integer between 1-30"),
+        ),
+        "10",
+      ),
+      cursor: v.optional(
+        v.pipe(
+          v.string(),
+          v.transform(Number),
+          v.number("cursor should be a number between 0-1"),
+          v.minValue(0, "cursor should be a number between 0-1"),
+          v.maxValue(1, "cursor should be a number between 0-1"),
+        ),
+        "1",
+      ),
+    }),
+  ),
+  async (c) => {
+    const query = c.req.valid("query");
+    const page = await doctorService.search(query);
+    return c.json({ code: 0, message: "", data: page });
+  },
+);
+
+doctorController.get(
   "/:id",
   validator("param", v.object({ id: idSchema })),
   async (c) => {
