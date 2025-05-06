@@ -4,10 +4,12 @@ from datetime import datetime
 from typing import List
 from uuid import UUID
 from app.model import Evaluation
+import app.config as config
 
 from pymongo import MongoClient
 
-client = MongoClient('mongodb://localhost:27017/',uuidRepresentation='standard')
+MONGO_URL = f"mongodb://{config.MONGO_HOST}:{config.MONGO_PORT}/"
+client = MongoClient(MONGO_URL,uuidRepresentation='standard')
 db = client['smart_assistant']
 collection = db['session']
 

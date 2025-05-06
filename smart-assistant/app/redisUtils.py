@@ -3,9 +3,10 @@ from uuid import UUID
 
 from redis.asyncio import Redis
 from fastapi import HTTPException
+import app.config as config
 
 # 配置 Redis 连接
-REDIS_URL = "redis://localhost:6379"
+REDIS_URL = f"redis://{config.REDIS_HOST}:{config.REDIS_PORT}"
 
 EXPIRE_SECONDS = 60 * 60
 
