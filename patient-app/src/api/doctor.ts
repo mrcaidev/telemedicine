@@ -40,7 +40,7 @@ export function useDoctorSearchQuery(q: string) {
       const params = new URLSearchParams({
         q,
         limit: String(10),
-        ...(cursor && { cursor: String(cursor) }),
+        ...(cursor === null ? {} : { cursor: String(cursor) }),
       });
       return await request.get(`/doctors/search?${params}`);
     },
