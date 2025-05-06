@@ -1,5 +1,9 @@
 import type { Doctor, DoctorAvailability } from "@/utils/types";
-import { useQuery } from "@tanstack/react-query";
+import {
+  type QueryKey,
+  useInfiniteQuery,
+  useQuery,
+} from "@tanstack/react-query";
 import { request } from "./request";
 
 export function useDoctorQuery(id: string) {
@@ -17,5 +21,31 @@ export function useDoctorAvailabilitiesQuery(doctorId: string) {
     queryFn: async () => {
       return await request.get(`/doctor-availabilities/${doctorId}`);
     },
+  });
+}
+
+export function useDoctorSearchQuery(q: string) {
+  return useInfiniteQuery<
+    {
+      doctors: Omit<Doctor, "role" | "email">[];
+      nextCursor: number | null;
+    },
+    Error,
+    Omit<Doctor, "role" | "email">[],
+    QueryKey,
+    number | null
+  >({
+    queryKey: ["doctors", q],
+    queryFn: async ({ pageParam: cursor }) => {
+      const params = new URLSearchParams({
+        q,
+        limit: String(10),
+        ...(cursor && { cursor: String(cursor) }),
+      });
+      return await request.get(`/doctors/search?${params}`);
+    },
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => lastPage.nextCursor,
+    select: (data) => data.pages.flatMap((page) => page.doctors),
   });
 }

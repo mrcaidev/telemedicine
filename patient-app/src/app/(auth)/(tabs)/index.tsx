@@ -8,11 +8,13 @@ import {
 } from "@/components/appointment/highlighted-appointment-card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Icon } from "@/components/ui/icon";
+import { Input } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { Muted } from "@/components/ui/typography";
 import { LinearGradient } from "expo-linear-gradient";
-import { Link } from "expo-router";
-import { ArrowRightIcon, BotIcon } from "lucide-react-native";
+import { Link, useRouter } from "expo-router";
+import { ArrowRightIcon, BotIcon, SearchIcon } from "lucide-react-native";
+import { useState } from "react";
 import { ScrollView, View } from "react-native";
 
 export default function HomePage() {
@@ -28,6 +30,8 @@ export default function HomePage() {
       <UpcomingAppointment />
       <Text className="mt-4 mb-3 text-lg font-semibold">Not Feeling Well?</Text>
       <ChatPageLink />
+      <Text className="mt-4 mb-3 text-lg font-semibold">Find A Doctor</Text>
+      <SearchDoctorInput />
     </ScrollView>
   );
 }
@@ -115,5 +119,33 @@ function ChatPageLink() {
         <Icon as={ArrowRightIcon} className="text-primary-foreground" />
       </LinearGradient>
     </Link>
+  );
+}
+
+function SearchDoctorInput() {
+  const [q, setQ] = useState("");
+
+  const router = useRouter();
+
+  const search = () => {
+    if (q.length > 0) {
+      router.push(`/doctor/search?q=${q}`);
+    }
+  };
+
+  return (
+    <View>
+      <Input
+        value={q}
+        onChangeText={setQ}
+        placeholder="Search by name, specialty, keyword..."
+        inputMode="search"
+        onSubmitEditing={search}
+        className="pl-10"
+      />
+      <View className="absolute left-3 inset-y-0 items-center justify-center">
+        <Icon as={SearchIcon} className="text-muted-foreground" />
+      </View>
+    </View>
   );
 }
