@@ -164,3 +164,146 @@ describe("POST /doctors", () => {
     expect(publishDoctorCreatedEventSpy).toHaveBeenCalledTimes(0);
   });
 });
+
+describe("GET /doctors/search", () => {
+  it("returns two doctors if searching 'surgery'", async () => {
+    const res = await GET("/doctors/search?q=surgery");
+    const json = await res.json();
+    expect(res.status).toEqual(200);
+    expect(json).toEqual({
+      ...successResponseTemplate,
+      data: {
+        doctors: [
+          {
+            id: "df9ffcca-1415-4837-95fa-83288e199d99",
+            clinic: mockData.clinic,
+            firstName: "Christa",
+            lastName: "Conn",
+            avatarUrl: null,
+            gender: "male",
+            description: "Very good at Surgery",
+            specialties: ["surgery"],
+          },
+          {
+            id: "04cd46f0-c785-48cc-bde1-898aac54c425",
+            clinic: mockData.clinic,
+            firstName: "Rory",
+            lastName: "Greenfelder",
+            avatarUrl: null,
+            gender: "male",
+            description: "Good at both Cardiology and Surgery",
+            specialties: ["cardiology"],
+          },
+        ],
+        nextCursor: null,
+      },
+    });
+  });
+
+  it("returns one doctor if searching 'cardiology'", async () => {
+    const res = await GET("/doctors/search?q=cardiology");
+    const json = await res.json();
+    expect(res.status).toEqual(200);
+    expect(json).toEqual({
+      ...successResponseTemplate,
+      data: {
+        doctors: [
+          {
+            id: "04cd46f0-c785-48cc-bde1-898aac54c425",
+            clinic: mockData.clinic,
+            firstName: "Rory",
+            lastName: "Greenfelder",
+            avatarUrl: null,
+            gender: "male",
+            description: "Good at both Cardiology and Surgery",
+            specialties: ["cardiology"],
+          },
+        ],
+        nextCursor: null,
+      },
+    });
+  });
+
+  it("returns one doctor if searching 'david tan'", async () => {
+    const res = await GET("/doctors/search?q=david%20tan");
+    const json = await res.json();
+    expect(res.status).toEqual(200);
+    expect(json).toEqual({
+      ...successResponseTemplate,
+      data: {
+        doctors: [
+          {
+            id: mockData.doctor.id,
+            clinic: mockData.doctor.clinic,
+            firstName: mockData.doctor.firstName,
+            lastName: mockData.doctor.lastName,
+            avatarUrl: mockData.doctor.avatarUrl,
+            gender: mockData.doctor.gender,
+            description: mockData.doctor.description,
+            specialties: mockData.doctor.specialties,
+          },
+        ],
+        nextCursor: null,
+      },
+    });
+  });
+
+  it("returns no doctor if searching 'neurology'", async () => {
+    const res = await GET("/doctors/search?q=neurology");
+    const json = await res.json();
+    expect(res.status).toEqual(200);
+    expect(json).toEqual({
+      ...successResponseTemplate,
+      data: { doctors: [], nextCursor: null },
+    });
+  });
+
+  it("paginates", async () => {
+    const res1 = await GET("/doctors/search?q=surgery&limit=1");
+    const json1 = await res1.json();
+    expect(res1.status).toEqual(200);
+    expect(json1).toEqual({
+      ...successResponseTemplate,
+      data: {
+        doctors: [
+          {
+            id: "df9ffcca-1415-4837-95fa-83288e199d99",
+            clinic: mockData.clinic,
+            firstName: "Christa",
+            lastName: "Conn",
+            avatarUrl: null,
+            gender: "male",
+            description: "Very good at Surgery",
+            specialties: ["surgery"],
+          },
+        ],
+        nextCursor: expect.any(Number),
+      },
+    });
+
+    const res2 = await GET(
+      // @ts-ignore
+      `/doctors/search?q=surgery&cursor=${json1.data.nextCursor}`,
+    );
+    const json2 = await res2.json();
+    expect(res2.status).toEqual(200);
+    expect(json2).toEqual({
+      ...successResponseTemplate,
+      data: {
+        doctors: [
+          {
+            id: "04cd46f0-c785-48cc-bde1-898aac54c425",
+            clinic: mockData.clinic,
+            firstName: "Rory",
+            lastName: "Greenfelder",
+            avatarUrl: null,
+            gender: "male",
+            description: "Good at both Cardiology and Surgery",
+            specialties: ["cardiology"],
+          },
+        ],
+        nextCursor: null,
+      },
+    });
+  });
+});

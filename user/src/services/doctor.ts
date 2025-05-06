@@ -77,3 +77,25 @@ export async function createOne(
 
   return doctor as Doctor;
 }
+
+export async function search(query: {
+  q: string;
+  limit: number;
+  cursor: number;
+}) {
+  const fullProfiles = await doctorProfileRepository.searchManyFull({
+    q: query.q,
+    limit: query.limit,
+    maxSimilarity: query.cursor,
+  });
+
+  const nextCursor =
+    fullProfiles.length < query.limit
+      ? null
+      : (fullProfiles.at(-1)?.similarity ?? 0);
+
+  return {
+    doctors: fullProfiles.map(({ similarity, ...rest }) => rest),
+    nextCursor,
+  };
+}
