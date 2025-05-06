@@ -3,5 +3,5 @@ uvicorn
 redis
 pymongo
 openai
-pydanic
+pydantic
 python-dotenv
