@@ -6,6 +6,18 @@ import {
 } from "@tanstack/react-query";
 import { request } from "./request";
 
+export function useRandomDoctorsQuery(limit = 3) {
+  return useQuery<Omit<Doctor, "role" | "email">[]>({
+    queryKey: ["random-doctors"],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        limit: String(limit),
+      });
+      return await request.get(`/doctors/random?${params}`);
+    },
+  });
+}
+
 export function useDoctorQuery(id: string) {
   return useQuery<Doctor>({
     queryKey: ["doctor", id],
