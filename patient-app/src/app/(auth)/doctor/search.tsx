@@ -1,14 +1,12 @@
 import { useDoctorSearchQuery } from "@/api/doctor";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { DoctorCard } from "@/components/doctor/card";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
 import { Muted } from "@/components/ui/typography";
-import type { Doctor } from "@/utils/types";
-import { Link, useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { RotateCwIcon, SearchIcon } from "lucide-react-native";
 import { useState } from "react";
 import { FlatList, View } from "react-native";
@@ -18,7 +16,7 @@ export default function DoctorSearchPage() {
     <View className="grow max-h-screen px-6">
       <Text className="pt-2 pb-4 text-2xl font-bold">Search Result</Text>
       <SearchDoctorInput />
-      <DoctorList />
+      <Doctors />
     </View>
   );
 }
@@ -52,7 +50,7 @@ function SearchDoctorInput() {
   );
 }
 
-function DoctorList() {
+function Doctors() {
   const { q = "" } = useLocalSearchParams<{ q?: string }>();
   const {
     data: doctors,
@@ -98,49 +96,20 @@ function DoctorList() {
   return (
     <FlatList
       data={doctors}
-      renderItem={({ item }) => <DoctorListItem doctor={item} />}
+      renderItem={({ item }) => <DoctorCard doctor={item} />}
       keyExtractor={(item) => item.id}
       onEndReached={() => {
         if (hasNextPage) {
           fetchNextPage();
         }
       }}
-      ItemSeparatorComponent={Separator}
       ListFooterComponent={
         <Muted className="mt-2 text-center text-sm">
           {hasNextPage ? "Loading more for you..." : "- That's all, for now -"}
         </Muted>
       }
       className="grow"
-      contentContainerClassName="pb-8"
+      contentContainerClassName="gap-2 pb-8"
     />
-  );
-}
-
-function DoctorListItem({
-  doctor,
-}: { doctor: Omit<Doctor, "role" | "email"> }) {
-  return (
-    <Link href={{ pathname: "/doctor/[id]", params: { id: doctor.id } }}>
-      <View className="flex-row items-center gap-3 w-full py-3">
-        <Avatar
-          alt={`Dr. ${doctor.firstName} ${doctor.lastName}'s profile photo`}
-        >
-          <AvatarImage source={{ uri: doctor.avatarUrl ?? undefined }} />
-          <AvatarFallback>
-            <Muted>
-              {doctor.firstName[0]}
-              {doctor.lastName[0]}
-            </Muted>
-          </AvatarFallback>
-        </Avatar>
-        <View>
-          <Text className="font-semibold">
-            {doctor.firstName} {doctor.lastName}
-          </Text>
-          <Muted className="text-sm">{doctor.specialties.join(", ")}</Muted>
-        </View>
-      </View>
-    </Link>
   );
 }
