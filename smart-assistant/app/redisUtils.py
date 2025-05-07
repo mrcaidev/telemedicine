@@ -6,11 +6,10 @@ from fastapi import HTTPException
 import app.config as config
 
 # 配置 Redis 连接
-REDIS_URL = f"redis://{config.REDIS_HOST}"
 
 EXPIRE_SECONDS = 60 * 60
 
-redis = Redis.from_url(REDIS_URL, encoding="utf-8", decode_responses=True)
+redis = Redis.from_url(config.REDIS_URL, encoding="utf-8", decode_responses=True)
 
 # 向redis中插入一个数据
 async def set_key(key:str, value:str):

@@ -8,8 +8,7 @@ import app.config as config
 
 from pymongo import MongoClient
 
-MONGO_URL = f"mongodb://{config.MONGO_HOST}/"
-client = MongoClient(MONGO_URL,uuidRepresentation='standard')
+client = MongoClient(config.MONGO_URL,uuidRepresentation='standard')
 db = client['smart_assistant']
 collection = db['session']
 

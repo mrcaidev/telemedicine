@@ -3,9 +3,9 @@ from datetime import datetime
 from uuid import UUID
 
 class SessionData(BaseModel):
-    user_id: UUID
-    session_id: UUID
-    created_at: datetime = datetime.now()
+    userId: UUID
+    sessionId: UUID
+    createdAt: datetime = datetime.now()
 
 class Evaluation(BaseModel):
     symptom:str | None
@@ -16,6 +16,11 @@ class get_all_session_data(BaseModel):
     id: str
     evaluation: Evaluation
     createdAt: datetime
+
+class chatbotReply(BaseModel):
+    type: str
+    content: str
+    role: str
 
 
 class ResponseData(BaseModel):

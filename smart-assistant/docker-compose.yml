@@ -10,8 +10,8 @@ services:
     environment:
       - AGENT_ENDPOINT=https://rple22irdjo2o7ujic6jsgqy.agents.do-ai.run/api/v1/
       - AGENT_ACCESS_KEY=KkkSNvyp5VGydbd4u8kWS6a6BeaInBI_
-      - MONGO_HOST=mongo:27017
-      - REDIS_HOST=redis:6379
+      - MONGO_URL=mongodb://mongo:27017/
+      - REDIS_URL=redis://redis:6379/
     depends_on:
       - redis
       - mongo

@@ -10,9 +10,7 @@ AGENT_ACCESS_KEY = os.getenv("AGENT_ACCESS_KEY")
 
 
 #Redis config
-REDIS_HOST = os.getenv("REDIS_HOST")
-REDIS_PORT = os.getenv("REDIS_PORT")
+REDIS_URL = os.getenv("REDIS_URL")
 
 #MongoDB config
-MONGO_HOST = os.getenv("MONGO_HOST")
-MONGO_PORT = os.getenv("MONGO_PORT")
+MONGO_URL = os.getenv("MONGO_URL")

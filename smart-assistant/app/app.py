@@ -4,20 +4,23 @@ from fastapi import FastAPI, Response, Request
 from fastapi.responses import JSONResponse
 from uuid import UUID, uuid4
 
-from app.model import SessionData,ResponseData
+from app.model import SessionData,ResponseData, chatbotReply
 from app.respCode import RespCode
 import app.redisUtils as RedisUtils
 import app.assistant as Assistant
+import logging
 
 app = FastAPI()
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # done
 @app.post("/sessions", response_model=ResponseData)
 async def create_session(request:Request, response: Response):
     user_id = request.headers.get("X-User-Id")
     session_id = uuid4()
-    data = SessionData(user_id=UUID(user_id), session_id=session_id)
+    data = SessionData(userId=UUID(user_id), sessionId=session_id)
     await Assistant.create_session(UUID(user_id), session_id)
     await RedisUtils.set_key(str(user_id), data.model_dump_json())
     result = await Assistant.get_session(session_id)
@@ -30,7 +33,7 @@ async def get_session(request: Request, response: Response):
     data = await RedisUtils.get_key(user_id)
     value = data["value"]
     session_id = json.loads(value)["session_id"]
-    data = SessionData(user_id=UUID(user_id), session_id=session_id)
+    data = SessionData(userId=UUID(user_id), sessionId=session_id)
 
     return ResponseData(code=RespCode.SUCCESS, message="success", data=data)
 
@@ -55,9 +58,12 @@ async def get_user_all_sessions(request: Request, response: Response):
     return ResponseData(code=RespCode.SUCCESS, message="success", data=result)
 
 @app.post("/sessions/{id}/chat", response_model=ResponseData)
-async def speak_to_agent(id:str, message:str, response: Response):
+async def speak_to_agent(id:str, request:Request, response: Response):
+    body: dict = await request.json()
+    message = body.get("message")
     session_id = UUID(id)
-    return await Assistant.speak_to_agent(session_id, message)
+    message_reply = await Assistant.speak_to_agent(session_id, message)
+    return ResponseData(code=RespCode.SUCCESS, message="success", data=chatbotReply(type=message_reply["type"], content=message_reply["content"], role=message_reply["role"]))
 
 @app.get("/livez")
 async def check_live(request: Request, response: Response):

@@ -36,9 +36,11 @@ async def speak_to_bot(id: UUID, user_message):
     history.append({"role": "assistant", "content": assistant_reply})
     await session.update_session_history(id, history)
     symptom, urgency, suggestion = parse_evaluation_results(assistant_reply)
+
     if symptom and urgency and suggestion:
         await save_evaluation_results(id, symptom, urgency, suggestion)
-    return assistant_reply
+        return {"role": "assistant", "content": assistant_reply, "type": "evaluation"}
+    return {"role": "assistant", "content": assistant_reply, "type": "message"}
 
 
 def parse_evaluation_results(message: str):
