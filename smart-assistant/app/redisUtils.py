@@ -6,7 +6,7 @@ from fastapi import HTTPException
 import app.config as config
 
 # 配置 Redis 连接
-REDIS_URL = f"redis://{config.REDIS_HOST}:{config.REDIS_PORT}"
+REDIS_URL = f"redis://{config.REDIS_HOST}"
 
 EXPIRE_SECONDS = 60 * 60
 
