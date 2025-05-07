@@ -6,10 +6,11 @@ import re
 
 import app.session as session
 from openai import OpenAI
+import app.config as config
 
 # Set your agent endpoint and access key as environment variables in your OS.
-agent_endpoint = "https://rple22irdjo2o7ujic6jsgqy.agents.do-ai.run/api/v1/"
-agent_access_key = "KkkSNvyp5VGydbd4u8kWS6a6BeaInBI_"
+agent_endpoint = config.AGENT_ENDPOINT
+agent_access_key = config.AGENT_ACCESS_KEY
 
 default_message = []
 
