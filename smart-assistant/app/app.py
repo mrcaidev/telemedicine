@@ -26,7 +26,7 @@ async def create_session(request:Request, response: Response):
 #done
 @app.get("/sessions/active", response_model=ResponseData)
 async def get_session(request: Request, response: Response):
-    user_id = request.headers.get("X-User-ID")
+    user_id = request.headers.get("X-User-Id")
     data = await RedisUtils.get_key(user_id)
     value = data["value"]
     session_id = json.loads(value)["session_id"]
@@ -50,7 +50,7 @@ async def get_session(id: str, response: Response):
 
 @app.get("/sessions", response_model=ResponseData)
 async def get_user_all_sessions(request: Request, response: Response):
-    user_id = request.headers.get("X-User-ID")
+    user_id = request.headers.get("X-User-Id")
     result = await Assistant.get_user_history(UUID(user_id))
     return ResponseData(code=RespCode.SUCCESS, message="success", data=result)
 
