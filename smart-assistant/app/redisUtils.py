@@ -43,3 +43,10 @@ async def delete_key(key: str):
     if result == 0:
         return {"message": "Key not found"}
     return {"message": "Key deleted successfully"}
+
+async def test_ping():
+    result = await redis.ping()
+    if result:
+        return True
+    else:
+        return False

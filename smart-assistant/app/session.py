@@ -74,3 +74,11 @@ async def delete_user_session(user_id:UUID):
     collection.delete(
         {"user_id": user_id},
     )
+
+async def test_connect():
+    try:
+        collection.find_one()
+    except Exception:
+        return False
+
+    return True

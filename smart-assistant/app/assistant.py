@@ -18,3 +18,6 @@ async def speak_to_agent(id: UUID, message:str):
 
 async def delete_session(id: UUID):
     return await session.delete_session(id)
+
+async def test_mongo():
+    return await session.test_connect()

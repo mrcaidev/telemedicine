@@ -58,3 +58,17 @@ async def get_user_all_sessions(request: Request, response: Response):
 async def speak_to_agent(id:str, message:str, response: Response):
     session_id = UUID(id)
     return await Assistant.speak_to_agent(session_id, message)
+
+@app.get("/livez")
+async def check_live(request: Request, response: Response):
+    return ResponseData(code=RespCode.SUCCESS, message="success live check", data=None)
+
+@app.get("/readyz")
+async def check_connect_ready(request: Request, response: Response):
+    result_redis = RedisUtils.test_ping()
+    result_mongo = Assistant.test_mongo()
+    if result_mongo and result_redis:
+        return ResponseData(code=RespCode.SUCCESS, message="success", data=None)
+
+    return ResponseData(code=RespCode.SERVER_INTERNAL_ERROR, message="server error", data=None)
+
