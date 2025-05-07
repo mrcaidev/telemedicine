@@ -1,0 +1,2 @@
+global:
+  defaultStorageClass: do-block-storage
