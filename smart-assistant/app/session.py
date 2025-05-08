@@ -21,9 +21,9 @@ async def insert_session(user_id:UUID, id:UUID):
         "createdAt": datetime.now(),
     })
 
-async def get_session(id:UUID):
+async def get_session(id:UUID, user_id:UUID):
     result = collection.find_one(
-        {"id": id},
+        {"id": id, "user_id": user_id},
         {"_id": 0, "user_id":1,"id":1,"history": 1,"evaluation":1,"createdAt":1}
     )
     if result is None:
@@ -62,10 +62,9 @@ async def update_session_evaluation(id:UUID, symptom:str, urgency:int, suggestio
             "evaluation": Evaluation(symptom=symptom, urgency=urgency, suggestion=suggestion).model_dump(),
             "updated_at": datetime.now()}}
     )
-async def delete_session(id:UUID):
+async def delete_session(id:UUID, user_id:UUID):
     session_deleted = collection.find_one_and_delete(
-        {"id": id},
-        {"user_id":1}
+        {"id": id, "user_id": user_id},
     )
     print(session_deleted)
     return session_deleted
