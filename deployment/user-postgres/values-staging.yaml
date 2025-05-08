@@ -1,3 +1,2 @@
-primary:
-  persistence:
-    storageClass: do-block-storage
+global:
+  defaultStorageClass: do-block-storage
