@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { RawAppointment } from "@/types/appointment";
-let hasFetched = false;
 
 export function useAppointments() {
   const [appointments, setAppointments] = useState<RawAppointment[]>([]);
@@ -30,8 +29,6 @@ export function useAppointments() {
   };
 
   useEffect(() => {
-    if (hasFetched) return;
-    hasFetched = true;
     fetchAppointments();
   }, []);
 

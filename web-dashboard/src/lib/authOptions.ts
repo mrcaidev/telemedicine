@@ -4,7 +4,7 @@ import { NextAuthOptions } from "next-auth";
 const BACKEND_API =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080/api";
 
-  export const authOptions: NextAuthOptions = {
+export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -13,6 +13,9 @@ const BACKEND_API =
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
+        console.log("AUTH LOGIN to:", BACKEND_API);
+        console.log("Received credentials:", credentials);
+
         const res = await fetch(`${BACKEND_API}/auth/login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -26,9 +29,17 @@ const BACKEND_API =
 
         const data = result.data;
 
-        console.log(`[AUDIT] Login: ${data.email} at ${new Date().toISOString()}`);
+        console.log(
+          `[AUDIT] Login: ${data.email} at ${new Date().toISOString()}`
+        );
 
-        if (!res.ok || !data.token || !data.role) return null;
+        if (!res.ok || !data.token || !data.role) {
+          console.error("Login failed:", result);
+          console.error("Response status:", res.status);
+          console.error("Response status text:", res.statusText);
+          console.error("Response data:", data);
+          return null;
+        }
 
         return {
           id: data.id,
@@ -55,7 +66,10 @@ const BACKEND_API =
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string;
-        session.user.role = token.role as "doctor" | "clinic_admin" | "platform_admin";
+        session.user.role = token.role as
+          | "doctor"
+          | "clinic_admin"
+          | "platform_admin";
         session.user.token = token.accessToken as string;
         session.user.avatarUrl = token.avatarUrl as string | null;
       }
