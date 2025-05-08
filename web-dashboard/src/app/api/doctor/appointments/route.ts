@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
+import { RawAppointment } from "@/types/appointment";
 
 const BACKEND_API =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080/api";
 
-const VALID_SORT_FIELDS = ["startTime", "endTime", "createdAt", "endAt"];
+const VALID_SORT_FIELDS = ["startAt", "endAt", "createdAt"];
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -20,7 +21,12 @@ export async function GET(req: NextRequest) {
   const doctorId = session.user.id;
   const token = session.user.token;
 
+  if (!req.url.startsWith("http")) {
+    throw new Error("req.url must be an absolute URL");
+  }
+  
   const { searchParams } = new URL(req.url);
+
   const cursor = searchParams.get("cursor");
   const limit = searchParams.get("limit") || "10";
   const sortBy = searchParams.get("sortBy") || "endAt";
@@ -64,9 +70,15 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    result.data.appointments.sort((a: any, b: any) => {
-      const timeA = new Date(a[safeSortBy]).getTime();
-      const timeB = new Date(b[safeSortBy]).getTime();
+    const appointments: RawAppointment[] = result.data.appointments;
+
+    appointments.sort((a, b) => {
+      const timeA = new Date(
+        a[safeSortBy as keyof RawAppointment] as string
+      ).getTime();
+      const timeB = new Date(
+        b[safeSortBy as keyof RawAppointment] as string
+      ).getTime();
       return sortOrder === "desc" ? timeB - timeA : timeA - timeB;
     });
 

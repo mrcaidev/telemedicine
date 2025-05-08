@@ -15,7 +15,6 @@ export async function GET(
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  const doctorId = session.user.id;
   const token = session.user.token;
   const { id } = await params;
   const patientId = id;

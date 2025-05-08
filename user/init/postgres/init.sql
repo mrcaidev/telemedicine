@@ -41,6 +41,23 @@ create type gender as enum (
   'female'
 );
 
+create function create_doctor_fts(
+  first_name text,
+  last_name text,
+  description text,
+  specialties text[]
+)
+returns tsvector
+language sql
+immutable
+as $$
+select
+  to_tsvector('english', first_name) ||
+  to_tsvector('english', last_name) ||
+  to_tsvector('english', description) ||
+  to_tsvector('english', array_to_string(specialties, ' '));
+$$;
+
 create table doctor_profiles (
   id uuid primary key references accounts(id),
   clinic_id uuid not null references clinics(id),
@@ -50,6 +67,7 @@ create table doctor_profiles (
   gender gender default 'male' not null,
   description text default '' not null,
   specialties text[] default '{}' not null,
+  fts tsvector generated always as (create_doctor_fts(first_name, last_name, description, specialties)) stored,
   created_by uuid not null references clinic_admin_profiles(id),
   deleted_by uuid default null references clinic_admin_profiles(id)
 );
