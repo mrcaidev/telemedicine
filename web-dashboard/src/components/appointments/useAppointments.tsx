@@ -8,8 +8,9 @@ export function useAppointments() {
 
   const fetchAppointments = async (cursor?: string) => {
     setLoading(true);
-
-    const url = new URL("/api/doctor/appointments", window.location.origin);
+    
+    const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL!;
+    const url = new URL("/api/doctor/appointments", apiBase);
     url.searchParams.set("limit", "10");
     url.searchParams.set("sortBy", "endAt");
     url.searchParams.set("sortOrder", "asc");
