@@ -26,6 +26,7 @@ export async function GET(req: NextRequest) {
   }
   
   const { searchParams } = new URL(req.url);
+
   const cursor = searchParams.get("cursor");
   const limit = searchParams.get("limit") || "10";
   const sortBy = searchParams.get("sortBy") || "endAt";
