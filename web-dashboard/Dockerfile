@@ -1,15 +1,18 @@
-FROM node:lts-alpine AS build
+FROM node:lts-alpine AS builder
 WORKDIR /code
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
+ARG NEXT_PUBLIC_API_BASE_URL
+ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
 ENV NODE_ENV=production
 RUN npm run build
 
 FROM node:lts-alpine
 WORKDIR /app
-COPY --from=build /code/public public
-COPY --from=build /code/.next/standalone .
-COPY --from=build /code/.next/static .next/static
+COPY --from=builder /code/public public
+COPY --from=builder /code/.next/standalone .
+COPY --from=builder /code/.next/static .next/static
 ENV HOSTNAME=0.0.0.0
+ENV NODE_ENV=production
 CMD ["node", "server.js"]

@@ -1,29 +1,38 @@
 "use client";
 
 import Link from "next/link";
-import { Home, Calendar, Users } from "lucide-react";
+import { Home, Calendar, Users, CalendarClock } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { clsx } from "clsx";
 
 const menu = [
-  { label: "Home", icon: Home, href: "/dashboard/doctor" },
+  { label: "Dashboard", icon: Home, href: "/dashboard/doctor" },
   {
     label: "Appointments",
     icon: Calendar,
     href: "/dashboard/doctor/appointments",
   },
-  { label: "Patients", icon: Users, href: "/dashboard/doctor/patients" },
-  // { label: "Settings", icon: Settings, href: "/dashboard/doctor/settings" },
+  {
+    label: "Schedule",
+    icon: CalendarClock,
+    href: "/dashboard/doctor/schedule",
+  },
+
+  { label: "Profile", icon: Users, href: "/dashboard/doctor/profile" },
 ];
 
 export default function DoctorSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="w-56 h-screen bg-white border-r px-4 py-6 hidden md:block fixed">
+    <aside className="w-56 h-screen bg-white border-r px-4 py-6 hidden md:block fixed ">
       <nav className="space-y-2">
         {menu.map((item) => {
-          const isActive = pathname === item.href;
+          const isActive =
+            item.href === "/dashboard/doctor/appointments"
+              ? pathname.startsWith("/dashboard/doctor/appointments") ||
+                pathname.startsWith("/dashboard/doctor/patients")
+              : pathname === item.href;
 
           return (
             <Link

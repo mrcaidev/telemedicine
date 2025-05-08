@@ -1,36 +1,56 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+doctor
+✅ 顶部卡片1	总销售额	今日预约数	今日该医生的预约数量
+✅ 顶部卡片2	访问量	今日新患者数	今日首次就诊患者数
+✅ 顶部卡片3	支付笔数	待处理预约数	预约状态为 normal但是时间晚于当前时间 的记录
 
-## Getting Started
+月度预约趋势图（Bar Chart）
 
-First, run the development server:
+X轴：1月~12月
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Y轴：每月预约次数
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+交互：支持时间筛选器（默认当年）
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+症状关键词排行（Table）
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+数据示例：
 
-## Learn More
+排名	症状	出现次数
+1	咳嗽	45
+2	腹痛	33
+3	胸闷	28
 
-To learn more about Next.js, take a look at the following resources:
+platform
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+clinic
+1️⃣ 顶部四个指标卡片（关键运营指标）
+诊所数据指标	说明
+今日总预约数	汇总 clinic 下所有医生的预约
+今日新增患者	注册信息统计
+待分配 / 待处理预约数	某些预约可能 AI 推荐无匹配医生
+AI 推荐匹配成功率	AI 推荐的医生是成功预约上
+2️⃣ 下方图表区块（趋势分析）
+左侧：柱状图 + Tab
+Tab 选项	内容
+总预约趋势	显示每月预约量（Y轴 = 次数）
+每医生预约趋势	按医生分组统计（堆叠柱状图）
+每症状趋势	按用户填写的 top 症状聚类展示
+右侧：医生预约排行榜（榜单）
+排名	医生姓名	预约数
+1	李医生	126
+2	王医生	109
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+📌 可加 tooltip 查看医生科室、专长，点击跳转医生管理页
+3️⃣ 下方双卡片区域（业务洞察）
+左侧卡片：高频症状统计
+类似“线上热门搜索”，改成“本周高频症状关键词”
 
-## Deploy on Vercel
+排名	症状	人数	环比
+1	腹泻	145	+15%
+2	咽喉不适	120	+22%
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+右侧卡片：症状类别分布图（饼图）
+类别	比例
+呼吸系统	32%
+消化系统	28%
+精神心理类	12%
