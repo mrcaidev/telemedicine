@@ -6,5 +6,6 @@ paths:
 minReplicas: 1
 maxReplicas: 2
 secrets:
-  NEXT_PUBLIC_API_BASE_URL: http://api.localhost
+  NEXT_PUBLIC_API_BASE_URL: http://host.docker.internal:4523/m1/6162561-5854630-default
   NEXTAUTH_SECRET: 3f74d44d7e162cb85ec8c5072b9709af
+  NEXTAUTH_URL: http://localhost:3000

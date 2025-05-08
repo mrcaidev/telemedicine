@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { RawAppointment } from "@/types/appointment";
-let hasFetched = false;
 
 export function useAppointments() {
   const [appointments, setAppointments] = useState<RawAppointment[]>([]);
@@ -18,8 +17,8 @@ export function useAppointments() {
 
     const res = await fetch(url.toString());
     const json = await res.json();
-    console.log("✅ API response:", json); 
-    console.log("cursor",json.data.nextCursor);
+    console.log("✅ API response:", json);
+    console.log("cursor", json.data.nextCursor);
 
     if (json?.data?.appointments) {
       setAppointments((prev) => [...prev, ...json.data.appointments]);
@@ -30,19 +29,19 @@ export function useAppointments() {
   };
 
   useEffect(() => {
-    if (hasFetched) return;
-    hasFetched = true;
     fetchAppointments();
   }, []);
+
+  const fetchMore = useCallback(() => {
+    if (nextCursor) {
+      fetchAppointments(nextCursor);
+    }
+  }, [nextCursor]);
 
   return {
     appointments,
     loading,
     nextCursor,
-    fetchMore: () => {
-      if (nextCursor) {
-        fetchAppointments(nextCursor);
-      }
-    },
+    fetchMore,
   };
 }
