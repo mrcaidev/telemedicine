@@ -35,5 +35,9 @@ echo '🚀 Deploying appointment...'
 minikube image load mrcaidev/telemedicine-appointment:$TAG
 helm install appointment ./deployment/appointment --set image=mrcaidev/telemedicine-appointment:$TAG
 
-echo '🚀 Deploying web-dashboard...'
-helm install web-dashboard ./deployment/web-dashboard
+echo '📦 Building web-dashboard...'
+docker build -t mrcaidev/telemedicine-web-dashboard:$TAG --build-arg NEXT_PUBLIC_API_BASE_URL=http://api.localhost web-dashboard
+
+echo '🚀 Deploying appointment...'
+minikube image load mrcaidev/telemedicine-web-dashboard:$TAG
+helm install web-dashboard ./deployment/web-dashboard --set image=mrcaidev/telemedicine-web-dashboard:$TAG

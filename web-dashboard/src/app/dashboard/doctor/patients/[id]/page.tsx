@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import { UserCircle } from "lucide-react";
 import { ArrowLeft } from "lucide-react";
 import { RawPatient } from "@/types/patient";
 
@@ -21,23 +22,22 @@ export default function PatientDetailPage() {
   if (!patient) return <div>Loading...</div>;
 
   return (
-    <div className="max-w-xl mx-auto px-4 py-6">
-      <div className="px-4 pt-4 pb-6 space-y-4">
-        {/* 返回按钮 */}
-        <Button
-          variant="outline"
-          onClick={() => router.back()}
-          className="flex items-center cursor-pointer"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back
-        </Button>
+    <div className="w-full px-8 py-6 min-h-screen space-y-6">
+      {/* 顶部返回 + 标题 */}
+      <Button
+        variant="outline"
+        onClick={() => router.back()}
+        className="flex items-center cursor-pointer"
+      >
+        <ArrowLeft className="w-4 h-4 mr-2" />
+        Back
+      </Button>
+      <h1 className="text-2xl flex items-center gap-2 font-bold">
+        <UserCircle className="w-6 h-6 text-gray-700" /> Patient Detail
+      </h1>
 
-        {/* 页面标题 */}
-        <h1 className="text-2xl font-bold">🧑‍⚕️ Patient Detail</h1>
-      </div>
-
-      <div className="space-y-6 border rounded-2xl shadow p-6 bg-white">
+      {/* 卡片内容 */}
+      <div className="bg-white border rounded-xl shadow-sm p-6 space-y-6">
         <div className="flex items-center space-x-4">
           <Image
             src={patient.avatarUrl || "/p.png"}
@@ -47,7 +47,9 @@ export default function PatientDetailPage() {
             className="rounded-full"
           />
           <div>
-            <div className="text-xl font-semibold">{patient.nickname || "Anonymous"}</div>
+            <div className="text-xl font-semibold">
+              {patient.nickname || "Anonymous"}
+            </div>
             <div className="text-sm text-gray-500">{patient.email}</div>
           </div>
         </div>
