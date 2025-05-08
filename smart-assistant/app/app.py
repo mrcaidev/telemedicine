@@ -18,7 +18,10 @@ logger = logging.getLogger(__name__)
 
 # done
 @app.post("/sessions", response_model=ResponseData, dependencies=[Depends(HttpMiddleware.validate_request_header)])
-async def create_session(request:Request, response: Response):
+async def create_session(request:Request, response: Response, res: ResponseData=Depends(HttpMiddleware.validate_request_header)):
+    if res is not None:
+        response.status_code = res["code"]
+        return res
     user_id = request.headers.get("X-User-Id")
     session_id = uuid4()
     data = SessionData(userId=UUID(user_id), sessionId=session_id)
@@ -30,7 +33,10 @@ async def create_session(request:Request, response: Response):
 
 #done
 @app.get("/sessions/active", response_model=ResponseData, dependencies=[Depends(HttpMiddleware.validate_request_header)])
-async def get_session(request: Request, response: Response):
+async def get_session(request: Request, response: Response, res: ResponseData=Depends(HttpMiddleware.validate_request_header)):
+    if res is not None:
+        response.status_code = res.code
+        return res
     user_id = request.headers.get("X-User-Id")
     try:
         data = await RedisUtils.get_key(user_id)
@@ -45,7 +51,10 @@ async def get_session(request: Request, response: Response):
 
 
 @app.delete("/sessions/{id}", response_model=ResponseData, dependencies=[Depends(HttpMiddleware.validate_request_header)])
-async def delete_session(id: str, request:Request, response: Response):
+async def delete_session(id: str, request:Request, response: Response, res: ResponseData=Depends(HttpMiddleware.validate_request_header)):
+    if res is not None:
+        response.status_code = res.code
+        return res
     user_id = request.headers.get("X-User-Id")
     result = await Assistant.delete_session(UUID(id), UUID(user_id))
     if result is None:
@@ -54,19 +63,28 @@ async def delete_session(id: str, request:Request, response: Response):
     return ResponseData(code=RespCode.SUCCESS, message="success", data=None)
 
 @app.get("/sessions/{id}", response_model=ResponseData, dependencies=[Depends(HttpMiddleware.validate_request_header)])
-async def get_session(id: str, request:Request,response: Response):
+async def get_session(id: str, request:Request,response: Response, res: ResponseData=Depends(HttpMiddleware.validate_request_header)):
+    if res is not None:
+        response.status_code = res.code
+        return res
     user_id = request.headers.get("X-User-Id")
     result = await Assistant.get_session(UUID(id), UUID(user_id))
     return ResponseData(code=RespCode.SUCCESS, message="success", data=result)
 
 @app.get("/sessions", response_model=ResponseData, dependencies=[Depends(HttpMiddleware.validate_request_header)])
-async def get_user_all_sessions(request: Request, response: Response):
+async def get_user_all_sessions(request: Request, response: Response, res: ResponseData=Depends(HttpMiddleware.validate_request_header)):
+    if res is not None:
+        response.status_code = res.code
+        return res
     user_id = request.headers.get("X-User-Id")
     result = await Assistant.get_user_history(UUID(user_id))
     return ResponseData(code=RespCode.SUCCESS, message="success", data=result)
 
 @app.post("/sessions/{id}/chat", response_model=ResponseData, dependencies=[Depends(HttpMiddleware.validate_request_header)])
-async def speak_to_agent(id:str, request:Request, response: Response):
+async def speak_to_agent(id:str, request:Request, response: Response, res: ResponseData=Depends(HttpMiddleware.validate_request_header)):
+    if res is not None:
+        response.status_code = res.code
+        return res
     body: dict = await request.json()
     message = body.get("content")
     session_id = UUID(id)
@@ -86,5 +104,4 @@ async def check_connect_ready(request: Request, response: Response):
         return ResponseData(code=RespCode.SUCCESS, message="success", data=None)
 
     return ResponseData(code=RespCode.SERVER_INTERNAL_ERROR, message="server error", data=None)
-
 
