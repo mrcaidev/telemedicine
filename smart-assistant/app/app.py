@@ -41,7 +41,6 @@ async def get_session(request: Request, response: Response, res: ResponseData=De
     try:
         data = await RedisUtils.get_key(user_id)
     except HTTPException as e:
-        response.status_code = RespCode.NOT_FOUND
         return ResponseData(code=RespCode.NOT_FOUND, message=e.detail, data=None)
     value = data["value"]
     session_id = json.loads(value)["sessionId"]
