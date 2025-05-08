@@ -69,6 +69,9 @@ async def get_session(id: str, request:Request,response: Response, res: Response
         return res
     user_id = request.headers.get("X-User-Id")
     result = await Assistant.get_session(UUID(id), UUID(user_id))
+    if result is None:
+        response.status_code = RespCode.NOT_FOUND
+        return ResponseData(code=RespCode.NOT_FOUND, message="session not found", data=None)
     return ResponseData(code=RespCode.SUCCESS, message="success", data=result)
 
 @app.get("/sessions", response_model=ResponseData, dependencies=[Depends(HttpMiddleware.validate_request_header)])
