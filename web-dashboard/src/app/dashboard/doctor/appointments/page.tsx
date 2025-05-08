@@ -5,12 +5,11 @@ import { useAppointments } from "@/components/appointments/useAppointments";
 import { useEffect, useRef, useState } from "react";
 import { Clock, FileText } from "lucide-react";
 import { StatusBadge } from "@/components/dashboard/status-badge";
-import { useRouter } from "next/navigation";
 import SearchBar from "@/components/search/search-bar";
 import AppointmentDateFilter from "@/components/appointments/appointment-date-filter";
+import Image from "next/image";
 
 export default function DoctorAppointmentsPage() {
-  const router = useRouter();
   const { appointments, loading, nextCursor, fetchMore } = useAppointments();
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
@@ -106,10 +105,12 @@ export default function DoctorAppointmentsPage() {
             <div className="border bg-white p-5 mb-4 rounded-2xl shadow hover:shadow-md transition-all hover:bg-blue-50/30 cursor-pointer">
               <div className="flex justify-between items-center mb-2">
                 <div className="flex items-center gap-3">
-                  <img
+                  <Image
                     src={appt.patient.avatarUrl || "/p.png"}
                     alt={appt.patient.nickname || "Anonymous"}
                     className="w-10 h-10 rounded-full object-cover"
+                    width={200}
+                    height={200}
                   />
                   <p className="font-semibold text-lg">
                     {appt.patient.nickname || "Anonymous"}

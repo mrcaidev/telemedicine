@@ -8,6 +8,7 @@ import { FileText, StickyNote } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/dashboard/status-badge";
 import { ArrowLeft } from "lucide-react";
+import Image from "next/image";
 
 const format = (d: string) =>
   new Date(d).toLocaleString(undefined, {
@@ -69,10 +70,12 @@ export default function AppointmentDetailPage() {
             }
             className="flex items-center gap-3 cursor-pointer hover:opacity-80 flex-1 min-w-[200px]"
           >
-            <img
+            <Image
               src={appointment.patient.avatarUrl || "/p.png"}
               alt={appointment.patient.nickname || "Anonymous"}
               className="w-10 h-10 rounded-full object-cover"
+              width={200}
+              height={200}
             />
             <div className="text-sm">
               <p className="font-medium">

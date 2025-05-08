@@ -19,12 +19,12 @@ import { useState } from "react";
 
 const { RangePicker } = DatePicker;
 
-const presetRanges = {
-  Today: [dayjs(), dayjs()],
-  "This Week": [dayjs().startOf("week"), dayjs().endOf("week")],
-  "This Month": [dayjs().startOf("month"), dayjs().endOf("month")],
-  "This Year": [dayjs().startOf("year"), dayjs().endOf("year")],
-};
+// const presetRanges = {
+//   Today: [dayjs(), dayjs()],
+//   "This Week": [dayjs().startOf("week"), dayjs().endOf("week")],
+//   "This Month": [dayjs().startOf("month"), dayjs().endOf("month")],
+//   "This Year": [dayjs().startOf("year"), dayjs().endOf("year")],
+// };
 
 const stats = {
   totalAppointments: 1280,

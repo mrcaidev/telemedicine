@@ -24,10 +24,6 @@ const menu = [
 export default function DoctorSidebar() {
   const pathname = usePathname();
 
-  const isAppointmentPage =
-    pathname.startsWith("/dashboard/doctor/appointments") ||
-    pathname.startsWith("/dashboard/doctor/patients");
-
   return (
     <aside className="w-56 h-screen bg-white border-r px-4 py-6 hidden md:block fixed ">
       <nav className="space-y-2">
