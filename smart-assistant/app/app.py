@@ -57,6 +57,7 @@ async def delete_session(id: str, request:Request, response: Response, res: Resp
     user_id = request.headers.get("X-User-Id")
     result = await Assistant.delete_session(UUID(id), UUID(user_id))
     if result is None:
+        response.status_code = RespCode.NOT_FOUND
         return ResponseData(code=RespCode.NOT_FOUND, message="session not found", data=None)
 
     data = await RedisUtils.get_key(user_id)
