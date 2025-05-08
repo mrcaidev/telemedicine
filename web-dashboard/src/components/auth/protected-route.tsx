@@ -16,7 +16,7 @@ export default function ProtectedRoute({
     if (status === "unauthenticated") {
       router.push("/login");
     }
-  }, [status]);
+  }, [status, router]);
 
   if (status === "loading") {
     return <div className="p-6">🔒 Checking authentication...</div>;
