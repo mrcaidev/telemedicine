@@ -19,6 +19,10 @@ spec:
           envFrom:
             - secretRef:
                 name: {{ .Release.Name }}
+          volumeMounts:
+            - name: kafka-certs
+              mountPath: /etc/kafka/certs
+              readOnly: true
           {{- with .Values.livenessProbe }}
           livenessProbe:
             httpGet:
@@ -31,11 +35,22 @@ spec:
               path: {{ . }}
               port: {{ $.Values.port }}
           {{- end }}
+      volumes:
+        - name: kafka-certs
+          secret:
+            secretName: kafka-certs
+            items:
+              - key: ca.crt
+                path: ca.crt
+              - key: client.key
+                path: client.key
+              - key: client.crt
+                path: client.crt
       resources:
         requests:
-          cpu: {{ .Values.resources.requests.cpu | default "100m" }}
-          memory: {{ .Values.resources.requests.memory | default "128Mi" }}
+          cpu: 100m
+          memory: 128Mi
         limits:
-          cpu: {{ .Values.resources.limits.cpu | default "200m" }}
-          memory: {{ .Values.resources.limits.memory | default "256Mi" }}
+          cpu: 200m
+          memory: 256Mi
       serviceAccountName: {{ .Release.Name }}
