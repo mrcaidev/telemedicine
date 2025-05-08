@@ -38,6 +38,7 @@ async def speak_to_bot(id: UUID, user_message):
     if symptom and urgency and suggestion:
         # 说明产出了诊断结果，保存诊断结果，本轮对话不记录
         await save_evaluation_results(id, symptom, urgency, suggestion)
+        await session.update_session_history(id, history)
         return {"role": "assistant", "symptom": symptom,"urgency":urgency, "suggestion":suggestion, "type": "evaluation"}
     else:
         # 没有产出诊断，保留记录，继续对话
