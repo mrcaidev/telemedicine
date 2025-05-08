@@ -20,8 +20,8 @@ export async function GET(req: NextRequest) {
 
   const doctorId = session.user.id;
   const token = session.user.token;
-
-  const { searchParams } = new URL(req.url);
+  const BASE_URL = process.env.NEXTAUTH_URL || "http://localhost:3000";
+  const { searchParams } = new URL(req.url, BASE_URL);
   const cursor = searchParams.get("cursor");
   const limit = searchParams.get("limit") || "10";
   const sortBy = searchParams.get("sortBy") || "endAt";
