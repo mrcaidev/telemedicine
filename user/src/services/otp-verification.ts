@@ -1,4 +1,4 @@
-import { sendEmailRequestedEvent } from "@/events/producer";
+import { publishEmailRequestedEvent } from "@/events/producer";
 import * as otpVerificationRepository from "@/repositories/otp-verification";
 import { HTTPException } from "hono/http-exception";
 
@@ -24,18 +24,17 @@ export async function sendOtp(email: string) {
   // 生成一个新的 OTP。
   const otp = generateOtp();
 
-  // 让 notification 服务立即发送邮件。
-  await sendEmailRequestedEvent({
+  // 立即发送邮件。
+  await publishEmailRequestedEvent({
     subject: "Your One-Time Password",
     to: [email],
     cc: [],
     bcc: [],
-    content: `Your OTP is: ${otp}\nThis will expire in 5 minutes. Please do not share it with anyone.`,
-    scheduledAt: null,
+    content: `Your OTP is: ${otp}\nThis OTP will expire in 5 minutes. Please do not share it with anyone.`,
   });
 
   // 插入 OTP 发送记录。
-  await otpVerificationRepository.insertOne({ email, otp });
+  await otpVerificationRepository.createOne({ email, otp });
 }
 
 export async function verifyOtp(email: string, otp: string) {
@@ -61,12 +60,10 @@ export async function verifyOtp(email: string, otp: string) {
 
   // 检查 OTP 是否匹配。
   if (lastOtpVerification.otp !== otp) {
-    throw new HTTPException(422, {
-      message: "This OTP is incorrect. Make sure you copied the right code!",
-    });
+    throw new HTTPException(422, { message: "Wrong OTP" });
   }
 
-  // 更新 OTP 验证记录，标记为已验证。
+  // 更新 OTP 验证记录，将其标记为已验证。
   await otpVerificationRepository.updateOneById(lastOtpVerification.id, {
     verifiedAt: new Date().toISOString(),
   });

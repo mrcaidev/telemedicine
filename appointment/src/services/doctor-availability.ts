@@ -1,5 +1,6 @@
 import * as doctorRepository from "@/repositories/doctor";
 import * as doctorAvailabilityRepository from "@/repositories/doctor-availability";
+import type { Actor } from "@/utils/types";
 import { HTTPException } from "hono/http-exception";
 
 export async function findAllByDoctorId(doctorId: string) {
@@ -13,7 +14,7 @@ export async function createOne(
     startTime: string;
     endTime: string;
   },
-  createdBy: string,
+  actor: Actor,
 ) {
   // 医生必须存在。
   const doctor = await doctorRepository.findOneById(data.doctorId);
@@ -29,5 +30,8 @@ export async function createOne(
     });
   }
 
-  return await doctorAvailabilityRepository.insertOne({ ...data, createdBy });
+  return await doctorAvailabilityRepository.createOne({
+    ...data,
+    createdBy: actor.id,
+  });
 }

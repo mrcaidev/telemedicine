@@ -5,23 +5,23 @@ import { Separator } from "@/components/ui/separator";
 import { Text } from "@/components/ui/text";
 import { Muted } from "@/components/ui/typography";
 import { Link } from "expo-router";
-import { FlatList, ScrollView, View } from "react-native";
+import { FlatList, View } from "react-native";
 
 export default function AppointmentListPage() {
   return (
-    <ScrollView className="px-6">
+    <View className="px-6">
       <View className="flex-row items-center justify-between mt-2 mb-6">
         <Text className="text-2xl font-bold">Appointment</Text>
         <Link href="/appointment" className="text-primary text-sm">
           View history
         </Link>
       </View>
-      <AppointmentList />
-    </ScrollView>
+      <Appointments />
+    </View>
   );
 }
 
-function AppointmentList() {
+function Appointments() {
   const {
     data: appointments,
     error,
@@ -38,35 +38,29 @@ function AppointmentList() {
     return <Text>Error loading appointments</Text>;
   }
 
-  const [highlightedAppointment, ...restAppointments] = appointments;
-
-  if (!highlightedAppointment) {
-    return <Text>No appointments available</Text>;
-  }
-
   return (
-    <View>
-      <View className="mb-2">
-        <HighlightedAppointmentCard appointment={highlightedAppointment} />
-      </View>
-      <FlatList
-        data={restAppointments}
-        renderItem={({ item }) => <SimpleAppointmentCard appointment={item} />}
-        keyExtractor={(item) => item.id}
-        onEndReached={() => {
-          if (hasNextPage) {
-            fetchNextPage();
-          }
-        }}
-        ItemSeparatorComponent={Separator}
-        ListFooterComponent={
-          <Muted className="mt-2 text-center text-sm">
-            {hasNextPage
-              ? "Loading more for you..."
-              : "- That's all, for now -"}
-          </Muted>
+    <FlatList
+      data={appointments}
+      renderItem={({ item, index }) =>
+        index === 0 ? (
+          <HighlightedAppointmentCard appointment={item} />
+        ) : (
+          <SimpleAppointmentCard appointment={item} />
+        )
+      }
+      keyExtractor={(item) => item.id}
+      onEndReached={() => {
+        if (hasNextPage) {
+          fetchNextPage();
         }
-      />
-    </View>
+      }}
+      ItemSeparatorComponent={Separator}
+      ListEmptyComponent={() => <Text>No appointments available</Text>}
+      ListFooterComponent={
+        <Muted className="mt-2 text-center text-sm">
+          {hasNextPage ? "Loading more for you..." : "- That's all, for now -"}
+        </Muted>
+      }
+    />
   );
 }

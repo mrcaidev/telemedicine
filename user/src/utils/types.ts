@@ -1,33 +1,40 @@
 export type Role = "platform_admin" | "clinic_admin" | "doctor" | "patient";
 
-export type Gender = "male" | "female";
-
-export type User = {
+export type Account = {
   id: string;
   role: Role;
   email: string;
-  passwordHash: string | null;
 };
 
-export type PlatformAdmin = {
+export type PlatformAdminProfile = {
   id: string;
 };
+
+export type PlatformAdmin = Account & PlatformAdminProfile;
 
 export type Clinic = {
   id: string;
   name: string;
 };
 
-export type ClinicAdmin = {
+export type ClinicAdminProfile = {
   id: string;
-  clinic: Clinic;
+  clinicId: string;
   firstName: string;
   lastName: string;
 };
 
-export type Doctor = {
-  id: string;
+export type ClinicAdminFullProfile = Omit<ClinicAdminProfile, "clinicId"> & {
   clinic: Clinic;
+};
+
+export type ClinicAdmin = Account & ClinicAdminFullProfile;
+
+export type Gender = "male" | "female";
+
+export type DoctorProfile = {
+  id: string;
+  clinicId: string;
   firstName: string;
   lastName: string;
   avatarUrl: string | null;
@@ -36,7 +43,13 @@ export type Doctor = {
   specialties: string[];
 };
 
-export type Patient = {
+export type DoctorFullProfile = Omit<DoctorProfile, "clinicId"> & {
+  clinic: Clinic;
+};
+
+export type Doctor = Account & DoctorFullProfile;
+
+export type PatientProfile = {
   id: string;
   nickname: string | null;
   avatarUrl: string | null;
@@ -44,8 +57,21 @@ export type Patient = {
   birthDate: string | null;
 };
 
-export type WithFull<T extends PlatformAdmin | ClinicAdmin | Doctor | Patient> =
-  Pick<User, "id" | "role" | "email"> & T;
+export type Patient = Account & PatientProfile;
+
+export type UserProfile =
+  | PlatformAdminProfile
+  | ClinicAdminProfile
+  | DoctorProfile
+  | PatientProfile;
+
+export type UserFullProfile =
+  | PlatformAdminProfile
+  | ClinicAdminFullProfile
+  | DoctorFullProfile
+  | PatientProfile;
+
+export type User = PlatformAdmin | ClinicAdmin | Doctor | Patient;
 
 export type OtpVerification = {
   id: string;
@@ -54,3 +80,23 @@ export type OtpVerification = {
   sentAt: string;
   verifiedAt: string | null;
 };
+
+export type GoogleIdentity = {
+  id: string;
+  googleId: string;
+};
+
+export type AuditLog = {
+  id: string;
+  userId: string;
+  action:
+    | "register_with_email_and_password"
+    | "log_in_with_email_and_password"
+    | "register_with_google"
+    | "link_to_google"
+    | "log_in_with_google"
+    | "log_out";
+  createdAt: string;
+};
+
+export type PartiallyRequired<T, K extends keyof T> = Pick<T, K> & Partial<T>;

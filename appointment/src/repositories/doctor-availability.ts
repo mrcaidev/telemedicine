@@ -1,5 +1,5 @@
 import { camelToSnakeJson, snakeToCamelJson } from "@/utils/case";
-import type { DoctorAvailability } from "@/utils/types";
+import type { DoctorAvailability, PartiallyRequired } from "@/utils/types";
 import { sql } from "bun";
 
 export async function findAllByDoctorId(doctorId: string) {
@@ -8,7 +8,8 @@ export async function findAllByDoctorId(doctorId: string) {
     from doctor_availabilities
     where doctor_id = ${doctorId}
   `;
-  return rows.map(snakeToCamelJson) as DoctorAvailability[];
+
+  return snakeToCamelJson(rows) as DoctorAvailability[];
 }
 
 export async function findOneById(id: string) {
@@ -29,9 +30,7 @@ export async function hasConflict(
   availability: Pick<
     DoctorAvailability,
     "weekday" | "startTime" | "endTime"
-  > & {
-    doctorId: string;
-  },
+  > & { doctorId: string },
 ) {
   const rows = await sql`
     select *
@@ -44,11 +43,11 @@ export async function hasConflict(
   return rows.length > 0;
 }
 
-export async function insertOne(
-  data: Pick<DoctorAvailability, "weekday" | "startTime" | "endTime"> & {
-    doctorId: string;
-    createdBy: string;
-  },
+export async function createOne(
+  data: PartiallyRequired<
+    DoctorAvailability,
+    "weekday" | "startTime" | "endTime"
+  > & { doctorId: string; createdBy: string },
 ) {
   const [row] = await sql`
     insert into doctor_availabilities ${sql(camelToSnakeJson(data))}
@@ -56,7 +55,7 @@ export async function insertOne(
   `;
 
   if (!row) {
-    throw new Error("Failed to create doctor availability");
+    throw new Error("failed to create doctor availability");
   }
 
   return snakeToCamelJson(row) as DoctorAvailability;

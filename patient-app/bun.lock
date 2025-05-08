@@ -5,11 +5,13 @@
       "name": "patient-app",
       "dependencies": {
         "@hookform/resolvers": "^5.0.1",
+        "@react-native-google-signin/google-signin": "^13.2.0",
         "@react-navigation/bottom-tabs": "^7.2.0",
         "@react-navigation/native": "^7.0.14",
         "@rn-primitives/alert-dialog": "^1.1.0",
         "@rn-primitives/avatar": "^1.1.0",
         "@rn-primitives/checkbox": "^1.1.0",
+        "@rn-primitives/dialog": "^1.1.0",
         "@rn-primitives/label": "^1.1.0",
         "@rn-primitives/portal": "^1.1.0",
         "@rn-primitives/separator": "^1.1.0",
@@ -514,6 +516,8 @@
 
     "@radix-ui/react-use-size": ["@radix-ui/react-use-size@1.1.1", "", { "dependencies": { "@radix-ui/react-use-layout-effect": "1.1.1" }, "peerDependencies": { "@types/react": "*", "react": "^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc" }, "optionalPeers": ["@types/react"] }, "sha512-ewrXRDTAqAXlkl6t/fkXWNAhFX9I+CkKlw6zjEwk86RSPKwZr3xpBRso655aqYafwtnbpHLj6toFzmd6xdVptQ=="],
 
+    "@react-native-google-signin/google-signin": ["@react-native-google-signin/google-signin@13.2.0", "", { "peerDependencies": { "expo": ">=50.0.0", "react": "*", "react-dom": "*", "react-native": "*" }, "optionalPeers": ["expo", "react-dom"] }, "sha512-1D7eWPE7itfPmNwLkBylaoiIXAvHQNalt+AfKWcgLp45ZvPh6D5wJEhbs03PJtwO7j+Nc7Z9+DjZ2auIlWzZjw=="],
+
     "@react-native/assets-registry": ["@react-native/assets-registry@0.76.9", "", {}, "sha512-pN0Ws5xsjWOZ8P37efh0jqHHQmq+oNGKT4AyAoKRpxBDDDmlAmpaYjer9Qz7PpDKF+IUyRjF/+rBsM50a8JcUg=="],
 
     "@react-native/babel-plugin-codegen": ["@react-native/babel-plugin-codegen@0.76.9", "", { "dependencies": { "@react-native/codegen": "0.76.9" } }, "sha512-vxL/vtDEIYHfWKm5oTaEmwcnNGsua/i9OjIxBDBFiJDu5i5RU3bpmDiXQm/bJxrJNPRp5lW0I0kpGihVhnMAIQ=="],
@@ -555,6 +559,8 @@
     "@rn-primitives/avatar": ["@rn-primitives/avatar@1.1.0", "", { "dependencies": { "@rn-primitives/hooks": "1.1.0", "@rn-primitives/slot": "1.1.0", "@rn-primitives/types": "1.1.0" }, "peerDependencies": { "react": "*", "react-native": "*", "react-native-web": "*" }, "optionalPeers": ["react-native", "react-native-web"] }, "sha512-GqhsQHeY7OP9oe3MZkl1Z0IbhIiuQX4+FxafoRK/Aes2m5386nMGK0NBaZBJy06WnFQBN52C8yq+LYv27sA86A=="],
 
     "@rn-primitives/checkbox": ["@rn-primitives/checkbox@1.1.0", "", { "dependencies": { "@radix-ui/react-checkbox": "^1.1.1", "@rn-primitives/hooks": "1.1.0", "@rn-primitives/slot": "1.1.0", "@rn-primitives/types": "1.1.0" }, "peerDependencies": { "react": "*", "react-native": "*", "react-native-web": "*" }, "optionalPeers": ["react-native", "react-native-web"] }, "sha512-drIWeB41LOkkGDHUKM++7e5vuODB6KeX7qJR3JfYoF0FDRGMG23f3cCo6cQy6DNgsjBctGPpTojQQxuLjuuTWg=="],
+
+    "@rn-primitives/dialog": ["@rn-primitives/dialog@1.1.0", "", { "dependencies": { "@radix-ui/react-dialog": "^1.1.1", "@rn-primitives/hooks": "1.1.0", "@rn-primitives/slot": "1.1.0", "@rn-primitives/types": "1.1.0" }, "peerDependencies": { "@rn-primitives/portal": "*", "react": "*", "react-native": "*", "react-native-web": "*" }, "optionalPeers": ["react-native", "react-native-web"] }, "sha512-ZEq0eayERy9Nwys9GFAM2Q1UHu/JOBuSSCSLXUXtAn26SAdFfKn2KAWZwCxQXGW2Kph9GV9B/Vm6X5vCe8Ct2w=="],
 
     "@rn-primitives/hooks": ["@rn-primitives/hooks@1.1.0", "", { "dependencies": { "@rn-primitives/types": "1.1.0" }, "peerDependencies": { "react": "*", "react-native": "*", "react-native-web": "*" }, "optionalPeers": ["react-native", "react-native-web"] }, "sha512-+WP4i395UDXZueL6PE0PiyLgheD4EbZ0ONgVaHjbrWjGKalfXuCyVNeaN79y3Aw9sY+SYQm7P9RckBAgi0C5xQ=="],
 

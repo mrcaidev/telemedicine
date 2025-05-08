@@ -1,5 +1,11 @@
 export type Role = "platform_admin" | "clinic_admin" | "doctor" | "patient";
 
+export type Actor = {
+  id: string;
+  role: Role;
+  email: string;
+};
+
 export type Patient = {
   id: string;
   nickname: string | null;
@@ -37,3 +43,11 @@ export type FullAppointment = Omit<Appointment, "patientId" | "doctorId"> & {
   patient: Patient;
   doctor: Doctor;
 };
+
+export type EmailSchedule = {
+  appointmentId: string;
+  emailId: string;
+  scheduledAt: string;
+};
+
+export type PartiallyRequired<T, K extends keyof T> = Pick<T, K> & Partial<T>;

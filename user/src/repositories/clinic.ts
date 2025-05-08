@@ -1,12 +1,12 @@
 import { camelToSnakeJson, snakeToCamelJson } from "@/utils/case";
-import type { Clinic } from "@/utils/types";
+import type { Clinic, PartiallyRequired } from "@/utils/types";
 import { sql } from "bun";
 
 export async function findOneById(id: string) {
   const [row] = await sql`
     select id, name
     from clinics
-    where id = ${id}
+    where id = ${id} and deleted_at is null
   `;
 
   if (!row) {
@@ -16,8 +16,8 @@ export async function findOneById(id: string) {
   return snakeToCamelJson(row) as Clinic;
 }
 
-export async function insertOne(
-  data: Pick<Clinic, "name"> & { createdBy: string },
+export async function createOne(
+  data: PartiallyRequired<Clinic, "name"> & { createdBy: string },
 ) {
   const [row] = await sql`
     insert into clinics ${sql(camelToSnakeJson(data))}
@@ -25,7 +25,7 @@ export async function insertOne(
   `;
 
   if (!row) {
-    throw new Error("failed to insert clinic");
+    throw new Error("failed to create clinic");
   }
 
   return snakeToCamelJson(row) as Clinic;

@@ -7,17 +7,18 @@ import type {
   Appointment,
   AppointmentStatus,
   FullAppointment,
+  PartiallyRequired,
 } from "@/utils/types";
 import { sql } from "bun";
 
-export async function findAll(options: {
+export async function findAll(query: {
   patientId?: string;
   doctorId?: string;
   status?: AppointmentStatus;
   sortBy: "startAt" | "endAt";
   sortOrder: "asc" | "desc";
   limit: number;
-  cursor: string | null;
+  cursor: string;
 }) {
   const rows = await sql`
     select a.id, a.start_at, a.end_at, a.remark, a.status, a.created_at, p.id as patient_id, p.nickname as patient_nickname, p.avatar_url as patient_avatar_url, d.id as doctor_id, d.first_name as doctor_first_name, d.last_name as doctor_last_name, d.avatar_url as doctor_avatar_url
@@ -25,12 +26,12 @@ export async function findAll(options: {
     left outer join patients p on a.patient_id = p.id
     left outer join doctors d on a.doctor_id = d.id
     where true
-    ${options.patientId ? sql`and a.patient_id = ${options.patientId}` : sql``}
-    ${options.doctorId ? sql`and a.doctor_id = ${options.doctorId}` : sql``}
-    ${options.status ? sql`and a.status = ${options.status}` : sql``}
-    ${!options.cursor ? sql`` : options.sortOrder === "asc" ? sql`and ${sql.unsafe(camelToSnakeString(options.sortBy))} > ${options.cursor}` : sql`and ${sql.unsafe(camelToSnakeString(options.sortBy))} < ${options.cursor}`}
-    order by ${sql.unsafe(camelToSnakeString(options.sortBy))} ${sql.unsafe(options.sortOrder)}
-    limit ${options.limit}
+    ${query.patientId ? sql`and a.patient_id = ${query.patientId}` : sql``}
+    ${query.doctorId ? sql`and a.doctor_id = ${query.doctorId}` : sql``}
+    ${query.status ? sql`and a.status = ${query.status}` : sql``}
+    ${!query.cursor ? sql`` : query.sortOrder === "asc" ? sql`and ${sql.unsafe(camelToSnakeString(query.sortBy))} > ${query.cursor}` : sql`and ${sql.unsafe(camelToSnakeString(query.sortBy))} < ${query.cursor}`}
+    order by ${sql.unsafe(camelToSnakeString(query.sortBy))} ${sql.unsafe(query.sortOrder)}
+    limit ${query.limit}
   `;
   // @ts-ignore
   return rows.map((row) => ({
@@ -102,8 +103,8 @@ export async function findOneFullById(id: string) {
   } as FullAppointment;
 }
 
-export async function insertOne(
-  data: Pick<
+export async function createOne(
+  data: PartiallyRequired<
     Appointment,
     "patientId" | "doctorId" | "startAt" | "endAt" | "remark"
   >,
@@ -120,7 +121,7 @@ export async function insertOne(
   `;
 
   if (!row) {
-    throw new Error("Failed to insert appointment");
+    throw new Error("failed to create appointment");
   }
 
   return {
@@ -164,7 +165,7 @@ export async function updateOneById(
   `;
 
   if (!row) {
-    throw new Error("Failed to update appointment");
+    throw new Error("failed to update appointment");
   }
 
   return {

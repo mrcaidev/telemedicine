@@ -8,8 +8,8 @@ import * as v from "valibot";
 export const authController = new Hono();
 
 authController.get("/me", authGuard(), async (c) => {
-  const userId = c.get("userId");
-  const user = await authService.findUserById(userId);
+  const actor = c.get("actor");
+  const user = await authService.findCurrentUser(actor);
   return c.json({ code: 0, message: "", data: user });
 });
 
@@ -25,3 +25,9 @@ authController.post(
     return c.json({ code: 0, message: "", data: userWithToken }, 201);
   },
 );
+
+authController.post("/logout", authGuard(), async (c) => {
+  const actor = c.get("actor");
+  await authService.logOut(actor);
+  return c.json({ code: 0, message: "", data: null });
+});

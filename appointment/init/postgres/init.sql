@@ -1,5 +1,6 @@
 create table patients (
   id uuid primary key,
+  email text,
   nickname text,
   avatar_url text
 );
@@ -36,4 +37,10 @@ create table appointments (
   remark text not null,
   status appointment_status default 'normal' not null,
   created_at timestamptz default now() not null
+);
+
+create table email_schedules (
+  appointment_id uuid primary key references appointments(id),
+  email_id uuid not null unique,
+  scheduled_at timestamptz not null
 );

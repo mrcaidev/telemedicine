@@ -1,0 +1,13 @@
+import type { ValidationTargets } from "hono";
+import { validator as honoValidator } from "hono/validator";
+import * as v from "valibot";
+
+// 让 Hono 的数据验证中间件接受 Valibot 的 schema。
+export function validator<
+  Target extends keyof ValidationTargets,
+  Schema extends v.GenericSchema,
+>(target: Target, schema: Schema) {
+  return honoValidator(target, async (value) => {
+    return await v.parseAsync(schema, value);
+  });
+}
