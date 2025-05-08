@@ -66,7 +66,6 @@ async def delete_session(id:UUID, user_id:UUID):
     session_deleted = collection.find_one_and_delete(
         {"id": id, "user_id": user_id},
     )
-    print(session_deleted)
     return session_deleted
 async def delete_user_session(user_id:UUID):
     collection.delete(

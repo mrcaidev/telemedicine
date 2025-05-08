@@ -33,13 +33,16 @@ async def speak_to_bot(id: UUID, user_message):
         extra_body={"include_retrieval_info": True},
     )
     assistant_reply = response.choices[0].message.content
-    history.append({"role": "assistant", "content": assistant_reply})
-    await session.update_session_history(id, history)
     symptom, urgency, suggestion = parse_evaluation_results(assistant_reply)
 
     if symptom and urgency and suggestion:
+        # 说明产出了诊断结果，保存诊断结果，本轮对话不记录
         await save_evaluation_results(id, symptom, urgency, suggestion)
-        return {"role": "assistant", "content": assistant_reply, "type": "evaluation"}
+        return {"role": "assistant", "symptom": symptom,"urgency":urgency, "suggestion":suggestion, "type": "evaluation"}
+    else:
+        # 没有产出诊断，保留记录，继续对话
+        history.append({"role": "assistant", "content": assistant_reply})
+        await session.update_session_history(id, history)
     return {"role": "assistant", "content": assistant_reply, "type": "message"}
 
 
@@ -55,13 +58,6 @@ def parse_evaluation_results(message: str):
 
 
 async def save_evaluation_results(id, symptom, urgency, suggestion):
-    print(
-        f"评估结果已保存：\n"
-        f"会话ID: {id}\n"
-        f"症状描述: {symptom}\n"
-        f"紧急程度: {urgency}\n"
-        f"处理建议: {suggestion}"
-    )
     # 添加保存逻辑
     await session.update_session_evaluation(
         id=id,

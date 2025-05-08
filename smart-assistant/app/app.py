@@ -4,7 +4,7 @@ from fastapi import FastAPI, Response, Request, HTTPException, APIRouter, Depend
 from fastapi.responses import JSONResponse
 from uuid import UUID, uuid4
 
-from app.model import SessionData,ResponseData, chatbotReply
+from app.model import SessionData,ResponseData, chatbotReply, chatbotEvaluation
 from app.respCode import RespCode
 import app.redisUtils as RedisUtils
 import app.assistant as Assistant
@@ -93,12 +93,24 @@ async def speak_to_agent(id:str, request:Request, response: Response, res: Respo
     if res is not None:
         response.status_code = res.code
         return res
+    user_id = request.headers.get("X-User-Id")
+    if await session_validate(id, user_id) is False:
+        response.status_code = RespCode.UNAUTHORIZED
+        return ResponseData(code=RespCode.UNAUTHORIZED, message="unauthorized", data=None)
     body: dict = await request.json()
     message = body.get("content")
     session_id = UUID(id)
     message_reply = await Assistant.speak_to_agent(session_id, message)
     response.status_code = RespCode.SUCCESS_CREATE
-    return ResponseData(code=RespCode.SUCCESS_CREATE, message="success", data=chatbotReply(type=message_reply["type"], content=message_reply["content"], role=message_reply["role"]))
+    if message_reply["type"] == "message":
+        return ResponseData(code=RespCode.SUCCESS_CREATE, message="success",data=chatbotReply(type=message_reply["type"], content=message_reply["content"],role=message_reply["role"]))
+    else:
+        await RedisUtils.delete_key(user_id)
+        return ResponseData(code=RespCode.SUCCESS_CREATE, message="success",
+                            data=chatbotEvaluation(type=message_reply["type"], symptom=message_reply["symptom"],
+                                                   urgency=message_reply["urgency"],
+                                                   suggestion=message_reply["suggestion"]))
+
 
 @app.get("/livez")
 async def check_live(request: Request, response: Response):
@@ -112,4 +124,16 @@ async def check_connect_ready(request: Request, response: Response):
         return ResponseData(code=RespCode.SUCCESS, message="success", data=None)
 
     return ResponseData(code=RespCode.SERVER_INTERNAL_ERROR, message="server error", data=None)
+
+async def session_validate(id:str, user_id:str):
+    try:
+        data = await RedisUtils.get_key(user_id)
+        value = data["value"]
+        session_id = json.loads(value)["sessionId"]
+        if id == session_id:
+            return True
+        else:
+            return False
+    except:
+        return False
 

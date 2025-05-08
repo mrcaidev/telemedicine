@@ -22,6 +22,12 @@ class chatbotReply(BaseModel):
     content: str
     role: str
 
+class chatbotEvaluation(BaseModel):
+    type: str
+    symptom: str
+    urgency: int
+    suggestion: str
+
 
 class ResponseData(BaseModel):
     code: int
