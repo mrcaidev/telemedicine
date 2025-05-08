@@ -1,9 +1,9 @@
 import {
   emailSchema,
   firstNameSchema,
+  idSchema,
   lastNameSchema,
   passwordSchema,
-  uuidSchema,
 } from "@/common/schema";
 import { authGuard } from "@/middleware/auth-guard";
 import { validator } from "@/middleware/validator";
@@ -15,7 +15,8 @@ export const clinicAdminController = new Hono();
 
 clinicAdminController.get(
   "/:id",
-  validator("param", v.object({ id: uuidSchema })),
+  authGuard(["platform_admin"]),
+  validator("param", v.object({ id: idSchema })),
   async (c) => {
     const { id } = c.req.valid("param");
     const clinicAdmin = await clinicAdminService.findOneById(id);
@@ -31,15 +32,15 @@ clinicAdminController.post(
     v.object({
       email: emailSchema,
       password: passwordSchema,
-      clinicId: uuidSchema,
+      clinicId: idSchema,
       firstName: firstNameSchema,
       lastName: lastNameSchema,
     }),
   ),
   async (c) => {
     const data = c.req.valid("json");
-    const userId = c.get("userId");
-    const clinicAdmin = await clinicAdminService.createOne(data, userId);
-    return c.json({ code: 0, message: "", data: clinicAdmin });
+    const actor = c.get("actor");
+    const clinicAdmin = await clinicAdminService.createOne(data, actor);
+    return c.json({ code: 0, message: "", data: clinicAdmin }, 201);
   },
 );

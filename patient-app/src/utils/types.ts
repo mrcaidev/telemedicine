@@ -45,3 +45,21 @@ export type DoctorAvailability = {
   startTime: string;
   endTime: string;
 };
+
+export type ChatMessage = {
+  role: "assistant" | "user";
+  content: string;
+};
+
+export type ChatEvaluation = {
+  symptom: string;
+  urgency: number;
+  suggestion: string;
+};
+
+export type ChatSession = {
+  id: string;
+  history: ChatMessage[];
+  evaluation: ChatEvaluation | null;
+  createdAt: string;
+};

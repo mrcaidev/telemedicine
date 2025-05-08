@@ -17,9 +17,10 @@ authGatewayController.get("/", async (c) => {
 
     // 如果 JWT 验证成功，说明 JWT 必然是可信且有效的，
     // 将其中的 ID 和角色信息放入响应头中。
-    const { id, role } = await verifyJwt(token);
+    const { id, role, email } = await verifyJwt(token);
     c.header("X-User-Id", id);
     c.header("X-User-Role", role);
+    c.header("X-User-Email", email);
 
     // 返回 204。
     return c.body(null, 204);

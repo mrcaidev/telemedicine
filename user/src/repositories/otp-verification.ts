@@ -1,5 +1,5 @@
 import { camelToSnakeJson, snakeToCamelJson } from "@/utils/case";
-import type { OtpVerification } from "@/utils/types";
+import type { OtpVerification, PartiallyRequired } from "@/utils/types";
 import { sql } from "bun";
 
 export async function findLastOneByEmail(email: string) {
@@ -18,14 +18,16 @@ export async function findLastOneByEmail(email: string) {
   return snakeToCamelJson(row) as OtpVerification;
 }
 
-export async function insertOne(data: Pick<OtpVerification, "email" | "otp">) {
+export async function createOne(
+  data: PartiallyRequired<OtpVerification, "email" | "otp">,
+) {
   const [row] = await sql`
     insert into otp_verifications ${sql(camelToSnakeJson(data))}
     returning id, email, otp, sent_at, verified_at
   `;
 
   if (!row) {
-    throw new Error("failed to insert OTP verification");
+    throw new Error("failed to create otp verification");
   }
 
   return snakeToCamelJson(row) as OtpVerification;
@@ -43,7 +45,7 @@ export async function updateOneById(
   `;
 
   if (!row) {
-    throw new Error("failed to update OTP verification");
+    throw new Error("failed to update otp verification");
   }
 
   return snakeToCamelJson(row) as OtpVerification;

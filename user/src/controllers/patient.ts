@@ -1,9 +1,10 @@
 import {
   emailSchema,
+  idSchema,
   otpSchema,
   passwordSchema,
-  uuidSchema,
 } from "@/common/schema";
+import { authGuard } from "@/middleware/auth-guard";
 import { validator } from "@/middleware/validator";
 import * as patientService from "@/services/patient";
 import { Hono } from "hono";
@@ -13,7 +14,8 @@ export const patientController = new Hono();
 
 patientController.get(
   "/:id",
-  validator("param", v.object({ id: uuidSchema })),
+  authGuard(["doctor"]),
+  validator("param", v.object({ id: idSchema })),
   async (c) => {
     const { id } = c.req.valid("param");
     const patient = await patientService.findOneById(id);

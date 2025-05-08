@@ -4,5 +4,6 @@ declare module "bun" {
     SUPER_ADMIN_TOKEN: string;
     POSTGRES_URL: string;
     KAFKA_BROKERS: string;
+    GOOGLE_OAUTH_CLIENT_IDS: string;
   }
 }

@@ -1,6 +1,8 @@
 image: mrcaidev/telemedicine-appointment
 host: api.localhost
 port: 3000
+livenessProbe: /livez
+readinessProbe: /readyz
 paths:
   - /appointments
   - /doctor-availabilities

@@ -28,6 +28,12 @@
         "image": "src/assets/images/splash.png",
         "imageWidth": 200
       }
+    ],
+    [
+      "@react-native-google-signin/google-signin",
+      {
+        "iosUrlScheme": "com.googleusercontent.apps.234782665622-ml21883i8km05ls3t6eschrapvqb6rge"
+      }
     ]
   ],
   "jsEngine": "hermes",
