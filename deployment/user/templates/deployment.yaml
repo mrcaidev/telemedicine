@@ -31,4 +31,11 @@ spec:
               path: {{ . }}
               port: {{ $.Values.port }}
           {{- end }}
+      resources:
+        requests:
+          cpu: {{ .Values.resources.requests.cpu | default "100m" }}
+          memory: {{ .Values.resources.requests.memory | default "128Mi" }}
+        limits:
+          cpu: {{ .Values.resources.limits.cpu | default "200m" }}
+          memory: {{ .Values.resources.limits.memory | default "256Mi" }}
       serviceAccountName: {{ .Release.Name }}
