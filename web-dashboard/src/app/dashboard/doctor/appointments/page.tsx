@@ -39,7 +39,7 @@ export default function DoctorAppointmentsPage() {
     return () => {
       if (target) observer.unobserve(target);
     };
-  }, [hasMore, loading]);
+  }, [hasMore, loading, fetchMore]);
 
   const filteredAppointments = appointments.filter((appt) => {
     if (!appt.patient) return false;
