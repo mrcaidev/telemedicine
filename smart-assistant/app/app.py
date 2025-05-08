@@ -59,7 +59,12 @@ async def delete_session(id: str, request:Request, response: Response, res: Resp
     result = await Assistant.delete_session(UUID(id), UUID(user_id))
     if result is None:
         return ResponseData(code=RespCode.NOT_FOUND, message="session not found", data=None)
-    await RedisUtils.delete_key(str(result["user_id"]))
+
+    data = await RedisUtils.get_key(user_id)
+    value = data["value"]
+    session_id = json.loads(value)["sessionId"]
+    if id == session_id:
+        await RedisUtils.delete_key(str(result["user_id"]))
     return ResponseData(code=RespCode.SUCCESS, message="success", data=None)
 
 @app.get("/sessions/{id}", response_model=ResponseData, dependencies=[Depends(HttpMiddleware.validate_request_header)])
