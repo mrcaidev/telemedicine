@@ -12,6 +12,7 @@ export function useAppointments() {
     const apiBase =
       process.env.NEXT_PUBLIC_API_BASE_URL ||
       "http://127.0.0.1:4523/m1/6162561-5854630-default";
+
     const url = new URL("/api/doctor/appointments", apiBase);
     url.searchParams.set("limit", "10");
     url.searchParams.set("sortBy", "endAt");
