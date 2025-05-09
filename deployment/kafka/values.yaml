@@ -13,4 +13,7 @@ provisioning:
     - name: DoctorCreated
     - name: DoctorUpdated
     - name: DoctorDeleted
+    - name: AppointmentBooked
+    - name: AppointmentRescheduled
+    - name: AppointmentCancelled
     - name: EmailRequested
