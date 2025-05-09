@@ -6,19 +6,19 @@ import { usePathname } from "next/navigation";
 import { clsx } from "clsx";
 
 const menu = [
-  { label: "Dashboard", icon: Home, href: "/dashboard/doctor" },
+  { label: "Dashboard", icon: Home, href: "/dashboard/clinic" },
   {
-    label: "Appointments",
+    label: "Doctors",
     icon: Calendar,
-    href: "/dashboard/doctor/appointments",
+    href: "/dashboard/clinic/doctors",
   },
   {
     label: "Schedule",
     icon: CalendarClock,
-    href: "/dashboard/doctor/schedule",
+    href: "/dashboard/clinic/schedule",
   },
 
-  { label: "Profile", icon: Users, href: "/dashboard/doctor/profile" },
+  { label: "Profile", icon: Users, href: "/dashboard/clinic/profile" },
 ];
 
 export default function DoctorSidebar() {
@@ -29,9 +29,9 @@ export default function DoctorSidebar() {
       <nav className="space-y-2">
         {menu.map((item) => {
           const isActive =
-            item.href === "/dashboard/doctor/appointments"
-              ? pathname.startsWith("/dashboard/doctor/appointments") ||
-                pathname.startsWith("/dashboard/doctor/patients")
+            item.href === "/dashboard/clinic/doctors"
+              ? pathname.startsWith("/dashboard/clinic/doctors") ||
+                pathname.startsWith("/dashboard/clinic/patients")
               : pathname === item.href;
 
           return (
