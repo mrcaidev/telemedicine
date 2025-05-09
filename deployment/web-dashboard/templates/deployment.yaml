@@ -33,9 +33,9 @@ spec:
           {{- end }}
       resources:
         requests:
-          cpu: {{ .Values.resources.requests.cpu | default "100m" }}
-          memory: {{ .Values.resources.requests.memory | default "128Mi" }}
+          cpu: 100m
+          memory: 128Mi
         limits:
-          cpu: {{ .Values.resources.limits.cpu | default "200m" }}
-          memory: {{ .Values.resources.limits.memory | default "256Mi" }}
+          cpu: 200m
+          memory: 256Mi
       serviceAccountName: {{ .Release.Name }}
