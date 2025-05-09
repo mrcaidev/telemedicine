@@ -1,0 +1,14 @@
+image: mrcaidev/telemedicine-smart-assistant
+host: api.localhost
+port: 80
+livenessProbe: /livez
+readinessProbe: /readyz
+paths:
+  - /sessions
+minReplicas: 1
+maxReplicas: 2
+secrets:
+  AGENT_ENDPOINT: https://rple22irdjo2o7ujic6jsgqy.agents.do-ai.run/api/v1/
+  AGENT_ACCESS_KEY: KkkSNvyp5VGydbd4u8kWS6a6BeaInBI_
+  MONGO_URL: mongodb://dev:dev@smart-assistant-mongo-mongodb:27017/?authSource=smart_assistant
+  REDIS_URL: redis://default:dev@smart-assistant-redis-master:6379

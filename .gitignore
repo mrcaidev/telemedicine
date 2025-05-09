@@ -1,0 +1,7 @@
+.idea
+.vscode
+*.crt
+*.key
+*.log
+*.pem
+.DS_Store

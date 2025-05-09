@@ -39,3 +39,16 @@ docker build -t mrcaidev/telemedicine-appointment:$TAG ./appointment
 echo "🚀 Deploying appointment..."
 minikube image load mrcaidev/telemedicine-appointment:$TAG
 helm install appointment ./deployment/appointment --set image=mrcaidev/telemedicine-appointment:$TAG
+
+echo "🚀 Deploying smart-assistant-mongo..."
+helm install smart-assistant-mongo bitnami/mongodb --values ./deployment/smart-assistant-mongo/values.yaml
+
+echo "🚀 Deploying smart-assistant-redis..."
+helm install smart-assistant-redis bitnami/redis --values ./deployment/smart-assistant-redis/values.yaml
+
+echo "📦 Building smart-assistant..."
+docker build -t mrcaidev/telemedicine-smart-assistant:$TAG ./smart-assistant
+
+echo "🚀 Deploying smart-assistant..."
+minikube image load mrcaidev/telemedicine-smart-assistant:$TAG
+helm install smart-assistant ./deployment/smart-assistant --set image=mrcaidev/telemedicine-smart-assistant:$TAG
