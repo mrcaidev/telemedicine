@@ -2,7 +2,7 @@ import { Kafka, type KafkaConfig, logLevel } from "kafkajs";
 
 async function readConfig() {
   const baseConfig: KafkaConfig = {
-    clientId: "notification",
+    clientId: "appointment",
     brokers: Bun.env.KAFKA_BROKERS.split(","),
     logLevel: logLevel.ERROR,
   };
