@@ -15,9 +15,11 @@ import { Plus, Trash2, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
 import { Doctor } from "@/types/doctor";
+import { DoctorFormDialog } from "@/components/dialog/doctor-form-dialog";
 
 export default function ClinicDoctorList() {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
     fetch("/api/clinic/doctor")
@@ -28,7 +30,8 @@ export default function ClinicDoctorList() {
           description: "can't load doctors, please try again later.",
         })
       );
-  }, []);
+  }, [refreshTrigger]);
+  const refreshDoctors = () => setRefreshTrigger((prev) => prev + 1);
 
   const handleDelete = (id: string) => {
     fetch(`/api/clinic/doctor/${id}`, { method: "DELETE" })
@@ -45,9 +48,12 @@ export default function ClinicDoctorList() {
     <div className="p-6">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-xl font-semibold">Doctor Management</h1>
-        <Button onClick={() => console.log("Add doctor")} className="gap-2 cursor-pointer">
-          <Plus size={16} /> Add Doctor
-        </Button>
+
+        <DoctorFormDialog onSuccess={refreshDoctors}>
+          <Button className="gap-2 cursor-pointer">
+            <Plus size={16} /> Add Doctor
+          </Button>
+        </DoctorFormDialog>
       </div>
 
       <Table>
@@ -79,14 +85,19 @@ export default function ClinicDoctorList() {
               <TableCell>{doctor.gender}</TableCell>
               <TableCell>{doctor.specialties.join(", ")}</TableCell>
               <TableCell className="text-right space-x-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="cursor-pointer"
-                  onClick={() => console.log("Edit", doctor)}
+                <DoctorFormDialog
+                  defaultValues={doctor}
+                  onSuccess={refreshDoctors}
                 >
-                  <Pencil className="w-4 h-4" />
-                </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="cursor-pointer"
+                    onClick={() => console.log("Edit", doctor)}
+                  >
+                    <Pencil className="w-4 h-4" />
+                  </Button>
+                </DoctorFormDialog>
                 <Button
                   variant="destructive"
                   size="sm"
