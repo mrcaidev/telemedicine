@@ -19,7 +19,7 @@ minikube image load mrcaidev/telemedicine-notification:$TAG
 helm install notification ./deployment/notification --set image=mrcaidev/telemedicine-notification:$TAG
 
 echo "🚀 Deploying user-postgres..."
-kubectl create configmap user-postgres-initdb --from-file=./user/init/postgres
+kubectl create cm user-postgres-initdb --from-file=./user/init/postgres
 helm install user-postgres bitnami/postgresql --values ./deployment/user-postgres/values.yaml
 
 echo "📦 Building user..."
@@ -30,7 +30,7 @@ minikube image load mrcaidev/telemedicine-user:$TAG
 helm install user ./deployment/user --set image=mrcaidev/telemedicine-user:$TAG
 
 echo "🚀 Deploying appointment-postgres..."
-kubectl create configmap appointment-postgres-initdb --from-file=./appointment/init/postgres
+kubectl create cm appointment-postgres-initdb --from-file=./appointment/init/postgres
 helm install appointment-postgres bitnami/postgresql --values ./deployment/appointment-postgres/values.yaml
 
 echo "📦 Building appointment..."
@@ -39,10 +39,3 @@ docker build -t mrcaidev/telemedicine-appointment:$TAG ./appointment
 echo "🚀 Deploying appointment..."
 minikube image load mrcaidev/telemedicine-appointment:$TAG
 helm install appointment ./deployment/appointment --set image=mrcaidev/telemedicine-appointment:$TAG
-
-echo "📦 Building web-dashboard..."
-docker build -t mrcaidev/telemedicine-web-dashboard:$TAG --build-arg NEXT_PUBLIC_API_BASE_URL=http://api.localhost ./web-dashboard
-
-echo "🚀 Deploying web-dashboard..."
-minikube image load mrcaidev/telemedicine-web-dashboard:$TAG
-helm install web-dashboard ./deployment/web-dashboard --set image=mrcaidev/telemedicine-web-dashboard:$TAG
