@@ -1,7 +1,7 @@
 import Navbar from "@/components/nav/navbar";
 import type { Metadata } from "next";
 import ProtectedRoute from "@/components/auth/protected-route";
-import Sidebar from "@/components/nav/clinic-sidebar copy";
+import Sidebar from "@/components/nav/platform-sidebar";
 
 export const metadata: Metadata = {
   title: "Create Next App",

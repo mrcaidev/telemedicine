@@ -16,39 +16,46 @@ export const authOptions: NextAuthOptions = {
         console.log("AUTH LOGIN to:", BACKEND_API);
         console.log("Received credentials:", credentials);
 
-        const res = await fetch(`${BACKEND_API}/auth/login`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: credentials?.email,
-            password: credentials?.password,
-          }),
-        });
+        try {
+          const res = await fetch(`${BACKEND_API}/auth/login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email: credentials?.email,
+              password: credentials?.password,
+            }),
+          });
 
-        const result = await res.json();
+          const result = await res.json();
 
-        const data = result.data;
+          console.log("Response from login:", result);
 
-        console.log(
-          `[AUDIT] Login: ${data.email} at ${new Date().toISOString()}`
-        );
+          const data = result?.data;
 
-        if (!res.ok || !data.token || !data.role) {
-          console.error("Login failed:", result);
-          console.error("Response status:", res.status);
-          console.error("Response status text:", res.statusText);
-          console.error("Response data:", data);
+          console.log(
+            `[AUDIT] Login: ${data.email} at ${new Date().toISOString()}`
+          );
+
+          if (!res.ok || !data || !data.token || !data.role) {
+            console.error("Login failed:", result);
+            console.error("Response status:", res.status);
+            console.error("Response status text:", res.statusText);
+            console.error("Response data:", data);
+            return null;
+          }
+
+          return {
+            id: data.id,
+            email: data.email,
+            name: `${data.firstName ?? "peter"} ${data.lastName ?? "griffin"}`,
+            role: data.role,
+            token: data.token,
+            avatarUrl: data.avatarUrl ?? "/d.png",
+          };
+        } catch (error) {
+          console.error("Error during login:", error);
           return null;
         }
-
-        return {
-          id: data.id,
-          email: data.email,
-          name: `${data.firstName ?? "peter"} ${data.lastName ?? "griffin"}`,
-          role: data.role,
-          token: data.token,
-          avatarUrl: data.avatarUrl ?? "/d.png",
-        };
       },
     }),
   ],
