@@ -46,11 +46,13 @@ spec:
                 path: client.key
               - key: client.crt
                 path: client.crt
+      {{- with .Values.resources }}
       resources:
         requests:
-          cpu: 100m
-          memory: 128Mi
+          cpu: {{ .requests.cpu }}
+          memory: {{ .requests.memory }}
         limits:
-          cpu: 200m
-          memory: 256Mi
+          cpu: {{ .limits.cpu }}
+          memory: {{ .limits.memory }}
+      {{- end }}
       serviceAccountName: {{ .Release.Name }}

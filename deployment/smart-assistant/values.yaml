@@ -1,12 +1,19 @@
 image: mrcaidev/telemedicine-smart-assistant
-host: api.localhost
+host: localhost
 port: 80
 livenessProbe: /livez
 readinessProbe: /readyz
 paths:
   - /sessions
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi
 minReplicas: 1
-maxReplicas: 2
+maxReplicas: 1
 secrets:
   AGENT_ENDPOINT: https://rple22irdjo2o7ujic6jsgqy.agents.do-ai.run/api/v1/
   AGENT_ACCESS_KEY: KkkSNvyp5VGydbd4u8kWS6a6BeaInBI_
