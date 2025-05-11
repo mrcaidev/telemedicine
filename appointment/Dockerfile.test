@@ -3,4 +3,5 @@ WORKDIR /code
 COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile
 ENV NODE_ENV=test
+ENV TZ=Asia/Singapore
 CMD ["sleep", "infinity"]

@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { RawAppointment } from "@/types/appointment";
-let hasFetched = false;
 
 export function useAppointments() {
   const [appointments, setAppointments] = useState<RawAppointment[]>([]);
@@ -10,7 +9,11 @@ export function useAppointments() {
   const fetchAppointments = async (cursor?: string) => {
     setLoading(true);
 
-    const url = new URL("/api/doctor/appointments", window.location.origin);
+    const apiBase =
+      process.env.NEXT_PUBLIC_API_BASE_URL ||
+      "http://127.0.0.1:4523/m1/6162561-5854630-default";
+
+    const url = new URL("/api/doctor/appointments", apiBase);
     url.searchParams.set("limit", "10");
     url.searchParams.set("sortBy", "endAt");
     url.searchParams.set("sortOrder", "asc");
@@ -18,8 +21,8 @@ export function useAppointments() {
 
     const res = await fetch(url.toString());
     const json = await res.json();
-    console.log("✅ API response:", json); 
-    console.log("cursor",json.data.nextCursor);
+    console.log("✅ API response:", json);
+    console.log("cursor", json.data.nextCursor);
 
     if (json?.data?.appointments) {
       setAppointments((prev) => [...prev, ...json.data.appointments]);
@@ -30,19 +33,19 @@ export function useAppointments() {
   };
 
   useEffect(() => {
-    if (hasFetched) return;
-    hasFetched = true;
     fetchAppointments();
   }, []);
+
+  const fetchMore = useCallback(() => {
+    if (nextCursor) {
+      fetchAppointments(nextCursor);
+    }
+  }, [nextCursor]);
 
   return {
     appointments,
     loading,
     nextCursor,
-    fetchMore: () => {
-      if (nextCursor) {
-        fetchAppointments(nextCursor);
-      }
-    },
+    fetchMore,
   };
 }

@@ -21,7 +21,12 @@ export async function GET(req: NextRequest) {
   const doctorId = session.user.id;
   const token = session.user.token;
 
+  if (!req.url.startsWith("http")) {
+    throw new Error("req.url must be an absolute URL");
+  }
+  
   const { searchParams } = new URL(req.url);
+
   const cursor = searchParams.get("cursor");
   const limit = searchParams.get("limit") || "10";
   const sortBy = searchParams.get("sortBy") || "endAt";
