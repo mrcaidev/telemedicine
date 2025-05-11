@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import Image from "next/image";
 import { Doctor } from "@/types/doctor";
 import { DoctorFormDialog } from "@/components/dialog/doctor-form-dialog";
+import { ConfirmDeleteDialog } from "@/components/dialog/confirm-delete-dialog";
 
 export default function ClinicDoctorList() {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
@@ -33,15 +34,25 @@ export default function ClinicDoctorList() {
   }, [refreshTrigger]);
   const refreshDoctors = () => setRefreshTrigger((prev) => prev + 1);
 
-  const handleDelete = (id: string) => {
-    fetch(`/api/clinic/doctor/${id}`, { method: "DELETE" })
-      .then(() => {
-        setDoctors((prev) => prev.filter((d) => d.id !== id));
-        toast("Deleted successfully", {
-          description: "Doctor has been deleted successfully.",
-        });
-      })
-      .catch(() => toast("Delete failed"));
+  const handleDelete = async (id: string) => {
+    try {
+      const res = await fetch(`/api/clinic/doctor/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to delete");
+      }
+
+      setDoctors((prev) => prev.filter((c) => c.id !== id));
+      toast.success("Deleted successfully", {
+        description: "Doctor has been deleted successfully.",
+      });
+    } catch {
+      toast.error("Delete failed", {
+        description: "Something went wrong. Please try again.",
+      });
+    }
   };
 
   return (
@@ -98,14 +109,18 @@ export default function ClinicDoctorList() {
                     <Pencil className="w-4 h-4" />
                   </Button>
                 </DoctorFormDialog>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  className="cursor-pointer"
-                  onClick={() => handleDelete(doctor.id)}
+                <ConfirmDeleteDialog
+                  onConfirm={() => handleDelete(doctor.id)}
+                  description={`Are you sure you want to delete "${doctor.firstName} ${doctor.lastName}"? This action cannot be undone.`}
                 >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    className="cursor-pointer"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </ConfirmDeleteDialog>
               </TableCell>
             </TableRow>
           ))}

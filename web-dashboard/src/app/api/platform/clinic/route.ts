@@ -5,12 +5,12 @@ const BACKEND_API =
 
 export async function GET() {
   try {
-    const res = await fetch(`${BACKEND_API}/doctors`);
+    const res = await fetch(`${BACKEND_API}/clinics`);
     const data = await res.json();
-    return NextResponse.json(data);
+    return NextResponse.json({ data });
   } catch (err) {
     return NextResponse.json(
-      { error: "Failed to fetch doctors" },
+      { error: "Failed to fetch clinics" },
       { status: 500 }
     );
   }
@@ -19,7 +19,7 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const res = await fetch(`${BACKEND_API}/doctors`, {
+    const res = await fetch(`${BACKEND_API}/clinics`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -27,7 +27,10 @@ export async function POST(req: NextRequest) {
 
     const data = await res.json();
     return NextResponse.json(data, { status: res.status });
-  } catch (e) {
-    return NextResponse.json({ error: "Create doctor failed" }, { status: 500 });
+  } catch {
+    return NextResponse.json(
+      { error: "Create clinic failed" },
+      { status: 500 }
+    );
   }
 }
