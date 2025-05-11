@@ -1,3 +1,4 @@
 host: staging-telemedicine.ink
 minReplicas: 1
 maxReplicas: 2
+kafkaCertsNeeded: true

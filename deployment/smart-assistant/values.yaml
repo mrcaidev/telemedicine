@@ -14,6 +14,7 @@ resources:
     memory: 256Mi
 minReplicas: 1
 maxReplicas: 1
+kafkaCertsNeeded: false
 secrets:
   AGENT_ENDPOINT: https://rple22irdjo2o7ujic6jsgqy.agents.do-ai.run/api/v1/
   AGENT_ACCESS_KEY: KkkSNvyp5VGydbd4u8kWS6a6BeaInBI_
