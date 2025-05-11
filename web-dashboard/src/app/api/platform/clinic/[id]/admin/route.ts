@@ -12,7 +12,7 @@ export async function GET(
     const res = await fetch(`${BACKEND_API}/clinics/${id}/clinic-admins`);
     const data = await res.json();
     return NextResponse.json({ data });
-  } catch (err) {
+  } catch {
     return NextResponse.json(
       { error: "Failed to fetch clinics" },
       { status: 500 }
@@ -24,7 +24,8 @@ export async function POST(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const clinicId = params.id;
+  const { id } = await params;
+  const clinicId = id;
   const body = await req.json();
 
   const payload = {

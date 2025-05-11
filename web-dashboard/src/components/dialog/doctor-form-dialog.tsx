@@ -15,15 +15,21 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-const specialtiesOptions = [
-  "Cardiology",
-  "Neurology",
-  "Pediatrics",
-  "Orthopedics",
-  "Dermatology",
-]; // TODO: Replace with dynamic options
+// const specialtiesOptions = [
+//   "Cardiology",
+//   "Neurology",
+//   "Pediatrics",
+//   "Orthopedics",
+//   "Dermatology",
+// ]; // TODO: Replace with dynamic options
 
 const createSchema = z.object({
   email: z.string().email(),
@@ -31,6 +37,8 @@ const createSchema = z.object({
   firstName: z.string().min(1),
   lastName: z.string().min(1),
 });
+
+type Gender = z.infer<typeof editSchema>["gender"];
 
 const editSchema = z.object({
   firstName: z.string().optional(),
@@ -50,19 +58,25 @@ type DoctorFormDialogProps = {
   children: React.ReactNode;
 };
 
-export function DoctorFormDialog({ defaultValues, onSuccess, children }: DoctorFormDialogProps) {
+export function DoctorFormDialog({
+  defaultValues,
+  onSuccess,
+  children,
+}: DoctorFormDialogProps) {
   const isEdit = !!defaultValues;
   const [open, setOpen] = useState(false);
 
   const form = useForm<CreateDoctorForm | EditDoctorForm>({
-    resolver: zodResolver(isEdit ? (editSchema as any) : (createSchema as any)),
+    resolver: zodResolver(isEdit ? (editSchema as any) : (createSchema as any)), // eslint-disable-line @typescript-eslint/no-explicit-any
     defaultValues,
   });
 
-  const handleSubmit = async (values: any) => {
+  const handleSubmit = async (values: CreateDoctorForm | EditDoctorForm) => {
     try {
       const res = await fetch(
-        isEdit ? `/api/clinic/doctor/${defaultValues!.id}` : "/api/clinic/doctor",
+        isEdit
+          ? `/api/clinic/doctor/${defaultValues!.id}`
+          : "/api/clinic/doctor",
         {
           method: isEdit ? "PATCH" : "POST",
           headers: { "Content-Type": "application/json" },
@@ -92,7 +106,11 @@ export function DoctorFormDialog({ defaultValues, onSuccess, children }: DoctorF
           {!isEdit && (
             <>
               <Input placeholder="Email" {...form.register("email")} />
-              <Input placeholder="Password" type="password" {...form.register("password")} />
+              <Input
+                placeholder="Password"
+                type="password"
+                {...form.register("password")}
+              />
             </>
           )}
 
@@ -103,7 +121,9 @@ export function DoctorFormDialog({ defaultValues, onSuccess, children }: DoctorF
             <>
               <Input placeholder="Avatar URL" {...form.register("avatarUrl")} />
 
-              <Select onValueChange={(val) => form.setValue("gender", val as any)}>
+              <Select
+                onValueChange={(val) => form.setValue("gender", val as Gender)}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select Gender" />
                 </SelectTrigger>
@@ -113,9 +133,18 @@ export function DoctorFormDialog({ defaultValues, onSuccess, children }: DoctorF
                 </SelectContent>
               </Select>
 
-              <Textarea placeholder="Description" {...form.register("description")} />
-              <Textarea placeholder="Specialties (comma separated)"
-                onChange={(e) => form.setValue("specialties", e.target.value.split(",").map(s => s.trim()))}
+              <Textarea
+                placeholder="Description"
+                {...form.register("description")}
+              />
+              <Textarea
+                placeholder="Specialties (comma separated)"
+                onChange={(e) =>
+                  form.setValue(
+                    "specialties",
+                    e.target.value.split(",").map((s) => s.trim())
+                  )
+                }
               />
             </>
           )}

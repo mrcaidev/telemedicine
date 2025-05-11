@@ -8,7 +8,7 @@ export async function GET() {
     const res = await fetch(`${BACKEND_API}/doctors`);
     const data = await res.json();
     return NextResponse.json(data);
-  } catch (err) {
+  } catch {
     return NextResponse.json(
       { error: "Failed to fetch doctors" },
       { status: 500 }
@@ -27,7 +27,10 @@ export async function POST(req: NextRequest) {
 
     const data = await res.json();
     return NextResponse.json(data, { status: res.status });
-  } catch (e) {
-    return NextResponse.json({ error: "Create doctor failed" }, { status: 500 });
+  } catch {
+    return NextResponse.json(
+      { error: "Create doctor failed" },
+      { status: 500 }
+    );
   }
 }

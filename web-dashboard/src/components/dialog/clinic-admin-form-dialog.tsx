@@ -46,12 +46,16 @@ export function ClinicAdminFormDialog({
   const isEdit = !!defaultValues;
   const [open, setOpen] = useState(false);
 
+  const schema = isEdit ? editSchema : createSchema;
+
   const form = useForm<CreateClinicAdminForm | EditClinicAdminForm>({
-    resolver: zodResolver(isEdit ? (editSchema as any) : (createSchema as any)),
+    resolver: zodResolver(schema),
     defaultValues,
   });
 
-  const handleSubmit = async (values: any) => {
+  const handleSubmit = async (
+    values: CreateClinicAdminForm | EditClinicAdminForm
+  ) => {
     const payload = isEdit
       ? values
       : {
