@@ -11,6 +11,13 @@ helm install traefik traefik/traefik --values ./deployment/traefik/values.yaml
 echo "🚀 Deploying kafka..."
 helm install kafka bitnami/kafka --values ./deployment/kafka/values.yaml
 
+echo "📦 Building auth-gateway..."
+docker build -t mrcaidev/telemedicine-auth-gateway:$TAG ./auth-gateway
+
+echo "🚀 Deploying auth-gateway..."
+minikube image load mrcaidev/telemedicine-auth-gateway:$TAG
+helm install auth-gateway ./deployment/auth-gateway --set image=mrcaidev/telemedicine-auth-gateway:$TAG
+
 echo "📦 Building notification..."
 docker build -t mrcaidev/telemedicine-notification:$TAG ./notification
 
