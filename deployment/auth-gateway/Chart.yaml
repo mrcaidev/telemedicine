@@ -1,0 +1,3 @@
+apiVersion: v2
+name: auth-gateway
+version: 0.1.0
