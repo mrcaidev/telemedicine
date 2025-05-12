@@ -31,4 +31,6 @@ jobs:
         run: bun run check
 
       - name: Run tests
-        run: bun test --coverage
+        run: |
+          export JWT_SECRET=a-string-secret-at-least-256-bits-long
+          bun test --coverage
