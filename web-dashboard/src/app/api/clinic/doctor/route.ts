@@ -5,14 +5,17 @@ import { authOptions } from "@/lib/authOptions";
 const BACKEND_API =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080/api";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const id = searchParams.get("clinicId");
+
   const session = await getServerSession(authOptions);
   if (!session || !session.user || !session.user.token) {
     return new Response("Unauthorized", { status: 401 });
   }
 
   try {
-    const res = await fetch(`${BACKEND_API}/doctors`, {
+    const res = await fetch(`${BACKEND_API}/doctors?clinicId=${id}`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${session.user.token}`,

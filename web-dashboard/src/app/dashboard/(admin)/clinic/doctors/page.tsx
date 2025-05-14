@@ -17,13 +17,17 @@ import Image from "next/image";
 import { Doctor } from "@/types/doctor";
 import { DoctorFormDialog } from "@/components/dialog/doctor-form-dialog";
 import { ConfirmDeleteDialog } from "@/components/dialog/confirm-delete-dialog";
+import { useSession } from "next-auth/react";
 
 export default function ClinicDoctorList() {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
+  const { data: session } = useSession();
+  const id = session?.user?.clinicId;
+
   useEffect(() => {
-    fetch("/api/clinic/doctor")
+    fetch(`/api/clinic/doctor?clinicId=${id}`)
       .then((res) => res.json())
       .then((data) => setDoctors(data.data.doctors))
       .catch(() =>
