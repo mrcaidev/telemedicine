@@ -27,11 +27,10 @@ export async function GET() {
       return new Response("Backend Error", { status: res.status });
     }
 
-  try {
-    const res = await fetch(`${BACKEND_API}/clinics`);
     const data = await res.json();
     return NextResponse.json({ data });
-  } catch {
+  } catch (error) {
+    console.error("Error fetching clinics:", error);
     return NextResponse.json(
       { error: "Failed to fetch clinics" },
       { status: 500 }
@@ -62,10 +61,6 @@ export async function POST(req: NextRequest) {
       console.error("Backend error:", res.status, errText);
       return new Response("Backend Error", { status: res.status });
     }
-    
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
 
     const data = await res.json();
     return NextResponse.json(data, { status: res.status });
