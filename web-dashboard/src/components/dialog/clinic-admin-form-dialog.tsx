@@ -67,8 +67,8 @@ export function ClinicAdminFormDialog({
     try {
       const res = await fetch(
         isEdit
-          ? `/api/platform/clinic/${clinicId}/admin/${defaultValues!.id}`
-          : `/api/platform/clinic/${clinicId}/admin`,
+          ? `/api/platform/clinic-admin/${defaultValues!.id}`
+          : `/api/platform/clinic-admin?clinicId=${clinicId}`,
         {
           method: isEdit ? "PATCH" : "POST",
           headers: { "Content-Type": "application/json" },

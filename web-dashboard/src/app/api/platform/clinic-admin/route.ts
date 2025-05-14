@@ -5,11 +5,9 @@ import { authOptions } from "@/lib/authOptions";
 const BACKEND_API =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080/api";
 
-export async function GET(
-  _req: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  const { id } = await params;
+export async function GET(request: NextRequest) {
+  const searchParams = request.nextUrl.searchParams;
+  const clinicId = searchParams.get("clinicId");
 
   const session = await getServerSession(authOptions);
   if (!session || !session.user || !session.user.token) {
@@ -17,13 +15,16 @@ export async function GET(
   }
 
   try {
-    const res = await fetch(`${BACKEND_API}/clinics/${id}/clinic-admins`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${session.user.token}`,
-        "Content-Type": "application/json",
-      },
-    });
+    const res = await fetch(
+      `${BACKEND_API}/clinic-admins?clinicId=${clinicId}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${session.user.token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
     if (!res.ok) {
       const errText = await res.text();
@@ -41,13 +42,10 @@ export async function GET(
   }
 }
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  const { id } = await params;
-  const clinicId = id;
-  const body = await req.json();
+export async function POST(request: NextRequest) {
+  const searchParams = request.nextUrl.searchParams;
+  const clinicId = searchParams.get("clinicId");
+  const body = await request.json();
 
   const payload = {
     ...body,

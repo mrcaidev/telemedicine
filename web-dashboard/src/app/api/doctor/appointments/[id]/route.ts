@@ -17,7 +17,7 @@ export async function GET(
 
   const doctorId = session.user.id;
   const token = session.user.token;
-  const { id } = await params
+  const { id } = await params;
   const appointmentId = id;
 
   try {

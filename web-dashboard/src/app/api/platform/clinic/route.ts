@@ -55,12 +55,12 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify(body),
     });
 
-     if (!res.ok) {
+    if (!res.ok) {
       const errText = await res.text();
       console.error("Backend error:", res.status, errText);
       return new Response("Backend Error", { status: res.status });
     }
-    
+
     const data = await res.json();
     return NextResponse.json(data, { status: res.status });
   } catch {
