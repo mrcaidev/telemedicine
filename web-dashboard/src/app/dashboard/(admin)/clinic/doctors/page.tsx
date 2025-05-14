@@ -25,6 +25,8 @@ export default function ClinicDoctorList() {
 
   const { data: session } = useSession();
   const id = session?.user?.clinicId;
+  console.log(session?.user)
+  console.log("Clinic ID", id);
 
   useEffect(() => {
     fetch(`/api/clinic/doctor?clinicId=${id}`)

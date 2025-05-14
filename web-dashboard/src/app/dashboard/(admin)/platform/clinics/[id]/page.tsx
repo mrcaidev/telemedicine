@@ -78,40 +78,48 @@ export default function ClinicDetailPage() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {admins.map((admin) => (
-            <TableRow key={admin.id}>
-              <TableCell>{`${admin.firstName} ${admin.lastName}`}</TableCell>
-              <TableCell>{admin.email}</TableCell>
-              <TableCell className="text-right space-x-2">
-                <ClinicAdminFormDialog
-                  defaultValues={admin}
-                  clinicId={id as string}
-                  onSuccess={refreshAdmins}
-                >
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="cursor-pointer"
+          {admins.length > 0 ? (
+            admins.map((admin) => (
+              <TableRow key={admin.id}>
+                <TableCell>{`${admin.firstName} ${admin.lastName}`}</TableCell>
+                <TableCell>{admin.email}</TableCell>
+                <TableCell className="text-right space-x-2">
+                  <ClinicAdminFormDialog
+                    defaultValues={admin}
+                    clinicId={id as string}
+                    onSuccess={refreshAdmins}
                   >
-                    <Pencil className="w-4 h-4" />
-                  </Button>
-                </ClinicAdminFormDialog>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="cursor-pointer"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </Button>
+                  </ClinicAdminFormDialog>
 
-                <ConfirmDeleteDialog
-                  onConfirm={() => handleDelete(admin.id)}
-                  description={`Delete admin ${admin.firstName} ${admin.lastName}?`}
-                >
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    className="cursor-pointer"
+                  <ConfirmDeleteDialog
+                    onConfirm={() => handleDelete(admin.id)}
+                    description={`Delete admin ${admin.firstName} ${admin.lastName}?`}
                   >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </ConfirmDeleteDialog>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      className="cursor-pointer"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </ConfirmDeleteDialog>
+                </TableCell>
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={3} className="text-center">
+                No admins found for this clinic.
               </TableCell>
             </TableRow>
-          ))}
+          )}
         </TableBody>
       </Table>
     </div>
