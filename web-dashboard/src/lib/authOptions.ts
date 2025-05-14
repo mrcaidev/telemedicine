@@ -68,6 +68,7 @@ export const authOptions: NextAuthOptions = {
         token.role = user.role;
         token.accessToken = user.token;
         token.avatarUrl = user.avatarUrl;
+        token.clinicId = user.clinicId;
       }
       return token;
     },
@@ -80,6 +81,7 @@ export const authOptions: NextAuthOptions = {
           | "platform_admin";
         session.user.token = token.accessToken as string;
         session.user.avatarUrl = token.avatarUrl as string | null;
+        session.user.clinicId = token.clinicId as string | null;
       }
       return session;
     },
