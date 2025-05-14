@@ -7,6 +7,67 @@ import {
 } from "./utils/data";
 import { GET, POST } from "./utils/request";
 
+describe("GET /clinic-admins", () => {
+  it("returns all clinic admins if ok", async () => {
+    const res = await GET("/clinic-admins", {
+      headers: mockData.platformAdminAuthHeaders,
+    });
+    const json = await res.json();
+    expect(res.status).toEqual(200);
+    expect(json).toEqual({
+      ...successResponseTemplate,
+      data: [mockData.clinicAdmin],
+    });
+  });
+
+  it("returns clinic admins within clinic if given clinicId", async () => {
+    const res = await GET(
+      "/clinic-admins?clinicId=00000000-0000-0000-0000-000000000000",
+      { headers: mockData.platformAdminAuthHeaders },
+    );
+    const json = await res.json();
+    expect(res.status).toEqual(200);
+    expect(json).toEqual({
+      ...successResponseTemplate,
+      data: [],
+    });
+  });
+
+  it("returns 401 if user has not logged in", async () => {
+    const res = await GET("/clinic-admins");
+    const json = await res.json();
+    expect(res.status).toEqual(401);
+    expect(json).toEqual(errorResponseTemplate);
+  });
+
+  it("returns 403 if user is clinic admin", async () => {
+    const res = await GET("/clinic-admins", {
+      headers: mockData.clinicAdminAuthHeaders,
+    });
+    const json = await res.json();
+    expect(res.status).toEqual(403);
+    expect(json).toEqual(errorResponseTemplate);
+  });
+
+  it("returns 403 if user is doctor", async () => {
+    const res = await GET("/clinic-admins", {
+      headers: mockData.doctorAuthHeaders,
+    });
+    const json = await res.json();
+    expect(res.status).toEqual(403);
+    expect(json).toEqual(errorResponseTemplate);
+  });
+
+  it("returns 403 if user is patient", async () => {
+    const res = await GET("/clinic-admins", {
+      headers: mockData.patientAuthHeaders,
+    });
+    const json = await res.json();
+    expect(res.status).toEqual(403);
+    expect(json).toEqual(errorResponseTemplate);
+  });
+});
+
 describe("GET /clinic-admins/{id}", () => {
   it("returns clinic admin if ok", async () => {
     const res = await GET(`/clinic-admins/${mockData.clinicAdmin.id}`, {

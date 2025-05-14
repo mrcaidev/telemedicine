@@ -5,6 +5,10 @@ import * as clinicAdminProfileRepository from "@/repositories/clinic-admin-profi
 import type { Account, ClinicAdmin } from "@/utils/types";
 import { HTTPException } from "hono/http-exception";
 
+export async function findMany(query: { clinicId?: string }) {
+  return await clinicAdminProfileRepository.findManyFull(query);
+}
+
 export async function findOneById(id: string) {
   const account = await accountRepository.findOneById(id);
   if (!account) {
