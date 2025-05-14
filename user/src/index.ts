@@ -3,7 +3,6 @@ import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { isValiError } from "valibot";
 import { authController } from "./controllers/auth";
-import { authGatewayController } from "./controllers/auth-gateway";
 import { clinicController } from "./controllers/clinic";
 import { clinicAdminController } from "./controllers/clinic-admin";
 import { doctorController } from "./controllers/doctor";
@@ -26,7 +25,6 @@ app.get("/readyz", async (c) => {
 });
 
 // 注册所有 API。
-app.route("/auth-gateway", authGatewayController);
 app.route("/auth", authController);
 app.route("/oauth", oauthController);
 app.route("/otp", otpVerificationController);

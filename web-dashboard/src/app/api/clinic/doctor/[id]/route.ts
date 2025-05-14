@@ -23,6 +23,7 @@ export async function PATCH(
         Authorization: `Bearer ${session.user.token}`,
         "Content-Type": "application/json",
       },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
 
@@ -54,6 +55,9 @@ export async function DELETE(
         Authorization: `Bearer ${session.user.token}`,
         "Content-Type": "application/json",
       },
+  try {
+    const res = await fetch(`${BACKEND_API}/doctors/${id}`, {
+      method: "DELETE",
     });
     if (!res.ok) throw new Error();
 

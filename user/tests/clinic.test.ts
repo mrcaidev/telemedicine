@@ -7,6 +7,18 @@ import {
 } from "./utils/data";
 import { GET, POST } from "./utils/request";
 
+describe("GET /clinics", () => {
+  it("returns clinics if ok", async () => {
+    const res = await GET("/clinics");
+    const json = await res.json();
+    expect(res.status).toEqual(200);
+    expect(json).toEqual({
+      ...successResponseTemplate,
+      data: [mockData.clinic],
+    });
+  });
+});
+
 describe("GET /clinics/{id}", () => {
   it("returns clinic if ok", async () => {
     const res = await GET(`/clinics/${mockData.clinic.id}`);

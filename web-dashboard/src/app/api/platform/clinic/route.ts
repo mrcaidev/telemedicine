@@ -27,6 +27,8 @@ export async function GET() {
       return new Response("Backend Error", { status: res.status });
     }
 
+  try {
+    const res = await fetch(`${BACKEND_API}/clinics`);
     const data = await res.json();
     return NextResponse.json({ data });
   } catch {
@@ -61,6 +63,10 @@ export async function POST(req: NextRequest) {
       return new Response("Backend Error", { status: res.status });
     }
     
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+
     const data = await res.json();
     return NextResponse.json(data, { status: res.status });
   } catch {
