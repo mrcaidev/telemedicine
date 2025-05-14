@@ -6,6 +6,27 @@ import * as doctorProfileRepository from "@/repositories/doctor-profile";
 import type { Account, Doctor } from "@/utils/types";
 import { HTTPException } from "hono/http-exception";
 
+export async function findMany(query: {
+  clinicId?: string;
+  sortBy: "createdAt";
+  sortOrder: "asc" | "desc";
+  limit: number;
+  cursor?: string;
+}) {
+  const doctors = await doctorProfileRepository.findManyFull(query);
+
+  const nextCursor =
+    doctors.length < query.limit ? null : (doctors.at(-1)?.createdAt ?? 0);
+
+  return {
+    doctors: doctors.map((d) => {
+      const { createdAt, ...rest } = d;
+      return rest;
+    }),
+    nextCursor,
+  } as const;
+}
+
 export async function findOneById(id: string) {
   const account = await accountRepository.findOneById(id);
   if (!account) {

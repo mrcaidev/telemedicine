@@ -23,6 +23,22 @@ export const uuidTemplate = expect.stringMatching(
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,
 );
 
+export const doctorTemplate = expect.objectContaining({
+  id: uuidTemplate,
+  role: "doctor",
+  email: expect.any(String),
+  clinic: expect.objectContaining({
+    id: uuidTemplate,
+    name: expect.any(String),
+  }),
+  firstName: expect.any(String),
+  lastName: expect.any(String),
+  avatarUrl: null,
+  description: expect.any(String),
+  gender: expect.stringMatching(/male|female/),
+  specialties: expect.any(Array),
+});
+
 const mockPlatformAdmin: PlatformAdmin = {
   id: "e4c315ef-0f8d-4456-a69e-c971b5e25ebc",
   role: "platform_admin",

@@ -9,6 +9,7 @@ import {
 } from "bun:test";
 import * as producer from "@/events/producer";
 import {
+  doctorTemplate,
   errorResponseTemplate,
   mockData,
   successResponseTemplate,
@@ -27,6 +28,47 @@ afterEach(() => {
 
 afterAll(() => {
   mock.restore();
+});
+
+describe("GET /doctors", () => {
+  it("returns doctors", async () => {
+    const res = await GET("/doctors");
+    const json = await res.json();
+    expect(res.status).toEqual(200);
+    expect(json).toEqual({
+      ...successResponseTemplate,
+      data: {
+        doctors: expect.arrayContaining([doctorTemplate]),
+        nextCursor: null,
+      },
+    });
+  });
+
+  it("paginates", async () => {
+    const res1 = await GET("/doctors?limit=2");
+    const json1 = await res1.json();
+    expect(res1.status).toEqual(200);
+    expect(json1).toEqual({
+      ...successResponseTemplate,
+      data: {
+        doctors: expect.arrayContaining([doctorTemplate]),
+        nextCursor: expect.any(String),
+      },
+    });
+
+    // @ts-ignore
+    const cursor = json1.data.nextCursor as string;
+    const res2 = await GET(`/doctors?limit=30&cursor=${cursor}`);
+    const json2 = await res2.json();
+    expect(res2.status).toEqual(200);
+    expect(json2).toEqual({
+      ...successResponseTemplate,
+      data: {
+        doctors: expect.arrayContaining([doctorTemplate]),
+        nextCursor: null,
+      },
+    });
+  });
 });
 
 describe("GET /doctors/{id}", () => {

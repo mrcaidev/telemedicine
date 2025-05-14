@@ -14,6 +14,17 @@ import * as v from "valibot";
 export const clinicAdminController = new Hono();
 
 clinicAdminController.get(
+  "/",
+  authGuard(["platform_admin"]),
+  validator("query", v.object({ clinicId: v.optional(idSchema) })),
+  async (c) => {
+    const query = c.req.valid("query");
+    const clinicAdmins = await clinicAdminService.findMany(query);
+    return c.json({ code: 0, message: "", data: clinicAdmins });
+  },
+);
+
+clinicAdminController.get(
   "/:id",
   authGuard(["platform_admin"]),
   validator("param", v.object({ id: idSchema })),

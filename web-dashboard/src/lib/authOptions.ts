@@ -51,6 +51,7 @@ export const authOptions: NextAuthOptions = {
             role: data.role,
             token: data.token,
             avatarUrl: data.avatarUrl ?? "/d.png",
+            clinicId: data.clinic?.id ?? null
           };
         } catch (error) {
           console.error("Error during login:", error);
