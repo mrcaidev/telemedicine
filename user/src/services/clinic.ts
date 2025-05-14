@@ -2,6 +2,10 @@ import * as clinicRepository from "@/repositories/clinic";
 import type { Account } from "@/utils/types";
 import { HTTPException } from "hono/http-exception";
 
+export async function findAll() {
+  return await clinicRepository.findAll();
+}
+
 export async function findOneById(id: string) {
   const clinic = await clinicRepository.findOneById(id);
   if (!clinic) {

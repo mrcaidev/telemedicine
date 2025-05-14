@@ -7,6 +7,11 @@ import * as v from "valibot";
 
 export const clinicController = new Hono();
 
+clinicController.get("/", async (c) => {
+  const clinics = await clinicService.findAll();
+  return c.json({ code: 0, message: "", data: clinics });
+});
+
 clinicController.get(
   "/:id",
   validator("param", v.object({ id: idSchema })),

@@ -2,6 +2,16 @@ import { camelToSnakeJson, snakeToCamelJson } from "@/utils/case";
 import type { Clinic, PartiallyRequired } from "@/utils/types";
 import { sql } from "bun";
 
+export async function findAll() {
+  const rows = await sql`
+    select id, name
+    from clinics
+    where deleted_at is null
+  `;
+
+  return rows.map(snakeToCamelJson) as Clinic[];
+}
+
 export async function findOneById(id: string) {
   const [row] = await sql`
     select id, name
