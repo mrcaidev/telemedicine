@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ .Release.Name }}
+          image: {{ .Values.image }}
+          ports:
+            - containerPort: {{ .Values.port }}
+          envFrom:
+            - secretRef:
+                name: {{ .Release.Name }}
+          {{- if .Values.kafkaCertsNeeded }}
+          volumeMounts:
+            - name: kafka-certs
+              mountPath: /etc/kafka/certs
+              readOnly: true
+          {{- end }}
+          {{- with .Values.livenessProbe }}
+          livenessProbe:
+            httpGet:
+              path: {{ . }}
+              port: {{ $.Values.port }}
+          {{- end }}
+          {{- with .Values.readinessProbe }}
+          readinessProbe:
+            httpGet:
+              path: {{ . }}
+              port: {{ $.Values.port }}
+          {{- end }}
+      {{- if .Values.kafkaCertsNeeded }}
+      volumes:
+        - name: kafka-certs
+          secret:
+            secretName: kafka-certs
+            items:
+              - key: ca.crt
+                path: ca.crt
+              - key: client.key
+                path: client.key
+              - key: client.crt
+                path: client.crt
+      {{- end }}
+      {{- with .Values.resources }}
+      resources:
+        requests:
+          cpu: {{ .requests.cpu }}
+          memory: {{ .requests.memory }}
+        limits:
+          cpu: {{ .limits.cpu }}
+          memory: {{ .limits.memory }}
+      {{- end }}
+      serviceAccountName: {{ .Release.Name }}
