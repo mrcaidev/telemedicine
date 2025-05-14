@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/authOptions";
 
 const BACKEND_API =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080/api";
@@ -9,11 +11,18 @@ export async function PATCH(
 ) {
   const { id } = await params;
   const body = await req.json();
+  const session = await getServerSession(authOptions);
+  if (!session || !session.user || !session.user.token) {
+    return new Response("Unauthorized", { status: 401 });
+  }
 
   try {
     const res = await fetch(`${BACKEND_API}/doctors/${id}`, {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        Authorization: `Bearer ${session.user.token}`,
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify(body),
     });
 
@@ -33,9 +42,18 @@ export async function DELETE(
 ) {
   const { id } = await params;
 
+  const session = await getServerSession(authOptions);
+  if (!session || !session.user || !session.user.token) {
+    return new Response("Unauthorized", { status: 401 });
+  }
+
   try {
     const res = await fetch(`${BACKEND_API}/doctors/${id}`, {
       method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${session.user.token}`,
+        "Content-Type": "application/json",
+      },
     });
     if (!res.ok) throw new Error();
 
