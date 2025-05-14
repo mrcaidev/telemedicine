@@ -14,6 +14,49 @@ import * as v from "valibot";
 export const doctorController = new Hono();
 
 doctorController.get(
+  "/",
+  validator(
+    "query",
+    v.object({
+      clinicId: v.optional(idSchema),
+      sortBy: v.optional(
+        v.union([v.literal("createdAt")], "sortBy should be 'createdAt'"),
+        "createdAt",
+      ),
+      sortOrder: v.optional(
+        v.union(
+          [v.literal("asc"), v.literal("desc")],
+          "sortOrder should be either 'asc' or 'desc'",
+        ),
+        "desc",
+      ),
+      limit: v.optional(
+        v.pipe(
+          v.string(),
+          v.transform(Number),
+          v.number("limit should be an integer between 1 and 100"),
+          v.integer("limit should be an integer between 1 and 100"),
+          v.minValue(1, "limit should be an integer between 1 and 100"),
+          v.maxValue(100, "limit should be an integer between 1 and 100"),
+        ),
+        "10",
+      ),
+      cursor: v.optional(
+        v.pipe(
+          v.string(),
+          v.isoTimestamp("cursor should be an ISO 8601 timestamp"),
+        ),
+      ),
+    }),
+  ),
+  async (c) => {
+    const query = c.req.valid("query");
+    const page = await doctorService.findMany(query);
+    return c.json({ code: 0, message: "", data: page });
+  },
+);
+
+doctorController.get(
   "/search",
   validator(
     "query",

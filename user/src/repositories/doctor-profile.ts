@@ -1,10 +1,44 @@
-import { camelToSnakeJson, snakeToCamelJson } from "@/utils/case";
+import {
+  camelToSnakeJson,
+  camelToSnakeString,
+  snakeToCamelJson,
+} from "@/utils/case";
 import type {
+  Doctor,
   DoctorFullProfile,
   DoctorProfile,
   PartiallyRequired,
 } from "@/utils/types";
 import { sql } from "bun";
+
+export async function findManyFull(query: {
+  clinicId?: string;
+  sortBy: "createdAt";
+  sortOrder: "asc" | "desc";
+  limit: number;
+  cursor?: string;
+}) {
+  const rows = await sql`
+    select dp.id, dp.first_name, dp.last_name, dp.avatar_url, dp.gender, dp.description, dp.specialties, a.role, a.email, a.created_at, c.id as clinic_id, c.name as clinic_name
+    from doctor_profiles dp
+    left outer join accounts a on dp.id = a.id
+    left outer join clinics c on dp.clinic_id = c.id
+    where true
+    ${query.clinicId ? sql`and dp.clinic_id = ${query.clinicId}` : sql``}
+    ${!query.cursor ? sql`` : query.sortOrder === "asc" ? sql`and a.${sql.unsafe(camelToSnakeString(query.sortBy))} > ${query.cursor}` : sql`and a.${sql.unsafe(camelToSnakeString(query.sortBy))} < ${query.cursor}`}
+    order by a.${sql.unsafe(camelToSnakeString(query.sortBy))} ${sql.unsafe(query.sortOrder)}
+    limit ${query.limit}
+  `;
+
+  // @ts-ignore
+  return rows.map((row) => {
+    const { clinicId, clinicName, ...rest } = snakeToCamelJson(row);
+    return {
+      ...rest,
+      clinic: { id: clinicId, name: clinicName },
+    };
+  }) as (Doctor & { createdAt: string })[];
+}
 
 export async function findOneById(id: string) {
   const [row] = await sql`
