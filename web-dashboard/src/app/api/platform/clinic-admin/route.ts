@@ -5,21 +5,26 @@ import { authOptions } from "@/lib/authOptions";
 const BACKEND_API =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080/api";
 
-export async function GET() {
-  const session = await getServerSession(authOptions);
+export async function GET(request: NextRequest) {
+  const searchParams = request.nextUrl.searchParams;
+  const clinicId = searchParams.get("clinicId");
 
+  const session = await getServerSession(authOptions);
   if (!session || !session.user || !session.user.token) {
     return new Response("Unauthorized", { status: 401 });
   }
 
   try {
-    const res = await fetch(`${BACKEND_API}/clinics`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${session.user.token}`,
-        "Content-Type": "application/json",
-      },
-    });
+    const res = await fetch(
+      `${BACKEND_API}/clinic-admins?clinicId=${clinicId}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${session.user.token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
     if (!res.ok) {
       const errText = await res.text();
@@ -29,8 +34,7 @@ export async function GET() {
 
     const data = await res.json();
     return NextResponse.json({ data });
-  } catch (error) {
-    console.error("Error fetching clinics:", error);
+  } catch {
     return NextResponse.json(
       { error: "Failed to fetch clinics" },
       { status: 500 }
@@ -38,22 +42,30 @@ export async function GET() {
   }
 }
 
-export async function POST(req: NextRequest) {
-  const session = await getServerSession(authOptions);
+export async function POST(request: NextRequest) {
+  const searchParams = request.nextUrl.searchParams;
+  const clinicId = searchParams.get("clinicId");
+  const body = await request.json();
 
+  const payload = {
+    ...body,
+    role: "clinic_admin",
+    clinicId,
+  };
+
+  const session = await getServerSession(authOptions);
   if (!session || !session.user || !session.user.token) {
     return new Response("Unauthorized", { status: 401 });
   }
 
   try {
-    const body = await req.json();
-    const res = await fetch(`${BACKEND_API}/clinics`, {
+    const res = await fetch(`${BACKEND_API}/clinic-admins`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${session.user.token}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify(payload),
     });
 
     if (!res.ok) {
@@ -66,7 +78,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(data, { status: res.status });
   } catch {
     return NextResponse.json(
-      { error: "Create clinic failed" },
+      { error: "Failed to create clinic admin" },
       { status: 500 }
     );
   }

@@ -23,7 +23,7 @@ export default function ClinicDetailPage() {
   const [clinicName, setClinicName] = useState<string>("");
 
   useEffect(() => {
-    fetch(`/api/platform/clinic/${id}/admin`)
+    fetch(`/api/platform/clinic-admin?clinicId=${id}`)
       .then((res) => res.json())
       .then((data) => {
         setAdmins(data.data.data);
@@ -36,14 +36,14 @@ export default function ClinicDetailPage() {
   }, [id]);
 
   const refreshAdmins = () => {
-    fetch(`/api/platform/clinic/${id}/admin`)
+    fetch(`/api/platform/clinic-admin?clinicId=${id}`)
       .then((res) => res.json())
       .then((data) => setAdmins(data.data.data));
   };
 
   const handleDelete = async (adminId: string) => {
     try {
-      const res = await fetch(`/api/platform/clinic/${id}/admin/${adminId}`, {
+      const res = await fetch(`/api/platform/clinic-admin/${adminId}`, {
         method: "DELETE",
       });
       if (!res.ok) throw new Error();
@@ -57,11 +57,12 @@ export default function ClinicDetailPage() {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-xl font-semibold">
-          Clinic: {clinicName || id}
-        </h1>
+        <h1 className="text-xl font-semibold">Clinic: {clinicName || id}</h1>
 
-        <ClinicAdminFormDialog clinicId={id as string} onSuccess={refreshAdmins}>
+        <ClinicAdminFormDialog
+          clinicId={id as string}
+          onSuccess={refreshAdmins}
+        >
           <Button className="gap-2 cursor-pointer">
             <Plus size={16} /> Add Admin
           </Button>
@@ -87,7 +88,11 @@ export default function ClinicDetailPage() {
                   clinicId={id as string}
                   onSuccess={refreshAdmins}
                 >
-                  <Button size="sm" variant="outline" className="cursor-pointer">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="cursor-pointer"
+                  >
                     <Pencil className="w-4 h-4" />
                   </Button>
                 </ClinicAdminFormDialog>
@@ -96,7 +101,11 @@ export default function ClinicDetailPage() {
                   onConfirm={() => handleDelete(admin.id)}
                   description={`Delete admin ${admin.firstName} ${admin.lastName}?`}
                 >
-                  <Button size="sm" variant="destructive" className="cursor-pointer">
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    className="cursor-pointer"
+                  >
                     <Trash2 className="w-4 h-4" />
                   </Button>
                 </ConfirmDeleteDialog>
