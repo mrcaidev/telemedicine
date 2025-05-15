@@ -29,7 +29,7 @@ async function wrappedFetch<T>(pathname: string, init: RequestInit) {
 
   const { code, message, data }: ResponseJson<T> = await res.json();
 
-  if (!res.ok || code !== 0) {
+  if (!res.ok) {
     throw new RequestError(code, message);
   }
 

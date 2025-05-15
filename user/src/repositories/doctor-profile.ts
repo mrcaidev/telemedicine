@@ -40,6 +40,26 @@ export async function findManyFull(query: {
   }) as (Doctor & { createdAt: string })[];
 }
 
+export async function findManyFullRandom(query: { limit: number }) {
+  const rows = await sql`
+    select dp.id, dp.first_name, dp.last_name, dp.avatar_url, dp.gender, dp.description, dp.specialties, a.role, a.email, c.id as clinic_id, c.name as clinic_name
+    from doctor_profiles dp
+    left outer join accounts a on dp.id = a.id
+    left outer join clinics c on dp.clinic_id = c.id
+    order by random()
+    limit ${query.limit}
+  `;
+
+  // @ts-ignore
+  return rows.map((row) => {
+    const { clinicId, clinicName, ...rest } = snakeToCamelJson(row);
+    return {
+      ...rest,
+      clinic: { id: clinicId, name: clinicName },
+    };
+  }) as Doctor[];
+}
+
 export async function findOneById(id: string) {
   const [row] = await sql`
     select id, clinic_id, first_name, last_name, avatar_url, gender, description, specialties

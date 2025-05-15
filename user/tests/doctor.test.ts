@@ -71,6 +71,30 @@ describe("GET /doctors", () => {
   });
 });
 
+describe("GET /doctors/random", () => {
+  it("returns random doctors", async () => {
+    const res = await GET("/doctors/random");
+    const json = await res.json();
+    expect(res.status).toEqual(200);
+    expect(json).toEqual({
+      ...successResponseTemplate,
+      data: expect.arrayContaining([doctorTemplate]),
+    });
+  });
+
+  it("limits number of doctors", async () => {
+    const res = await GET("/doctors/random?limit=1");
+    const json = await res.json();
+    expect(res.status).toEqual(200);
+    expect(json).toEqual({
+      ...successResponseTemplate,
+      data: expect.arrayContaining([doctorTemplate]),
+    });
+    // @ts-ignore
+    expect(json.data.length).toEqual(1);
+  });
+});
+
 describe("GET /doctors/{id}", () => {
   it("returns doctor if ok", async () => {
     const res = await GET(`/doctors/${mockData.doctor.id}`);
