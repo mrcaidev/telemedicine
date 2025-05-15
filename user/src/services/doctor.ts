@@ -27,6 +27,10 @@ export async function findMany(query: {
   } as const;
 }
 
+export async function findManyRandom(query: { limit: number }) {
+  return await doctorProfileRepository.findManyFullRandom(query);
+}
+
 export async function findOneById(id: string) {
   const account = await accountRepository.findOneById(id);
   if (!account) {

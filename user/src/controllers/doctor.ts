@@ -57,6 +57,31 @@ doctorController.get(
 );
 
 doctorController.get(
+  "/random",
+  validator(
+    "query",
+    v.object({
+      limit: v.optional(
+        v.pipe(
+          v.string(),
+          v.transform(Number),
+          v.number("limit should be an integer between 1 and 100"),
+          v.integer("limit should be an integer between 1 and 100"),
+          v.minValue(1, "limit should be an integer between 1 and 100"),
+          v.maxValue(100, "limit should be an integer between 1 and 100"),
+        ),
+        "3",
+      ),
+    }),
+  ),
+  async (c) => {
+    const query = c.req.valid("query");
+    const doctors = await doctorService.findManyRandom(query);
+    return c.json({ code: 0, message: "", data: doctors });
+  },
+);
+
+doctorController.get(
   "/search",
   validator(
     "query",
