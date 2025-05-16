@@ -60,3 +60,11 @@ export async function createOne(
 
   return snakeToCamelJson(row) as Account;
 }
+
+export async function deleteOneById(id: string) {
+  await sql`
+    update accounts
+    set deleted_at = now()
+    where id = ${id}
+  `;
+}
