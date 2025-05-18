@@ -154,3 +154,23 @@ export async function updatePassword(
 
   await accountRepository.updateOnePasswordHashById(actor.id, passwordHash);
 }
+
+export async function resetPassword(data: {
+  email: string;
+  password: string;
+  otp: string;
+}) {
+  const account = await accountRepository.findOneByEmail(data.email);
+  if (!account) {
+    throw new HTTPException(404, {
+      message: "This email has not yet been registered",
+    });
+  }
+
+  // 验证 OTP。
+  await otpVerificationService.verifyOtp(data.email, data.otp);
+
+  const passwordHash = await Bun.password.hash(data.password);
+
+  await accountRepository.updateOnePasswordHashById(account.id, passwordHash);
+}

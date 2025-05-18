@@ -58,3 +58,16 @@ authController.put(
     return c.json({ code: 0, message: "", data: null });
   },
 );
+
+authController.post(
+  "reset-password",
+  validator(
+    "json",
+    v.object({ email: emailSchema, password: passwordSchema, otp: otpSchema }),
+  ),
+  async (c) => {
+    const data = c.req.valid("json");
+    await authService.resetPassword(data);
+    return c.json({ code: 0, message: "", data: null });
+  },
+);
