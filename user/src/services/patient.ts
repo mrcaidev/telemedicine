@@ -1,10 +1,13 @@
-import { publishPatientCreatedEvent } from "@/events/producer";
+import {
+  publishPatientCreatedEvent,
+  publishPatientUpdatedEvent,
+} from "@/events/producer";
 import * as accountRepository from "@/repositories/account";
 import * as auditLogRepository from "@/repositories/audit-log";
 import * as patientProfileRepository from "@/repositories/patient-profile";
 import * as otpVerificationService from "@/services/otp-verification";
 import { signJwt } from "@/utils/jwt";
-import type { Patient } from "@/utils/types";
+import type { Account, Gender, Patient } from "@/utils/types";
 import { HTTPException } from "hono/http-exception";
 
 export async function findOneById(id: string) {
@@ -71,4 +74,29 @@ export async function createOne(data: {
   });
 
   return { ...patient, token } as Patient & { token: string };
+}
+
+export async function updateOneById(
+  id: string,
+  data: {
+    nickname?: string;
+    gender?: Gender;
+    birthDate?: string;
+  },
+  actor: Account,
+) {
+  const existingProfile = await patientProfileRepository.findOneById(id);
+  if (!existingProfile) {
+    throw new HTTPException(404, { message: "This patient does not exist" });
+  }
+
+  if (existingProfile.id !== actor.id) {
+    throw new HTTPException(403, { message: "Permission denied" });
+  }
+
+  const newPatient = await patientProfileRepository.updateOneById(id, data);
+
+  await publishPatientUpdatedEvent(newPatient);
+
+  return newPatient;
 }

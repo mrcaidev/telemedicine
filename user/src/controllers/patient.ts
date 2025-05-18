@@ -1,6 +1,9 @@
 import {
+  birthDateSchema,
   emailSchema,
+  genderSchema,
   idSchema,
+  nicknameSchema,
   otpSchema,
   passwordSchema,
 } from "@/common/schema";
@@ -33,5 +36,26 @@ patientController.post(
     const data = c.req.valid("json");
     const patientWithToken = await patientService.createOne(data);
     return c.json({ code: 0, message: "", data: patientWithToken }, 201);
+  },
+);
+
+patientController.patch(
+  "/:id",
+  authGuard(["patient"]),
+  validator("param", v.object({ id: idSchema })),
+  validator(
+    "json",
+    v.object({
+      nickname: v.optional(nicknameSchema),
+      gender: v.optional(genderSchema),
+      birthDate: v.optional(birthDateSchema),
+    }),
+  ),
+  async (c) => {
+    const { id } = c.req.valid("param");
+    const data = c.req.valid("json");
+    const actor = c.get("actor");
+    const patient = await patientService.updateOneById(id, data, actor);
+    return c.json({ code: 0, message: "", data: patient });
   },
 );

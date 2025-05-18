@@ -136,3 +136,45 @@ export async function searchManyFull(query: {
     return { ...rest, clinic: { id: clinicId, name: clinicName } };
   }) as (DoctorFullProfile & { similarity: number })[];
 }
+
+export async function updateOneById(
+  id: string,
+  data: Partial<
+    Pick<
+      DoctorProfile,
+      "firstName" | "lastName" | "description" | "gender" | "specialties"
+    >
+  >,
+) {
+  const [row] = await sql`
+    with updated as (
+      update doctor_profiles
+      set ${sql(camelToSnakeJson(data))}
+      where id = ${id}
+      returning id, clinic_id, first_name, last_name, avatar_url, description, gender, specialties
+    )
+    select u.id, u.clinic_id, u.first_name, u.last_name, u.avatar_url, u.description, u.gender, u.specialties, a.role, a.email, c.id as clinic_id, c.name as clinic_name
+    from updated u
+    left outer join accounts a on u.id = a.id
+    left outer join clinics c on u.clinic_id = c.id
+    where a.id = ${id}
+  `;
+
+  if (!row) {
+    throw new Error("failed to update doctor profile");
+  }
+
+  const { clinicId, clinicName, ...rest } = snakeToCamelJson(row);
+  return {
+    ...rest,
+    clinic: { id: clinicId, name: clinicName },
+  } as Doctor;
+}
+
+export async function deleteOneById(id: string, deletedBy: string) {
+  await sql`
+    update doctor_profiles
+    set deleted_by = ${deletedBy}
+    where id = ${id}
+  `;
+}

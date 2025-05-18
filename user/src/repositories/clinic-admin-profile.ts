@@ -72,3 +72,40 @@ export async function createOne(
 
   return snakeToCamelJson(row) as ClinicAdminProfile;
 }
+
+export async function updateOneById(
+  id: string,
+  data: Partial<Pick<ClinicAdminProfile, "firstName" | "lastName">>,
+) {
+  const [row] = await sql`
+    with updated as (
+      update clinic_admin_profiles
+      set ${sql(camelToSnakeJson(data))}
+      where id = ${id}
+      returning id, clinic_id, first_name, last_name
+    )
+    select u.id, u.first_name, u.last_name, a.role, a.email, c.id as clinic_id, c.name as clinic_name
+    from updated u
+    left outer join accounts a on u.id = a.id
+    left outer join clinics c on u.clinic_id = c.id
+    where a.id = ${id}
+  `;
+
+  if (!row) {
+    throw new Error("failed to update clinic admin profile");
+  }
+
+  const { clinicId, clinicName, ...rest } = snakeToCamelJson(row);
+  return {
+    ...rest,
+    clinic: { id: clinicId, name: clinicName },
+  } as ClinicAdmin;
+}
+
+export async function deleteOneById(id: string, deletedBy: string) {
+  await sql`
+    update clinic_admin_profiles
+    set deleted_by = ${deletedBy}
+    where id = ${id}
+  `;
+}

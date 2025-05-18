@@ -58,3 +58,14 @@ export const genderSchema = v.union(
   [v.literal("male"), v.literal("female")],
   "gender should be either male or female",
 );
+
+export const nicknameSchema = v.pipe(
+  v.string("nickname should be 1-20 characters long"),
+  v.minLength(1, "nickname should be 1-20 characters long"),
+  v.maxLength(20, "nickname should be 1-20 characters long"),
+);
+
+export const birthDateSchema = v.pipe(
+  v.string("birthDate should be an ISO 8601 date"),
+  v.isoDate("birthDate should be an ISO 8601 date"),
+);

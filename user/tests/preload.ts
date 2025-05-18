@@ -10,7 +10,8 @@ beforeAll(async () => {
     ('4504abab-58c2-4fa7-ab05-ec5ac687625f', 'doctor', 'doctor@example.com', '$argon2id$v=19$m=65536,t=2,p=1$9odw/G06GxMoWNzCfgKCk9zpSO1f72rix1JicYZPiZE$M4hpfUC3aFbqfxQmQoqgYb1laYKUQIRJXjcr5rcoC0o', '2025-05-14T06:27:50.926Z'),
     ('df9ffcca-1415-4837-95fa-83288e199d99', 'doctor', 'christa@gmail.com', '$argon2id$v=19$m=65536,t=2,p=1$xaY/2Vb3JiwZltld2mKRe12kY8PC9v92QZ7gKzxROVw$RivrTojN3HXV+5NozJExKzRLMWmkoRtG3URv0UfWObk', '2025-05-14T07:27:50.926Z'),
     ('04cd46f0-c785-48cc-bde1-898aac54c425', 'doctor', 'rory@gmail.com', '$argon2id$v=19$m=65536,t=2,p=1$y+9lSg+y5XY5gcKEtuNtkcocDrFG5qFw7XwF6l7Aehk$vYJQtO6fpq65og5KjAya9abMx7KsKF0HoAcSpIjX8cI', '2025-05-14T08:27:50.926Z'),
-    ('8b41503d-92fd-4325-8032-df5dca24ab10', 'patient', 'patient@example.com', '$argon2id$v=19$m=65536,t=2,p=1$uE7NAQTVldZFwIA3OIfshFBQDtBjun4jIu0F9nnD6Wo$wFLk+4YdSV8hhSY0mzGJlfe/b7riyH5cKmvVPbkq24s', '2025-05-14T08:27:50.926Z');
+    ('8b41503d-92fd-4325-8032-df5dca24ab10', 'patient', 'patient@example.com', '$argon2id$v=19$m=65536,t=2,p=1$uE7NAQTVldZFwIA3OIfshFBQDtBjun4jIu0F9nnD6Wo$wFLk+4YdSV8hhSY0mzGJlfe/b7riyH5cKmvVPbkq24s', '2025-05-14T08:27:50.926Z'),
+    ('6a322172-f2a3-4570-99cc-54afaa156ec4', 'patient', 'Brennan_Block@gmail.com', '$argon2id$v=19$m=65536,t=2,p=1$rtB7t7x8mfuNuaNaNtt8AT9tcXjvCaMIgBnIdg+JOWc$+xrdjctlRN0B+jpZhbJ7X8LHCIkrwTan6IeieLUz8Zw', '2025-05-14T08:27:50.926Z');
 
     insert into platform_admin_profiles (id) values
     ('e4c315ef-0f8d-4456-a69e-c971b5e25ebc');
@@ -27,7 +28,8 @@ beforeAll(async () => {
     ('04cd46f0-c785-48cc-bde1-898aac54c425', 'f5dc8bbb-079b-41a0-8f52-8e25b5c71401', 'Rory', 'Greenfelder', 'Good at both Cardiology and Surgery', '{"cardiology"}', 'b7aa316d-d7ef-4b35-8075-a5440922b030');
 
     insert into patient_profiles (id) values
-    ('8b41503d-92fd-4325-8032-df5dca24ab10');
+    ('8b41503d-92fd-4325-8032-df5dca24ab10'),
+    ('6a322172-f2a3-4570-99cc-54afaa156ec4');
   `.simple();
 });
 

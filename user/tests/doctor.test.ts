@@ -1,6 +1,7 @@
 import {
   afterAll,
   afterEach,
+  beforeAll,
   describe,
   expect,
   it,
@@ -8,6 +9,7 @@ import {
   spyOn,
 } from "bun:test";
 import * as producer from "@/events/producer";
+import { sql } from "bun";
 import {
   doctorTemplate,
   errorResponseTemplate,
@@ -15,15 +17,27 @@ import {
   successResponseTemplate,
   uuidTemplate,
 } from "./utils/data";
-import { GET, POST } from "./utils/request";
+import { DELETE, GET, PATCH, POST } from "./utils/request";
 
 const publishDoctorCreatedEventSpy = spyOn(
   producer,
   "publishDoctorCreatedEvent",
 );
 
+const publishDoctorUpdatedEventSpy = spyOn(
+  producer,
+  "publishDoctorUpdatedEvent",
+);
+
+const publishDoctorDeletedEventSpy = spyOn(
+  producer,
+  "publishDoctorDeletedEvent",
+);
+
 afterEach(() => {
   publishDoctorCreatedEventSpy.mockClear();
+  publishDoctorUpdatedEventSpy.mockClear();
+  publishDoctorDeletedEventSpy.mockClear();
 });
 
 afterAll(() => {
@@ -371,5 +385,219 @@ describe("GET /doctors/search", () => {
         nextCursor: null,
       },
     });
+  });
+});
+
+describe("PATCH /doctors/{id}", () => {
+  const targetId = crypto.randomUUID();
+
+  beforeAll(async () => {
+    await sql`
+      insert into accounts (id, role, email) values
+      (${targetId}, 'doctor', 'Dawson_Wisoky@gmail.com');
+    `;
+    await sql`
+      insert into doctor_profiles (id, clinic_id, first_name, last_name, created_by) values
+      (${targetId}, ${mockData.clinic.id}, 'Dawson', 'Wisoky', ${mockData.clinicAdmin.id});
+    `;
+  });
+
+  afterAll(async () => {
+    await sql`delete from doctor_profiles where id = ${targetId}`;
+    await sql`delete from accounts where id = ${targetId}`;
+  });
+
+  it("updates doctor", async () => {
+    publishDoctorUpdatedEventSpy.mockResolvedValueOnce();
+    const res = await PATCH(
+      `/doctors/${targetId}`,
+      {
+        firstName: "Tim",
+        description: "Vox clam sol vulgaris demo una universe cicuta",
+        gender: "female",
+      },
+      { headers: mockData.clinicAdminAuthHeaders },
+    );
+    const json = await res.json();
+    expect(res.status).toEqual(200);
+    expect(json).toEqual({
+      ...successResponseTemplate,
+      data: {
+        id: targetId,
+        role: "doctor",
+        email: "Dawson_Wisoky@gmail.com",
+        clinic: mockData.clinic,
+        firstName: "Tim",
+        lastName: "Wisoky",
+        avatarUrl: null,
+        description: "Vox clam sol vulgaris demo una universe cicuta",
+        gender: "female",
+        specialties: [],
+      },
+    });
+    expect(publishDoctorUpdatedEventSpy).toHaveBeenCalledTimes(1);
+    expect(publishDoctorUpdatedEventSpy).toHaveBeenNthCalledWith(1, {
+      id: targetId,
+      role: "doctor",
+      email: "Dawson_Wisoky@gmail.com",
+      clinic: mockData.clinic,
+      firstName: "Tim",
+      lastName: "Wisoky",
+      avatarUrl: null,
+      description: "Vox clam sol vulgaris demo una universe cicuta",
+      gender: "female",
+      specialties: [],
+    });
+  });
+
+  it("returns 401 if user has not logged in", async () => {
+    const res = await PATCH(`/doctors/${targetId}`, {
+      firstName: "Tim",
+      description: "Vox clam sol vulgaris demo una universe cicuta",
+      gender: "female",
+    });
+    const json = await res.json();
+    expect(res.status).toEqual(401);
+    expect(json).toEqual(errorResponseTemplate);
+  });
+
+  it("returns 403 if user is platform admin", async () => {
+    const res = await PATCH(
+      `/doctors/${targetId}`,
+      {
+        firstName: "Tim",
+        description: "Vox clam sol vulgaris demo una universe cicuta",
+        gender: "female",
+      },
+      { headers: mockData.platformAdminAuthHeaders },
+    );
+    const json = await res.json();
+    expect(res.status).toEqual(403);
+    expect(json).toEqual(errorResponseTemplate);
+  });
+
+  it("returns 403 if user is doctor", async () => {
+    const res = await PATCH(
+      `/doctors/${targetId}`,
+      {
+        firstName: "Tim",
+        description: "Vox clam sol vulgaris demo una universe cicuta",
+        gender: "female",
+      },
+      { headers: mockData.doctorAuthHeaders },
+    );
+    const json = await res.json();
+    expect(res.status).toEqual(403);
+    expect(json).toEqual(errorResponseTemplate);
+  });
+
+  it("returns 403 if user is patient", async () => {
+    const res = await PATCH(
+      `/doctors/${targetId}`,
+      {
+        firstName: "Tim",
+        description: "Vox clam sol vulgaris demo una universe cicuta",
+        gender: "female",
+      },
+      { headers: mockData.patientAuthHeaders },
+    );
+    const json = await res.json();
+    expect(res.status).toEqual(403);
+    expect(json).toEqual(errorResponseTemplate);
+  });
+
+  it("returns 404 if doctor not found", async () => {
+    const res = await PATCH(
+      "/doctors/00000000-0000-0000-0000-000000000000",
+      {
+        firstName: "Tim",
+        description: "Vox clam sol vulgaris demo una universe cicuta",
+        gender: "female",
+      },
+      { headers: mockData.clinicAdminAuthHeaders },
+    );
+    const json = await res.json();
+    expect(res.status).toEqual(404);
+    expect(json).toEqual(errorResponseTemplate);
+  });
+});
+
+describe("DELETE /doctors/{id}", () => {
+  const targetId = crypto.randomUUID();
+
+  beforeAll(async () => {
+    await sql`
+      insert into accounts (id, role, email) values
+      (${targetId}, 'doctor', 'Ben_Tay@gmail.com');
+    `;
+    await sql`
+      insert into doctor_profiles (id, clinic_id, first_name, last_name, created_by) values
+      (${targetId}, ${mockData.clinic.id}, 'Ben', 'Tay', ${mockData.clinicAdmin.id});
+    `;
+  });
+
+  afterAll(async () => {
+    await sql`delete from doctor_profiles where id = ${targetId}`;
+    await sql`delete from accounts where id = ${targetId}`;
+  });
+
+  it("deletes doctor", async () => {
+    publishDoctorDeletedEventSpy.mockResolvedValueOnce();
+    const res = await DELETE(`/doctors/${targetId}`, {
+      headers: mockData.clinicAdminAuthHeaders,
+    });
+    const json = await res.json();
+    expect(res.status).toEqual(200);
+    expect(json).toEqual({
+      ...successResponseTemplate,
+      data: null,
+    });
+    expect(publishDoctorDeletedEventSpy).toHaveBeenCalledTimes(1);
+    expect(publishDoctorDeletedEventSpy).toHaveBeenNthCalledWith(1, {
+      id: targetId,
+    });
+  });
+
+  it("returns 401 if user has not logged in", async () => {
+    const res = await DELETE(`/doctors/${targetId}`);
+    const json = await res.json();
+    expect(res.status).toEqual(401);
+    expect(json).toEqual(errorResponseTemplate);
+  });
+
+  it("returns 403 if user is platform admin", async () => {
+    const res = await DELETE(`/doctors/${targetId}`, {
+      headers: mockData.platformAdminAuthHeaders,
+    });
+    const json = await res.json();
+    expect(res.status).toEqual(403);
+    expect(json).toEqual(errorResponseTemplate);
+  });
+
+  it("returns 403 if user is doctor", async () => {
+    const res = await DELETE(`/doctors/${targetId}`, {
+      headers: mockData.doctorAuthHeaders,
+    });
+    const json = await res.json();
+    expect(res.status).toEqual(403);
+    expect(json).toEqual(errorResponseTemplate);
+  });
+
+  it("returns 403 if user is patient", async () => {
+    const res = await DELETE(`/doctors/${targetId}`, {
+      headers: mockData.patientAuthHeaders,
+    });
+    const json = await res.json();
+    expect(res.status).toEqual(403);
+    expect(json).toEqual(errorResponseTemplate);
+  });
+
+  it("returns 404 if doctor not found", async () => {
+    const res = await DELETE("/doctors/00000000-0000-0000-0000-000000000000", {
+      headers: mockData.clinicAdminAuthHeaders,
+    });
+    const json = await res.json();
+    expect(res.status).toEqual(404);
+    expect(json).toEqual(errorResponseTemplate);
   });
 });

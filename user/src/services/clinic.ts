@@ -21,3 +21,21 @@ export async function createOne(data: { name: string }, actor: Account) {
   });
   return clinic;
 }
+
+export async function updateOneById(id: string, data: { name?: string }) {
+  const existingClinic = await clinicRepository.findOneById(id);
+  if (!existingClinic) {
+    throw new HTTPException(404, { message: "This clinic does not exist" });
+  }
+
+  return await clinicRepository.updateOneById(id, data);
+}
+
+export async function deleteOneById(id: string, actor: Account) {
+  const existingClinic = await clinicRepository.findOneById(id);
+  if (!existingClinic) {
+    throw new HTTPException(404, { message: "This clinic does not exist" });
+  }
+
+  await clinicRepository.deleteOneById(id, actor.id);
+}
