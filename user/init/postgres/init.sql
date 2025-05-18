@@ -75,7 +75,10 @@ create view clinic_admin_full_profiles as (
     cap.first_name,
     cap.last_name,
     c.id as clinic_id,
-    c.name as clinic_name
+    c.name as clinic_name,
+    c.created_at as clinic_created_at,
+    c.updated_at as clinic_updated_at,
+    c.deleted_at as clinic_deleted_at
   from clinic_admin_profiles cap
   left outer join clinics c on cap.clinic_id = c.id
 );
@@ -92,7 +95,10 @@ create view clinic_admins as (
     cap.first_name,
     cap.last_name,
     c.id as clinic_id,
-    c.name as clinic_name
+    c.name as clinic_name,
+    c.created_at as clinic_created_at,
+    c.updated_at as clinic_updated_at,
+    c.deleted_at as clinic_deleted_at
   from clinic_admin_profiles cap
   left outer join clinics c on cap.clinic_id = c.id
   left outer join accounts a on cap.id = a.id
@@ -138,7 +144,10 @@ create view doctor_full_profiles as (
     dp.description,
     dp.specialties,
     c.id as clinic_id,
-    c.name as clinic_name
+    c.name as clinic_name,
+    c.created_at as clinic_created_at,
+    c.updated_at as clinic_updated_at,
+    c.deleted_at as clinic_deleted_at
   from doctor_profiles dp
   left outer join clinics c on dp.clinic_id = c.id
 );
@@ -154,12 +163,15 @@ create view doctors as (
     a.deleted_at,
     dp.first_name,
     dp.last_name,
-    dp.gender,
     dp.avatar_url,
+    dp.gender,
     dp.description,
     dp.specialties,
     c.id as clinic_id,
-    c.name as clinic_name
+    c.name as clinic_name,
+    c.created_at as clinic_created_at,
+    c.updated_at as clinic_updated_at,
+    c.deleted_at as clinic_deleted_at
   from doctor_profiles dp
   left outer join clinics c on dp.clinic_id = c.id
   left outer join accounts a on dp.id = a.id
