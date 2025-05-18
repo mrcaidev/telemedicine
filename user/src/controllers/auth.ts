@@ -1,4 +1,4 @@
-import { emailSchema, passwordSchema } from "@/common/schema";
+import { emailSchema, otpSchema, passwordSchema } from "@/common/schema";
 import { authGuard } from "@/middleware/auth-guard";
 import { validator } from "@/middleware/validator";
 import * as authService from "@/services/auth";
@@ -31,3 +31,30 @@ authController.post("/logout", authGuard(), async (c) => {
   await authService.logOut(actor);
   return c.json({ code: 0, message: "", data: null });
 });
+
+authController.put(
+  "/me/email",
+  authGuard(),
+  validator("json", v.object({ email: emailSchema, otp: otpSchema })),
+  async (c) => {
+    const actor = c.get("actor");
+    const data = c.req.valid("json");
+    await authService.updateEmail(data, actor);
+    return c.json({ code: 0, message: "", data: null });
+  },
+);
+
+authController.put(
+  "/me/password",
+  authGuard(),
+  validator(
+    "json",
+    v.object({ oldPassword: passwordSchema, newPassword: passwordSchema }),
+  ),
+  async (c) => {
+    const actor = c.get("actor");
+    const data = c.req.valid("json");
+    await authService.updatePassword(data, actor);
+    return c.json({ code: 0, message: "", data: null });
+  },
+);

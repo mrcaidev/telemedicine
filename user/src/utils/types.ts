@@ -95,6 +95,8 @@ export type AuditLog = {
     | "register_with_google"
     | "link_to_google"
     | "log_in_with_google"
+    | "update_email"
+    | "update_password"
     | "log_out";
   createdAt: string;
 };
