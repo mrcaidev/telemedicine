@@ -1,9 +1,13 @@
-import { publishDoctorCreatedEvent } from "@/events/producer";
+import {
+  publishDoctorCreatedEvent,
+  publishDoctorDeletedEvent,
+  publishDoctorUpdatedEvent,
+} from "@/events/producer";
 import * as accountRepository from "@/repositories/account";
 import * as auditLogRepository from "@/repositories/audit-log";
 import * as clinicAdminProfileRepository from "@/repositories/clinic-admin-profile";
 import * as doctorProfileRepository from "@/repositories/doctor-profile";
-import type { Account, Doctor } from "@/utils/types";
+import type { Account, Doctor, Gender } from "@/utils/types";
 import { HTTPException } from "hono/http-exception";
 
 export async function findMany(query: {
@@ -123,4 +127,70 @@ export async function search(query: {
     doctors: fullProfiles.map(({ similarity, ...rest }) => rest),
     nextCursor,
   };
+}
+
+export async function updateOneById(
+  id: string,
+  data: {
+    firstName?: string;
+    lastName?: string;
+    description?: string;
+    gender?: Gender;
+    specialties?: string[];
+  },
+  actor: Account,
+) {
+  const existingProfile = await doctorProfileRepository.findOneById(id);
+  if (!existingProfile) {
+    throw new HTTPException(404, {
+      message: "This doctor does not exist",
+    });
+  }
+
+  // 只有医生所属诊所的管理员才能更新。
+  const clinicAdminProfile = await clinicAdminProfileRepository.findOneById(
+    actor.id,
+  );
+  if (!clinicAdminProfile) {
+    throw new HTTPException(404, { message: "Clinic admin not found" });
+  }
+  if (clinicAdminProfile.clinicId !== existingProfile.clinicId) {
+    throw new HTTPException(403, { message: "Permission denied" });
+  }
+
+  const newDoctor = await doctorProfileRepository.updateOneById(id, data);
+
+  await publishDoctorUpdatedEvent(newDoctor);
+
+  return newDoctor;
+}
+
+export async function deleteOneById(id: string, actor: Account) {
+  // 首先得要存在。
+  const existingProfile = await doctorProfileRepository.findOneById(id);
+  if (!existingProfile) {
+    throw new HTTPException(404, {
+      message: "This doctor does not exist",
+    });
+  }
+
+  // 只有医生所属诊所的管理员才能删除。
+  const clinicAdminProfile = await clinicAdminProfileRepository.findOneById(
+    actor.id,
+  );
+  if (!clinicAdminProfile) {
+    throw new HTTPException(404, { message: "Clinic admin not found" });
+  }
+  if (clinicAdminProfile.clinicId !== existingProfile.clinicId) {
+    throw new HTTPException(403, { message: "Permission denied" });
+  }
+
+  // 删除账户。
+  await accountRepository.deleteOneById(id);
+
+  // 删除资料。
+  await doctorProfileRepository.deleteOneById(id, actor.id);
+
+  // 发布事件。
+  await publishDoctorDeletedEvent({ id });
 }
