@@ -128,6 +128,11 @@ export async function updateEmail(
   await otpVerificationService.verifyOtp(data.email, data.otp);
 
   await accountRepository.updateOneEmailById(actor.id, data.email);
+
+  await auditLogRepository.createOne({
+    userId: account.id,
+    action: "update_email",
+  });
 }
 
 export async function updatePassword(
@@ -153,6 +158,11 @@ export async function updatePassword(
   const passwordHash = await Bun.password.hash(data.newPassword);
 
   await accountRepository.updateOnePasswordHashById(actor.id, passwordHash);
+
+  await auditLogRepository.createOne({
+    userId: account.id,
+    action: "update_password",
+  });
 }
 
 export async function resetPassword(data: {
@@ -173,4 +183,9 @@ export async function resetPassword(data: {
   const passwordHash = await Bun.password.hash(data.password);
 
   await accountRepository.updateOnePasswordHashById(account.id, passwordHash);
+
+  await auditLogRepository.createOne({
+    userId: account.id,
+    action: "reset_password",
+  });
 }
