@@ -15,7 +15,7 @@ import { Plus, Trash2, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { ClinicAdmin } from "@/types/clinic-admin";
 import { ClinicAdminFormDialog } from "@/components/dialog/clinic-admin-form-dialog";
-import { ConfirmDeleteDialog } from "@/components/dialog/confirm-delete-dialog";
+import { ConfirmDeleteDialog } from "@/components/dialog/confirm-dialog";
 
 export default function ClinicDetailPage() {
   const { id } = useParams();
