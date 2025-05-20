@@ -4,6 +4,7 @@ import * as clinicAdminProfileRepository from "@/repositories/clinic-admin-profi
 import * as doctorProfileRepository from "@/repositories/doctor-profile";
 import * as patientProfileRepository from "@/repositories/patient-profile";
 import * as platformAdminProfileRepository from "@/repositories/platform-admin-profile";
+import * as otpVerificationService from "@/services/otp-verification";
 import { signJwt } from "@/utils/jwt";
 import type { Account, User, UserFullProfile } from "@/utils/types";
 import { HTTPException } from "hono/http-exception";
@@ -106,4 +107,85 @@ async function findFullProfileByAccount(
   throw new Error(
     `met unknown role when finding profile for account: ${JSON.stringify(account)}`,
   );
+}
+
+export async function updateEmail(
+  data: { email: string; otp: string },
+  actor: Account,
+) {
+  const account = await accountRepository.findOneById(actor.id);
+  if (!account) {
+    throw new HTTPException(404, { message: "This account does not exist" });
+  }
+
+  // 新邮箱不能和其他人冲突。
+  const conflictedAccount = await accountRepository.findOneByEmail(data.email);
+  if (conflictedAccount) {
+    throw new HTTPException(409, { message: "This email is already in use" });
+  }
+
+  // 验证 OTP。
+  await otpVerificationService.verifyOtp(data.email, data.otp);
+
+  await accountRepository.updateOneEmailById(actor.id, data.email);
+
+  await auditLogRepository.createOne({
+    userId: account.id,
+    action: "update_email",
+  });
+}
+
+export async function updatePassword(
+  data: {
+    oldPassword: string;
+    newPassword: string;
+  },
+  actor: Account,
+) {
+  const account = await accountRepository.findOneWithPasswordHashById(actor.id);
+  if (!account) {
+    throw new HTTPException(404, { message: "This account does not exist" });
+  }
+
+  const verified = await Bun.password.verify(
+    data.oldPassword,
+    account.passwordHash,
+  );
+  if (!verified) {
+    throw new HTTPException(401, { message: "Wrong password" });
+  }
+
+  const passwordHash = await Bun.password.hash(data.newPassword);
+
+  await accountRepository.updateOnePasswordHashById(actor.id, passwordHash);
+
+  await auditLogRepository.createOne({
+    userId: account.id,
+    action: "update_password",
+  });
+}
+
+export async function resetPassword(data: {
+  email: string;
+  password: string;
+  otp: string;
+}) {
+  const account = await accountRepository.findOneByEmail(data.email);
+  if (!account) {
+    throw new HTTPException(404, {
+      message: "This email has not yet been registered",
+    });
+  }
+
+  // 验证 OTP。
+  await otpVerificationService.verifyOtp(data.email, data.otp);
+
+  const passwordHash = await Bun.password.hash(data.password);
+
+  await accountRepository.updateOnePasswordHashById(account.id, passwordHash);
+
+  await auditLogRepository.createOne({
+    userId: account.id,
+    action: "reset_password",
+  });
 }

@@ -1,6 +1,7 @@
 import {
   emailSchema,
   firstNameSchema,
+  genderSchema,
   idSchema,
   lastNameSchema,
   passwordSchema,
@@ -148,5 +149,40 @@ doctorController.post(
     const actor = c.get("actor");
     const doctor = await doctorService.createOne(data, actor);
     return c.json({ code: 0, message: "", data: doctor }, 201);
+  },
+);
+
+doctorController.patch(
+  "/:id",
+  authGuard(["clinic_admin"]),
+  validator("param", v.object({ id: idSchema })),
+  validator(
+    "json",
+    v.object({
+      firstName: v.optional(firstNameSchema),
+      lastName: v.optional(lastNameSchema),
+      description: v.optional(v.string()),
+      gender: v.optional(genderSchema),
+      specialties: v.optional(v.array(v.string())),
+    }),
+  ),
+  async (c) => {
+    const { id } = c.req.valid("param");
+    const data = c.req.valid("json");
+    const actor = c.get("actor");
+    const doctor = await doctorService.updateOneById(id, data, actor);
+    return c.json({ code: 0, message: "", data: doctor });
+  },
+);
+
+doctorController.delete(
+  "/:id",
+  authGuard(["clinic_admin"]),
+  validator("param", v.object({ id: idSchema })),
+  async (c) => {
+    const { id } = c.req.valid("param");
+    const actor = c.get("actor");
+    await doctorService.deleteOneById(id, actor);
+    return c.json({ code: 0, message: "", data: null });
   },
 );

@@ -77,7 +77,7 @@ create table patient_profiles (
   nickname text default null,
   avatar_url text default null,
   gender gender default null,
-  birth_date date default null
+  birth_date text default null
 );
 
 create table otp_verifications (

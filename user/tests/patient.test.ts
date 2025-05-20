@@ -15,15 +15,25 @@ import {
   successResponseTemplate,
   uuidTemplate,
 } from "./utils/data";
-import { GET, POST } from "./utils/request";
+import { GET, PATCH, POST } from "./utils/request";
 
 const publishPatientCreatedEventSpy = spyOn(
   producer,
   "publishPatientCreatedEvent",
 );
+const publishPatientUpdatedEventSpy = spyOn(
+  producer,
+  "publishPatientUpdatedEvent",
+);
+const publishPatientDeletedEventSpy = spyOn(
+  producer,
+  "publishPatientDeletedEvent",
+);
 
 afterEach(() => {
   publishPatientCreatedEventSpy.mockClear();
+  publishPatientUpdatedEventSpy.mockClear();
+  publishPatientDeletedEventSpy.mockClear();
 });
 
 afterAll(() => {
@@ -174,5 +184,144 @@ describe("POST /patients", () => {
     expect(res.status).toEqual(422);
     expect(json).toEqual(errorResponseTemplate);
     expect(publishPatientCreatedEventSpy).toHaveBeenCalledTimes(0);
+  });
+});
+
+describe("PATCH /patients/{id}", () => {
+  const targetPatientId = "6a322172-f2a3-4570-99cc-54afaa156ec4";
+
+  it("updates patient", async () => {
+    publishPatientUpdatedEventSpy.mockResolvedValueOnce();
+    const res = await PATCH(
+      `/patients/${targetPatientId}`,
+      {
+        nickname: "Brennan",
+        gender: "female",
+        birthDate: "2000-01-01",
+      },
+      {
+        headers: {
+          "X-User-Id": targetPatientId,
+          "X-User-Role": "patient",
+          "X-User-Email": "Brennan_Block@gmail.com",
+        },
+      },
+    );
+    const json = await res.json();
+    expect(res.status).toEqual(200);
+    expect(json).toEqual({
+      ...successResponseTemplate,
+      data: {
+        id: targetPatientId,
+        role: "patient",
+        email: "Brennan_Block@gmail.com",
+        nickname: "Brennan",
+        avatarUrl: null,
+        gender: "female",
+        birthDate: "2000-01-01",
+      },
+    });
+    expect(publishPatientUpdatedEventSpy).toHaveBeenCalledTimes(1);
+    expect(publishPatientUpdatedEventSpy).toHaveBeenNthCalledWith(1, {
+      id: targetPatientId,
+      role: "patient",
+      email: "Brennan_Block@gmail.com",
+      nickname: "Brennan",
+      avatarUrl: null,
+      gender: "female",
+      birthDate: "2000-01-01",
+    });
+  });
+
+  it("returns 401 if user has not logged in", async () => {
+    const res = await PATCH(`/patients/${targetPatientId}`, {
+      nickname: "Brennan",
+      gender: "female",
+      birthDate: "2000-01-01",
+    });
+    const json = await res.json();
+    expect(res.status).toEqual(401);
+    expect(json).toEqual(errorResponseTemplate);
+  });
+
+  it("returns 403 if user is platform admin", async () => {
+    const res = await PATCH(
+      `/patients/${targetPatientId}`,
+      {
+        nickname: "Brennan",
+        gender: "female",
+        birthDate: "2000-01-01",
+      },
+      { headers: mockData.platformAdminAuthHeaders },
+    );
+    const json = await res.json();
+    expect(res.status).toEqual(403);
+    expect(json).toEqual(errorResponseTemplate);
+  });
+
+  it("returns 403 if user is clinic admin", async () => {
+    const res = await PATCH(
+      `/patients/${targetPatientId}`,
+      {
+        nickname: "Brennan",
+        gender: "female",
+        birthDate: "2000-01-01",
+      },
+      { headers: mockData.clinicAdminAuthHeaders },
+    );
+    const json = await res.json();
+    expect(res.status).toEqual(403);
+    expect(json).toEqual(errorResponseTemplate);
+  });
+
+  it("returns 403 if user is doctor", async () => {
+    const res = await PATCH(
+      `/patients/${targetPatientId}`,
+      {
+        nickname: "Brennan",
+        gender: "female",
+        birthDate: "2000-01-01",
+      },
+      { headers: mockData.doctorAuthHeaders },
+    );
+    const json = await res.json();
+    expect(res.status).toEqual(403);
+    expect(json).toEqual(errorResponseTemplate);
+  });
+
+  it("returns 403 if user is not the target patient", async () => {
+    const res = await PATCH(
+      `/patients/${targetPatientId}`,
+      {
+        nickname: "Brennan",
+        gender: "female",
+        birthDate: "2000-01-01",
+      },
+      { headers: mockData.patientAuthHeaders },
+    );
+    const json = await res.json();
+    expect(res.status).toEqual(403);
+    expect(json).toEqual(errorResponseTemplate);
+  });
+
+  it("returns 404 if patient does not exist", async () => {
+    const res = await PATCH(
+      "/patients/00000000-0000-0000-0000-000000000000",
+      {
+        nickname: "Brennan",
+        gender: "female",
+        birthDate: "2000-01-01",
+      },
+      {
+        headers: {
+          "X-User-Id": targetPatientId,
+          "X-User-Role": "patient",
+          "X-User-Email": "Brennan_Block@gmail.com",
+        },
+      },
+    );
+    const json = await res.json();
+    expect(res.status).toEqual(404);
+    expect(json).toEqual(errorResponseTemplate);
   });
 });

@@ -40,3 +40,29 @@ export async function createOne(
 
   return snakeToCamelJson(row) as Clinic;
 }
+
+export async function updateOneById(
+  id: string,
+  data: Partial<Pick<Clinic, "name">>,
+) {
+  const [row] = await sql`
+    update clinics
+    set ${sql(camelToSnakeJson(data))}
+    where id = ${id}
+    returning id, name
+  `;
+
+  if (!row) {
+    throw new Error("failed to update clinic");
+  }
+
+  return snakeToCamelJson(row) as Clinic;
+}
+
+export async function deleteOneById(id: string, deletedBy: string) {
+  await sql`
+    update clinics
+    set deleted_at = now(), deleted_by = ${deletedBy}
+    where id = ${id}
+  `;
+}

@@ -55,3 +55,34 @@ clinicAdminController.post(
     return c.json({ code: 0, message: "", data: clinicAdmin }, 201);
   },
 );
+
+clinicAdminController.patch(
+  "/:id",
+  authGuard(["platform_admin"]),
+  validator("param", v.object({ id: idSchema })),
+  validator(
+    "json",
+    v.object({
+      firstName: v.optional(firstNameSchema),
+      lastName: v.optional(lastNameSchema),
+    }),
+  ),
+  async (c) => {
+    const { id } = c.req.valid("param");
+    const data = c.req.valid("json");
+    const clinicAdmin = await clinicAdminService.updateOneById(id, data);
+    return c.json({ code: 0, message: "", data: clinicAdmin });
+  },
+);
+
+clinicAdminController.delete(
+  "/:id",
+  authGuard(["platform_admin"]),
+  validator("param", v.object({ id: idSchema })),
+  async (c) => {
+    const { id } = c.req.valid("param");
+    const actor = c.get("actor");
+    await clinicAdminService.deleteOneById(id, actor);
+    return c.json({ code: 0, message: "", data: null });
+  },
+);

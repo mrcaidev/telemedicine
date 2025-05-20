@@ -33,3 +33,28 @@ clinicController.post(
     return c.json({ code: 0, message: "", data: clinic }, 201);
   },
 );
+
+clinicController.patch(
+  "/:id",
+  authGuard(["platform_admin"]),
+  validator("param", v.object({ id: idSchema })),
+  validator("json", v.object({ name: v.optional(v.string()) })),
+  async (c) => {
+    const { id } = c.req.valid("param");
+    const data = c.req.valid("json");
+    const clinic = await clinicService.updateOneById(id, data);
+    return c.json({ code: 0, message: "", data: clinic });
+  },
+);
+
+clinicController.delete(
+  "/:id",
+  authGuard(["platform_admin"]),
+  validator("param", v.object({ id: idSchema })),
+  async (c) => {
+    const { id } = c.req.valid("param");
+    const actor = c.get("actor");
+    await clinicService.deleteOneById(id, actor);
+    return c.json({ code: 0, message: "", data: null });
+  },
+);

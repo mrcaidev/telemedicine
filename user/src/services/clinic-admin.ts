@@ -80,3 +80,33 @@ export async function createOne(
 
   return clinicAdmin as ClinicAdmin;
 }
+
+export async function updateOneById(
+  id: string,
+  data: { firstName?: string; lastName?: string },
+) {
+  const existingProfile = await clinicAdminProfileRepository.findOneById(id);
+  if (!existingProfile) {
+    throw new HTTPException(404, {
+      message: "This clinic admin does not exist",
+    });
+  }
+
+  return await clinicAdminProfileRepository.updateOneById(id, data);
+}
+
+export async function deleteOneById(id: string, actor: Account) {
+  // 首先得要存在。
+  const existingProfile = await clinicAdminProfileRepository.findOneById(id);
+  if (!existingProfile) {
+    throw new HTTPException(404, {
+      message: "This clinic admin does not exist",
+    });
+  }
+
+  // 删除账户。
+  await accountRepository.deleteOneById(id);
+
+  // 删除资料。
+  await clinicAdminProfileRepository.deleteOneById(id, actor.id);
+}
