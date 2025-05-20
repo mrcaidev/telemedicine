@@ -12,6 +12,7 @@ import { CalendarClock, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Doctor } from "@/types/doctor";
 import { ConfirmDialog } from "@/components/dialog/confirm-dialog";
+import { ScheduleDialog } from "@/components/dialog/clinic-schedule-dialog";
 
 const weekdays = [
   "Sunday",
@@ -41,6 +42,11 @@ export default function SchedulePage() {
     Doctor["availableTimes"]
   >([]);
   const [editMode, setEditMode] = useState(false);
+  const [pendingSlot, setPendingSlot] = useState<{
+    weekday: number;
+    startTime: string;
+    endTime: string;
+  } | null>(null);
 
   // 可以优化，使用只返回医生id和姓名的接口
   useEffect(() => {
@@ -240,15 +246,24 @@ export default function SchedulePage() {
                           }%`,
                         }}
                         onClick={() => {
-                          editMode &&
-                            handleAddSlot({
-                              weekday: day,
-                              startTime: s.startTime,
-                              endTime: s.endTime,
-                            });
+                          if (!editMode) return;
+                          setPendingSlot({
+                            weekday: day,
+                            startTime: s.startTime,
+                            endTime: s.endTime,
+                          });
                         }}
                       />
                     ))}
+
+                    <ScheduleDialog
+                      slot={pendingSlot}
+                      onClose={() => setPendingSlot(null)}
+                      onConfirm={(slot) => {
+                        handleAddSlot(slot);
+                        setPendingSlot(null);
+                      }}
+                    />
 
                     {!editMode &&
                       mergedSlots.map((merged) => (

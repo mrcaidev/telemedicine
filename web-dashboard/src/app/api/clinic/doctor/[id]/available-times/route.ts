@@ -56,7 +56,6 @@ export async function POST(
 
     if (!res.ok) throw new Error();
     const data = await res.json();
-    console.log("data", data);
     return NextResponse.json(data, { status: 200 });
   } catch {
     return NextResponse.json({ error: "Create failed" }, { status: 500 });
