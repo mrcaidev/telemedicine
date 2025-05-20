@@ -37,7 +37,7 @@ export default function ClinicDoctorList() {
           description: "can't load doctors, please try again later.",
         })
       );
-  }, [refreshTrigger]);
+  }, [refreshTrigger, id]);
   const refreshDoctors = () => setRefreshTrigger((prev) => prev + 1);
 
   const handleDelete = async (id: string) => {
@@ -127,7 +127,7 @@ export default function ClinicDoctorList() {
                 </DoctorFormDialog>
                 <ConfirmDialog
                   onConfirm={() => handleDelete(doctor.id)}
-                  title = "Confirm Deletion"
+                  title="Confirm Deletion"
                   description={`Are you sure you want to delete "${doctor.firstName} ${doctor.lastName}"? This action cannot be undone.`}
                 >
                   <Button

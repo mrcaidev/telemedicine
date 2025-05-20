@@ -7,8 +7,8 @@ import {
   SelectItem,
   SelectContent,
 } from "@/components/ui/select";
-import { Card, CardContent } from "@/components/ui/card";
-import { CalendarClock, Plus } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { CalendarClock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Doctor } from "@/types/doctor";
 import { ConfirmDialog } from "@/components/dialog/confirm-dialog";
