@@ -18,13 +18,12 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  const doctorId = session.user.id;
   const token = session.user.token;
 
   if (!req.url.startsWith("http")) {
     throw new Error("req.url must be an absolute URL");
   }
-  
+
   const { searchParams } = new URL(req.url);
 
   const cursor = searchParams.get("cursor");
@@ -35,7 +34,6 @@ export async function GET(req: NextRequest) {
   const safeSortBy = VALID_SORT_FIELDS.includes(sortBy) ? sortBy : "endAt";
 
   const backendUrl = new URL(`${BACKEND_API}/appointments`);
-  backendUrl.searchParams.append("doctorId", doctorId);
   backendUrl.searchParams.append("limit", limit);
   backendUrl.searchParams.append("sortBy", safeSortBy);
   backendUrl.searchParams.append("sortOrder", sortOrder);
