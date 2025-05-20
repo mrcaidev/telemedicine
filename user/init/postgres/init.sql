@@ -14,7 +14,7 @@ create table accounts (
   email text not null,
   password_hash text default null,
   created_at timestamptz default now() not null,
-  updated_at timestamptz default null,
+  updated_at timestamptz default now() not null,
   deleted_at timestamptz default null
 );
 
@@ -50,8 +50,8 @@ create table clinics (
   name text not null,
   created_at timestamptz default now() not null,
   created_by uuid not null references platform_admin_profiles(id),
-  updated_at timestamptz default null,
-  updated_by uuid default null references platform_admin_profiles(id),
+  updated_at timestamptz default now() not null,
+  updated_by uuid not null references platform_admin_profiles(id),
   deleted_at timestamptz default null,
   deleted_by uuid default null references platform_admin_profiles(id)
 );
@@ -64,7 +64,7 @@ create table clinic_admin_profiles (
   first_name text not null,
   last_name text not null,
   created_by uuid not null references platform_admin_profiles(id),
-  updated_by uuid default null references platform_admin_profiles(id),
+  updated_by uuid not null references platform_admin_profiles(id),
   deleted_by uuid default null references platform_admin_profiles(id)
 );
 
@@ -129,7 +129,7 @@ create table doctor_profiles (
     array_to_tsvector(specialties)
   ) stored,
   created_by uuid not null references clinic_admin_profiles(id),
-  updated_by uuid default null references clinic_admin_profiles(id),
+  updated_by uuid not null references clinic_admin_profiles(id),
   deleted_by uuid default null references clinic_admin_profiles(id)
 );
 
@@ -221,9 +221,10 @@ on otp_verifications(email, sent_at desc);
 
 -- Google 账号到平台账号的映射。
 create table google_identities (
-  id uuid primary key references patient_profiles(id),
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid not null references accounts(id),
   google_id text not null unique,
-  linked_at timestamptz default now() not null
+  created_at timestamptz default now() not null
 );
 
 -- 安全操作的审计日志。
