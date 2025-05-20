@@ -1,110 +1,24 @@
-import {
-  publishDoctorCreatedEvent,
-  publishDoctorDeletedEvent,
-  publishDoctorUpdatedEvent,
-} from "@/events/producer";
+import { produceEvent } from "@/events/producer";
 import * as accountRepository from "@/repositories/account";
 import * as auditLogRepository from "@/repositories/audit-log";
 import * as clinicAdminProfileRepository from "@/repositories/clinic-admin-profile";
 import * as doctorProfileRepository from "@/repositories/doctor-profile";
-import type { Account, Doctor, Gender } from "@/utils/types";
+import type { Actor, Gender } from "@/utils/types";
 import { HTTPException } from "hono/http-exception";
 
-export async function findMany(query: {
+export async function paginate(query: {
   clinicId?: string;
   sortBy: "createdAt";
   sortOrder: "asc" | "desc";
   limit: number;
   cursor?: string;
 }) {
-  const doctors = await doctorProfileRepository.findManyFull(query);
+  const doctors = await doctorProfileRepository.selectMany(query);
 
   const nextCursor =
-    doctors.length < query.limit ? null : (doctors.at(-1)?.createdAt ?? 0);
+    doctors.length < query.limit ? null : (doctors.at(-1)?.createdAt ?? null);
 
-  return {
-    doctors: doctors.map((d) => {
-      const { createdAt, ...rest } = d;
-      return rest;
-    }),
-    nextCursor,
-  } as const;
-}
-
-export async function findManyRandom(query: { limit: number }) {
-  return await doctorProfileRepository.findManyFullRandom(query);
-}
-
-export async function findOneById(id: string) {
-  const account = await accountRepository.findOneById(id);
-  if (!account) {
-    throw new HTTPException(404, { message: "This doctor does not exist" });
-  }
-
-  const fullProfile = await doctorProfileRepository.findOneFullById(id);
-  if (!fullProfile) {
-    throw new HTTPException(404, { message: "This doctor does not exist" });
-  }
-
-  return { ...account, ...fullProfile } as Doctor;
-}
-
-export async function createOne(
-  data: {
-    email: string;
-    password: string;
-    firstName: string;
-    lastName: string;
-  },
-  actor: Account,
-) {
-  // 如果该邮箱已经注册过了，就拒绝再次注册。
-  const existingAccount = await accountRepository.findOneByEmail(data.email);
-  if (existingAccount) {
-    throw new HTTPException(409, {
-      message: "This email has already been registered",
-    });
-  }
-
-  // 密码加盐。
-  const passwordHash = await Bun.password.hash(data.password);
-
-  // 医生的诊所信息继承自创建他的诊所管理员，也就是继承自当前用户。
-  const clinicAdminFullProfile =
-    await clinicAdminProfileRepository.findOneFullById(actor.id);
-  if (!clinicAdminFullProfile) {
-    throw new HTTPException(404, { message: "This clinic does not exist" });
-  }
-  const clinic = clinicAdminFullProfile.clinic;
-
-  // 创建账户。
-  const account = await accountRepository.createOne({
-    role: "doctor",
-    email: data.email,
-    passwordHash,
-  });
-
-  // 创建资料。
-  const profile = await doctorProfileRepository.createOne({
-    id: account.id,
-    firstName: data.firstName,
-    lastName: data.lastName,
-    clinicId: clinic.id,
-    createdBy: actor.id,
-  });
-
-  const { clinicId, ...doctor } = { ...account, clinic, ...profile };
-
-  // 发布事件。
-  await publishDoctorCreatedEvent(doctor);
-
-  // 记录到审计日志。
-  await auditLogRepository.createOne({
-    userId: account.id,
-    action: "register_with_email_and_password",
-  });
-
-  return doctor as Doctor;
+  return { doctors, nextCursor };
 }
 
 export async function search(query: {
@@ -112,24 +26,83 @@ export async function search(query: {
   limit: number;
   cursor: number;
 }) {
-  const fullProfiles = await doctorProfileRepository.searchManyFull({
-    q: query.q,
-    limit: query.limit,
-    maxSimilarity: query.cursor,
-  });
+  const matches = await doctorProfileRepository.selectManyMatching(query);
 
   const nextCursor =
-    fullProfiles.length < query.limit
-      ? null
-      : (fullProfiles.at(-1)?.similarity ?? 0);
+    matches.length < query.limit ? null : (matches.at(-1)?.similarity ?? 0);
 
   return {
-    doctors: fullProfiles.map(({ similarity, ...rest }) => rest),
+    doctors: matches.map(({ similarity, ...doctor }) => doctor),
     nextCursor,
   };
 }
 
-export async function updateOneById(
+export async function sample(query: { limit: number }) {
+  return await doctorProfileRepository.selectManyRandomly(query);
+}
+
+export async function findById(id: string) {
+  const doctor = await doctorProfileRepository.selectOneById(id);
+
+  if (!doctor) {
+    throw new HTTPException(404, { message: "Doctor not found" });
+  }
+
+  return doctor;
+}
+
+export async function create(
+  data: {
+    email: string;
+    password: string;
+    firstName: string;
+    lastName: string;
+  },
+  actor: Actor,
+) {
+  const conflictedAccount = await accountRepository.selectOneByEmail(
+    data.email,
+  );
+  if (conflictedAccount) {
+    throw new HTTPException(409, {
+      message: "This email has already been registered",
+    });
+  }
+
+  const passwordHash = await Bun.password.hash(data.password);
+
+  // 医生的诊所信息继承自创建他的诊所管理员，也就是继承自当前用户。
+  const clinicAdminProfile =
+    await clinicAdminProfileRepository.selectOneProfileById(actor.id);
+  if (!clinicAdminProfile) {
+    throw new HTTPException(404, { message: "Clinic not found" });
+  }
+
+  const account = await accountRepository.insertOne({
+    role: "doctor",
+    email: data.email,
+    passwordHash,
+  });
+
+  const doctor = await doctorProfileRepository.insertOne({
+    id: account.id,
+    clinicId: clinicAdminProfile.clinicId,
+    firstName: data.firstName,
+    lastName: data.lastName,
+    createdBy: actor.id,
+  });
+
+  await auditLogRepository.insertOne({
+    userId: account.id,
+    action: "register_with_email_and_password",
+  });
+
+  await produceEvent("DoctorCreated", doctor);
+
+  return doctor;
+}
+
+export async function updateById(
   id: string,
   data: {
     firstName?: string;
@@ -138,19 +111,17 @@ export async function updateOneById(
     gender?: Gender;
     specialties?: string[];
   },
-  actor: Account,
+  actor: Actor,
 ) {
-  const existingProfile = await doctorProfileRepository.findOneById(id);
+  const existingProfile =
+    await doctorProfileRepository.selectOneProfileById(id);
   if (!existingProfile) {
-    throw new HTTPException(404, {
-      message: "This doctor does not exist",
-    });
+    throw new HTTPException(404, { message: "Doctor not found" });
   }
 
   // 只有医生所属诊所的管理员才能更新。
-  const clinicAdminProfile = await clinicAdminProfileRepository.findOneById(
-    actor.id,
-  );
+  const clinicAdminProfile =
+    await clinicAdminProfileRepository.selectOneProfileById(actor.id);
   if (!clinicAdminProfile) {
     throw new HTTPException(404, { message: "Clinic admin not found" });
   }
@@ -160,24 +131,21 @@ export async function updateOneById(
 
   const newDoctor = await doctorProfileRepository.updateOneById(id, data);
 
-  await publishDoctorUpdatedEvent(newDoctor);
+  await produceEvent("DoctorUpdated", newDoctor);
 
   return newDoctor;
 }
 
-export async function deleteOneById(id: string, actor: Account) {
-  // 首先得要存在。
-  const existingProfile = await doctorProfileRepository.findOneById(id);
+export async function deleteById(id: string, actor: Actor) {
+  const existingProfile =
+    await doctorProfileRepository.selectOneProfileById(id);
   if (!existingProfile) {
-    throw new HTTPException(404, {
-      message: "This doctor does not exist",
-    });
+    throw new HTTPException(404, { message: "Doctor not found" });
   }
 
   // 只有医生所属诊所的管理员才能删除。
-  const clinicAdminProfile = await clinicAdminProfileRepository.findOneById(
-    actor.id,
-  );
+  const clinicAdminProfile =
+    await clinicAdminProfileRepository.selectOneProfileById(actor.id);
   if (!clinicAdminProfile) {
     throw new HTTPException(404, { message: "Clinic admin not found" });
   }
@@ -185,12 +153,8 @@ export async function deleteOneById(id: string, actor: Account) {
     throw new HTTPException(403, { message: "Permission denied" });
   }
 
-  // 删除账户。
   await accountRepository.deleteOneById(id);
-
-  // 删除资料。
   await doctorProfileRepository.deleteOneById(id, actor.id);
 
-  // 发布事件。
-  await publishDoctorDeletedEvent({ id });
+  await produceEvent("DoctorDeleted", { id });
 }

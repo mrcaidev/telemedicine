@@ -151,6 +151,7 @@ describe("POST /clinic-admins", () => {
         clinic: mockData.clinic,
         firstName: "Alice",
         lastName: "Cooper",
+        createdAt: expect.any(String),
       },
     });
   });
@@ -293,6 +294,7 @@ describe("PATCH /clinic-admins/{id}", () => {
         clinic: mockData.clinic,
         firstName: "Bob",
         lastName: "Marley",
+        createdAt: expect.any(String),
       },
     });
   });

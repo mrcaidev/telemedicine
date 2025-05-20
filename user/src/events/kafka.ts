@@ -1,5 +1,6 @@
 import { Kafka, type KafkaConfig, logLevel } from "kafkajs";
 
+// 读取 Kafka 配置。
 async function readConfig() {
   const baseConfig: KafkaConfig = {
     clientId: "user",
@@ -31,12 +32,12 @@ async function readConfig() {
 
     return {
       ...baseConfig,
-      ssl: { ca },
       sasl: {
         mechanism: "plain",
         username: Bun.env.KAFKA_SASL_USERNAME,
         password: Bun.env.KAFKA_SASL_PASSWORD,
       },
+      ssl: { ca },
     } satisfies KafkaConfig;
   }
 
@@ -61,12 +62,7 @@ async function readConfig() {
 
     return {
       ...baseConfig,
-      ssl: {
-        rejectUnauthorized: false,
-        ca,
-        key,
-        cert,
-      },
+      ssl: { ca, key, cert, rejectUnauthorized: false },
     } satisfies KafkaConfig;
   }
 

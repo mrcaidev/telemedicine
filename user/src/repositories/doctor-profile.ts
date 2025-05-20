@@ -1,140 +1,230 @@
-import {
-  camelToSnakeJson,
-  camelToSnakeString,
-  snakeToCamelJson,
-} from "@/utils/case";
+import { camelToSnakeJson, camelToSnakeString } from "@/utils/case";
 import type {
   Doctor,
   DoctorFullProfile,
   DoctorProfile,
+  Gender,
   PartiallyRequired,
+  Role,
 } from "@/utils/types";
 import { sql } from "bun";
 
-export async function findManyFull(query: {
+type ProfileRow = {
+  id: string;
+  clinic_id: string;
+  first_name: string;
+  last_name: string;
+  avatar_url: string;
+  gender: Gender;
+  description: string;
+  specialties: string[];
+};
+
+function normalizeProfileRow(row: ProfileRow): DoctorProfile {
+  return {
+    id: row.id,
+    clinicId: row.clinic_id,
+    firstName: row.first_name,
+    lastName: row.last_name,
+    avatarUrl: row.avatar_url,
+    gender: row.gender,
+    description: row.description,
+    specialties: row.specialties,
+  };
+}
+
+type FullProfileRow = {
+  id: string;
+  first_name: string;
+  last_name: string;
+  avatar_url: string;
+  gender: Gender;
+  description: string;
+  specialties: string[];
+  clinic_id: string;
+  clinic_name: string;
+  clinic_created_at: Date;
+};
+
+function normalizeFullProfileRow(row: FullProfileRow): DoctorFullProfile {
+  return {
+    id: row.id,
+    firstName: row.first_name,
+    lastName: row.last_name,
+    avatarUrl: row.avatar_url,
+    gender: row.gender,
+    description: row.description,
+    specialties: row.specialties,
+    clinic: {
+      id: row.clinic_id,
+      name: row.clinic_name,
+      createdAt: row.clinic_created_at.toISOString(),
+    },
+  };
+}
+
+type Row = {
+  id: string;
+  role: Role;
+  email: string;
+  created_at: Date;
+  first_name: string;
+  last_name: string;
+  avatar_url: string;
+  gender: Gender;
+  description: string;
+  specialties: string[];
+  clinic_id: string;
+  clinic_name: string;
+  clinic_created_at: Date;
+};
+
+function normalizeRow(row: Row): Doctor {
+  return {
+    id: row.id,
+    role: row.role,
+    email: row.email,
+    createdAt: row.created_at.toISOString(),
+    firstName: row.first_name,
+    lastName: row.last_name,
+    avatarUrl: row.avatar_url,
+    gender: row.gender,
+    description: row.description,
+    specialties: row.specialties,
+    clinic: {
+      id: row.clinic_id,
+      name: row.clinic_name,
+      createdAt: row.clinic_created_at.toISOString(),
+    },
+  };
+}
+
+export async function selectMany(query: {
   clinicId?: string;
   sortBy: "createdAt";
   sortOrder: "asc" | "desc";
   limit: number;
   cursor?: string;
 }) {
-  const rows = await sql`
-    select dp.id, dp.first_name, dp.last_name, dp.avatar_url, dp.gender, dp.description, dp.specialties, a.role, a.email, a.created_at, c.id as clinic_id, c.name as clinic_name
-    from doctor_profiles dp
-    left outer join accounts a on dp.id = a.id
-    left outer join clinics c on dp.clinic_id = c.id
+  const rows = (await sql`
+    select id, role, email, created_at, first_name, last_name, avatar_url, gender, description, specialties, clinic_id, clinic_name, clinic_created_at
+    from doctors
     where true
-    ${query.clinicId ? sql`and dp.clinic_id = ${query.clinicId}` : sql``}
-    ${!query.cursor ? sql`` : query.sortOrder === "asc" ? sql`and a.${sql.unsafe(camelToSnakeString(query.sortBy))} > ${query.cursor}` : sql`and a.${sql.unsafe(camelToSnakeString(query.sortBy))} < ${query.cursor}`}
-    order by a.${sql.unsafe(camelToSnakeString(query.sortBy))} ${sql.unsafe(query.sortOrder)}
+    ${query.clinicId ? sql`and clinic_id = ${query.clinicId}` : sql``}
+    ${!query.cursor ? sql`` : query.sortOrder === "asc" ? sql`and ${sql.unsafe(camelToSnakeString(query.sortBy))} > ${query.cursor}` : sql`and ${sql.unsafe(camelToSnakeString(query.sortBy))} < ${query.cursor}`}
+    order by ${sql.unsafe(camelToSnakeString(query.sortBy))} ${sql.unsafe(query.sortOrder)}
     limit ${query.limit}
-  `;
+  `) as Row[];
 
-  // @ts-ignore
-  return rows.map((row) => {
-    const { clinicId, clinicName, ...rest } = snakeToCamelJson(row);
-    return {
-      ...rest,
-      clinic: { id: clinicId, name: clinicName },
-    };
-  }) as (Doctor & { createdAt: string })[];
+  return rows.map(normalizeRow);
 }
 
-export async function findManyFullRandom(query: { limit: number }) {
-  const rows = await sql`
-    select dp.id, dp.first_name, dp.last_name, dp.avatar_url, dp.gender, dp.description, dp.specialties, a.role, a.email, c.id as clinic_id, c.name as clinic_name
-    from doctor_profiles dp
-    left outer join accounts a on dp.id = a.id
-    left outer join clinics c on dp.clinic_id = c.id
+export async function selectManyMatching(query: {
+  q: string;
+  limit: number;
+  cursor: number;
+}) {
+  const rows = (await sql`
+    with matched as (
+      select id, ts_rank_cd(fts, plainto_tsquery('english', ${query.q})) as similarity
+      from doctor_profiles
+      where fts @@ plainto_tsquery('english', ${query.q})
+      and ts_rank_cd(fts, plainto_tsquery('english', ${query.q})) < ${query.cursor}
+      order by similarity desc
+      limit ${query.limit}
+    )
+    select m.id, m.similarity, role, email, created_at, first_name, last_name, avatar_url, gender, description, specialties, clinic_id, clinic_name, clinic_created_at
+    from matched m
+    left outer join doctors d on m.id = d.id
+    order by similarity desc
+  `) as (Row & { similarity: number })[];
+  console.log("rows", rows);
+
+  return rows.map((row) => {
+    const { similarity, ...rest } = row;
+    return { ...normalizeRow(rest), similarity };
+  });
+}
+
+export async function selectManyRandomly(query: { limit: number }) {
+  const rows = (await sql`
+    select id, role, email, created_at, first_name, last_name, avatar_url, gender, description, specialties, clinic_id, clinic_name, clinic_created_at
+    from doctors
     order by random()
     limit ${query.limit}
-  `;
+  `) as Row[];
 
-  // @ts-ignore
-  return rows.map((row) => {
-    const { clinicId, clinicName, ...rest } = snakeToCamelJson(row);
-    return {
-      ...rest,
-      clinic: { id: clinicId, name: clinicName },
-    };
-  }) as Doctor[];
+  return rows.map(normalizeRow);
 }
 
-export async function findOneById(id: string) {
-  const [row] = await sql`
+export async function selectOneProfileById(id: string) {
+  const [row] = (await sql`
     select id, clinic_id, first_name, last_name, avatar_url, gender, description, specialties
     from doctor_profiles
     where id = ${id}
-  `;
+  `) as ProfileRow[];
 
   if (!row) {
     return null;
   }
 
-  return snakeToCamelJson(row) as DoctorProfile;
+  return normalizeProfileRow(row);
 }
 
-export async function findOneFullById(id: string) {
-  const [row] = await sql`
-    select dp.id, dp.first_name, dp.last_name, dp.avatar_url, dp.gender, dp.description, dp.specialties, c.id as clinic_id, c.name as clinic_name
-    from doctor_profiles dp
-    left outer join clinics c on dp.clinic_id = c.id
-    where dp.id = ${id}
-  `;
+export async function selectOneFullProfileById(id: string) {
+  const [row] = (await sql`
+    select id, first_name, last_name, avatar_url, gender, description, specialties, clinic_id, clinic_name, clinic_created_at
+    from doctor_full_profiles
+    where id = ${id}
+  `) as FullProfileRow[];
 
   if (!row) {
     return null;
   }
 
-  const { clinicId, clinicName, ...rest } = snakeToCamelJson(row);
-  return {
-    ...rest,
-    clinic: { id: clinicId, name: clinicName },
-  } as DoctorFullProfile;
+  return normalizeFullProfileRow(row);
 }
 
-export async function createOne(
+export async function selectOneById(id: string) {
+  const [row] = (await sql`
+    select id, role, email, created_at, first_name, last_name, avatar_url, gender, description, specialties, clinic_id, clinic_name, clinic_created_at
+    from doctors
+    where id = ${id}
+  `) as Row[];
+
+  if (!row) {
+    return null;
+  }
+
+  return normalizeRow(row);
+}
+
+export async function insertOne(
   data: PartiallyRequired<
     DoctorProfile,
     "id" | "clinicId" | "firstName" | "lastName"
   > & { createdBy: string },
 ) {
-  const [row] = await sql`
+  const [inserted] = (await sql`
     insert into doctor_profiles ${sql(camelToSnakeJson(data))}
-    returning id, clinic_id, first_name, last_name, avatar_url, gender, description, specialties
-  `;
+    returning id
+  `) as { id: string }[];
 
-  if (!row) {
-    throw new Error("failed to create doctor profile");
+  if (!inserted) {
+    throw new Error("failed to insert doctor profile");
   }
 
-  return snakeToCamelJson(row) as DoctorProfile;
-}
+  const [row] = (await sql`
+    select id, role, email, created_at, first_name, last_name, avatar_url, gender, description, specialties, clinic_id, clinic_name, clinic_created_at
+    from doctors
+    where id = ${inserted.id}
+  `) as Row[];
 
-export async function searchManyFull(query: {
-  q: string;
-  limit: number;
-  maxSimilarity: number;
-}) {
-  const rows = await sql`
-    with matched_doctor_profiles as (
-      select *, ts_rank_cd(fts, plainto_tsquery('english', ${query.q})) as similarity
-      from doctor_profiles
-      where fts @@ plainto_tsquery('english', ${query.q})
-      and ts_rank_cd(fts, plainto_tsquery('english', ${query.q})) < ${query.maxSimilarity}
-      order by similarity desc
-      limit ${query.limit}
-    )
-    select mdp.similarity, mdp.id, mdp.first_name, mdp.last_name, mdp.avatar_url, mdp.gender, mdp.description, mdp.specialties, c.id as clinic_id, c.name as clinic_name
-    from matched_doctor_profiles mdp
-    left outer join clinics c on mdp.clinic_id = c.id
-  `;
+  if (!row) {
+    throw new Error("failed to insert doctor profile");
+  }
 
-  // @ts-ignore
-  return snakeToCamelJson(rows).map((row) => {
-    const { clinicId, clinicName, ...rest } = row;
-    return { ...rest, clinic: { id: clinicId, name: clinicName } };
-  }) as (DoctorFullProfile & { similarity: number })[];
+  return normalizeRow(row);
 }
 
 export async function updateOneById(
@@ -146,29 +236,28 @@ export async function updateOneById(
     >
   >,
 ) {
-  const [row] = await sql`
-    with updated as (
-      update doctor_profiles
-      set ${sql(camelToSnakeJson(data))}
-      where id = ${id}
-      returning id, clinic_id, first_name, last_name, avatar_url, description, gender, specialties
-    )
-    select u.id, u.clinic_id, u.first_name, u.last_name, u.avatar_url, u.description, u.gender, u.specialties, a.role, a.email, c.id as clinic_id, c.name as clinic_name
-    from updated u
-    left outer join accounts a on u.id = a.id
-    left outer join clinics c on u.clinic_id = c.id
-    where a.id = ${id}
-  `;
+  const [updated] = (await sql`
+    update doctor_profiles
+    set ${sql(camelToSnakeJson(data))}
+    where id = ${id}
+    returning id
+  `) as { id: string }[];
+
+  if (!updated) {
+    throw new Error("failed to update doctor profile");
+  }
+
+  const [row] = (await sql`
+    select id, role, email, created_at, first_name, last_name, avatar_url, gender, description, specialties, clinic_id, clinic_name, clinic_created_at
+    from doctors
+    where id = ${updated.id}
+  `) as Row[];
 
   if (!row) {
     throw new Error("failed to update doctor profile");
   }
 
-  const { clinicId, clinicName, ...rest } = snakeToCamelJson(row);
-  return {
-    ...rest,
-    clinic: { id: clinicId, name: clinicName },
-  } as Doctor;
+  return normalizeRow(row);
 }
 
 export async function deleteOneById(id: string, deletedBy: string) {

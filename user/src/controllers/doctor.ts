@@ -2,11 +2,11 @@ import {
   emailSchema,
   firstNameSchema,
   genderSchema,
-  idSchema,
   lastNameSchema,
   passwordSchema,
+  uuidSchema,
 } from "@/common/schema";
-import { authGuard } from "@/middleware/auth-guard";
+import { rbac } from "@/middleware/rbac";
 import { validator } from "@/middleware/validator";
 import * as doctorService from "@/services/doctor";
 import { Hono } from "hono";
@@ -19,7 +19,7 @@ doctorController.get(
   validator(
     "query",
     v.object({
-      clinicId: v.optional(idSchema),
+      clinicId: v.optional(uuidSchema),
       sortBy: v.optional(
         v.union([v.literal("createdAt")], "sortBy should be 'createdAt'"),
         "createdAt",
@@ -52,7 +52,7 @@ doctorController.get(
   ),
   async (c) => {
     const query = c.req.valid("query");
-    const page = await doctorService.findMany(query);
+    const page = await doctorService.paginate(query);
     return c.json({ code: 0, message: "", data: page });
   },
 );
@@ -77,7 +77,7 @@ doctorController.get(
   ),
   async (c) => {
     const query = c.req.valid("query");
-    const doctors = await doctorService.findManyRandom(query);
+    const doctors = await doctorService.sample(query);
     return c.json({ code: 0, message: "", data: doctors });
   },
 );
@@ -124,17 +124,17 @@ doctorController.get(
 
 doctorController.get(
   "/:id",
-  validator("param", v.object({ id: idSchema })),
+  validator("param", v.object({ id: uuidSchema })),
   async (c) => {
     const { id } = c.req.valid("param");
-    const doctor = await doctorService.findOneById(id);
+    const doctor = await doctorService.findById(id);
     return c.json({ code: 0, message: "", data: doctor });
   },
 );
 
 doctorController.post(
   "/",
-  authGuard(["clinic_admin"]),
+  rbac(["clinic_admin"]),
   validator(
     "json",
     v.object({
@@ -147,15 +147,15 @@ doctorController.post(
   async (c) => {
     const data = c.req.valid("json");
     const actor = c.get("actor");
-    const doctor = await doctorService.createOne(data, actor);
+    const doctor = await doctorService.create(data, actor);
     return c.json({ code: 0, message: "", data: doctor }, 201);
   },
 );
 
 doctorController.patch(
   "/:id",
-  authGuard(["clinic_admin"]),
-  validator("param", v.object({ id: idSchema })),
+  rbac(["clinic_admin"]),
+  validator("param", v.object({ id: uuidSchema })),
   validator(
     "json",
     v.object({
@@ -170,19 +170,19 @@ doctorController.patch(
     const { id } = c.req.valid("param");
     const data = c.req.valid("json");
     const actor = c.get("actor");
-    const doctor = await doctorService.updateOneById(id, data, actor);
+    const doctor = await doctorService.updateById(id, data, actor);
     return c.json({ code: 0, message: "", data: doctor });
   },
 );
 
 doctorController.delete(
   "/:id",
-  authGuard(["clinic_admin"]),
-  validator("param", v.object({ id: idSchema })),
+  rbac(["clinic_admin"]),
+  validator("param", v.object({ id: uuidSchema })),
   async (c) => {
     const { id } = c.req.valid("param");
     const actor = c.get("actor");
-    await doctorService.deleteOneById(id, actor);
+    await doctorService.deleteById(id, actor);
     return c.json({ code: 0, message: "", data: null });
   },
 );

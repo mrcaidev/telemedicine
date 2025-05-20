@@ -17,23 +17,10 @@ import {
 } from "./utils/data";
 import { GET, PATCH, POST } from "./utils/request";
 
-const publishPatientCreatedEventSpy = spyOn(
-  producer,
-  "publishPatientCreatedEvent",
-);
-const publishPatientUpdatedEventSpy = spyOn(
-  producer,
-  "publishPatientUpdatedEvent",
-);
-const publishPatientDeletedEventSpy = spyOn(
-  producer,
-  "publishPatientDeletedEvent",
-);
+const produceEventSpy = spyOn(producer, "produceEvent");
 
 afterEach(() => {
-  publishPatientCreatedEventSpy.mockClear();
-  publishPatientUpdatedEventSpy.mockClear();
-  publishPatientDeletedEventSpy.mockClear();
+  produceEventSpy.mockClear();
 });
 
 afterAll(() => {
@@ -103,7 +90,7 @@ describe("POST /patients", () => {
       insert into otp_verifications (email, otp) values
       ('patient2@example.com', '123456');
     `;
-    publishPatientCreatedEventSpy.mockResolvedValueOnce();
+    produceEventSpy.mockResolvedValueOnce();
     const res = await POST("/patients", {
       email: "patient2@example.com",
       password: mockData.password,
@@ -121,13 +108,18 @@ describe("POST /patients", () => {
         avatarUrl: null,
         gender: null,
         birthDate: null,
+        createdAt: expect.any(String),
         token: expect.any(String),
       },
     });
-    expect(publishPatientCreatedEventSpy).toHaveBeenCalledTimes(1);
+    expect(produceEventSpy).toHaveBeenCalledTimes(1);
     // @ts-ignore
     const { token, ...patient } = json.data;
-    expect(publishPatientCreatedEventSpy).toHaveBeenNthCalledWith(1, patient);
+    expect(produceEventSpy).toHaveBeenNthCalledWith(
+      1,
+      "PatientCreated",
+      patient,
+    );
   });
 
   it("returns 409 if email has already been registered", async () => {
@@ -139,7 +131,7 @@ describe("POST /patients", () => {
     const json = await res.json();
     expect(res.status).toEqual(409);
     expect(json).toEqual(errorResponseTemplate);
-    expect(publishPatientCreatedEventSpy).toHaveBeenCalledTimes(0);
+    expect(produceEventSpy).toHaveBeenCalledTimes(0);
   });
 
   it("returns 422 if no otp is sent", async () => {
@@ -151,7 +143,7 @@ describe("POST /patients", () => {
     const json = await res.json();
     expect(res.status).toEqual(422);
     expect(json).toEqual(errorResponseTemplate);
-    expect(publishPatientCreatedEventSpy).toHaveBeenCalledTimes(0);
+    expect(produceEventSpy).toHaveBeenCalledTimes(0);
   });
 
   it("returns 422 if otp expires", async () => {
@@ -167,7 +159,7 @@ describe("POST /patients", () => {
     const json = await res.json();
     expect(res.status).toEqual(422);
     expect(json).toEqual(errorResponseTemplate);
-    expect(publishPatientCreatedEventSpy).toHaveBeenCalledTimes(0);
+    expect(produceEventSpy).toHaveBeenCalledTimes(0);
   });
 
   it("returns 422 if otp is wrong", async () => {
@@ -183,7 +175,7 @@ describe("POST /patients", () => {
     const json = await res.json();
     expect(res.status).toEqual(422);
     expect(json).toEqual(errorResponseTemplate);
-    expect(publishPatientCreatedEventSpy).toHaveBeenCalledTimes(0);
+    expect(produceEventSpy).toHaveBeenCalledTimes(0);
   });
 });
 
@@ -191,7 +183,7 @@ describe("PATCH /patients/{id}", () => {
   const targetPatientId = "6a322172-f2a3-4570-99cc-54afaa156ec4";
 
   it("updates patient", async () => {
-    publishPatientUpdatedEventSpy.mockResolvedValueOnce();
+    produceEventSpy.mockResolvedValueOnce();
     const res = await PATCH(
       `/patients/${targetPatientId}`,
       {
@@ -219,10 +211,11 @@ describe("PATCH /patients/{id}", () => {
         avatarUrl: null,
         gender: "female",
         birthDate: "2000-01-01",
+        createdAt: expect.any(String),
       },
     });
-    expect(publishPatientUpdatedEventSpy).toHaveBeenCalledTimes(1);
-    expect(publishPatientUpdatedEventSpy).toHaveBeenNthCalledWith(1, {
+    expect(produceEventSpy).toHaveBeenCalledTimes(1);
+    expect(produceEventSpy).toHaveBeenNthCalledWith(1, "PatientUpdated", {
       id: targetPatientId,
       role: "patient",
       email: "Brennan_Block@gmail.com",
@@ -230,6 +223,7 @@ describe("PATCH /patients/{id}", () => {
       avatarUrl: null,
       gender: "female",
       birthDate: "2000-01-01",
+      createdAt: expect.any(String),
     });
   });
 

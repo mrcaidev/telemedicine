@@ -14,7 +14,6 @@ create table accounts (
   email text not null,
   password_hash text default null,
   created_at timestamptz default now() not null,
-  updated_at timestamptz default now() not null,
   deleted_at timestamptz default null
 );
 
@@ -32,16 +31,13 @@ create table platform_admin_profiles (
 -- 平台管理员的完整用户视图。
 create view platform_admins as (
   select
-    a.id
-    a.role
+    a.id,
+    a.role,
     a.email,
-    a.created_at,
-    a.updated_at,
-    a.deleted_at,
+    a.created_at
   from platform_admin_profiles pap
   left outer join accounts a on pap.id = a.id
-  where a.deleted_at is null
-)
+);
 
 -- 诊所。
 -- 由平台管理员管理。
@@ -50,8 +46,6 @@ create table clinics (
   name text not null,
   created_at timestamptz default now() not null,
   created_by uuid not null references platform_admin_profiles(id),
-  updated_at timestamptz default now() not null,
-  updated_by uuid not null references platform_admin_profiles(id),
   deleted_at timestamptz default null,
   deleted_by uuid default null references platform_admin_profiles(id)
 );
@@ -64,7 +58,6 @@ create table clinic_admin_profiles (
   first_name text not null,
   last_name text not null,
   created_by uuid not null references platform_admin_profiles(id),
-  updated_by uuid not null references platform_admin_profiles(id),
   deleted_by uuid default null references platform_admin_profiles(id)
 );
 
@@ -76,9 +69,7 @@ create view clinic_admin_full_profiles as (
     cap.last_name,
     c.id as clinic_id,
     c.name as clinic_name,
-    c.created_at as clinic_created_at,
-    c.updated_at as clinic_updated_at,
-    c.deleted_at as clinic_deleted_at
+    c.created_at as clinic_created_at
   from clinic_admin_profiles cap
   left outer join clinics c on cap.clinic_id = c.id
 );
@@ -90,19 +81,14 @@ create view clinic_admins as (
     a.role,
     a.email,
     a.created_at,
-    a.updated_at,
-    a.deleted_at,
     cap.first_name,
     cap.last_name,
     c.id as clinic_id,
     c.name as clinic_name,
-    c.created_at as clinic_created_at,
-    c.updated_at as clinic_updated_at,
-    c.deleted_at as clinic_deleted_at
+    c.created_at as clinic_created_at
   from clinic_admin_profiles cap
   left outer join clinics c on cap.clinic_id = c.id
   left outer join accounts a on cap.id = a.id
-  where a.deleted_at is null
 );
 
 -- 性别。
@@ -110,6 +96,23 @@ create type gender as enum (
   'male',
   'female'
 );
+
+create function generate_doctor_fts(
+  first_name text,
+  last_name text,
+  description text,
+  specialties text[]
+)
+returns tsvector
+language sql
+immutable
+as $$
+select
+  to_tsvector('english', first_name) ||
+  to_tsvector('english', last_name) ||
+  to_tsvector('english', description) ||
+  to_tsvector('english', array_to_string(specialties, ' '));
+$$;
 
 -- 医生的资料。
 -- 由所在诊所的诊所管理员管理。
@@ -122,14 +125,8 @@ create table doctor_profiles (
   gender gender default 'male' not null,
   description text default '' not null,
   specialties text[] default '{}' not null,
-  fts tsvector generated always as (
-    to_tsvector('english', first_name) ||
-    to_tsvector('english', last_name) ||
-    to_tsvector('english', description) ||
-    array_to_tsvector(specialties)
-  ) stored,
+  fts tsvector generated always as (generate_doctor_fts(first_name, last_name, description, specialties)) stored,
   created_by uuid not null references clinic_admin_profiles(id),
-  updated_by uuid not null references clinic_admin_profiles(id),
   deleted_by uuid default null references clinic_admin_profiles(id)
 );
 
@@ -145,9 +142,7 @@ create view doctor_full_profiles as (
     dp.specialties,
     c.id as clinic_id,
     c.name as clinic_name,
-    c.created_at as clinic_created_at,
-    c.updated_at as clinic_updated_at,
-    c.deleted_at as clinic_deleted_at
+    c.created_at as clinic_created_at
   from doctor_profiles dp
   left outer join clinics c on dp.clinic_id = c.id
 );
@@ -159,8 +154,6 @@ create view doctors as (
     a.role,
     a.email,
     a.created_at,
-    a.updated_at,
-    a.deleted_at,
     dp.first_name,
     dp.last_name,
     dp.avatar_url,
@@ -169,13 +162,10 @@ create view doctors as (
     dp.specialties,
     c.id as clinic_id,
     c.name as clinic_name,
-    c.created_at as clinic_created_at,
-    c.updated_at as clinic_updated_at,
-    c.deleted_at as clinic_deleted_at
+    c.created_at as clinic_created_at
   from doctor_profiles dp
   left outer join clinics c on dp.clinic_id = c.id
   left outer join accounts a on dp.id = a.id
-  where a.deleted_at is null
 );
 
 -- 病人的资料。
@@ -195,15 +185,12 @@ create view patients as (
     a.role,
     a.email,
     a.created_at,
-    a.updated_at,
-    a.deleted_at,
     pp.nickname,
     pp.avatar_url,
     pp.gender,
     pp.birth_date
   from patient_profiles pp
   left outer join accounts a on pp.id = a.id
-  where a.deleted_at is null
 );
 
 -- 验证码记录。
