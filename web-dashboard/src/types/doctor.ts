@@ -5,5 +5,14 @@ export interface Doctor {
   email: string;
   avatarURL: string | null;
   gender: "male" | "female";
+  description: string;
   specialties: string[];
+  availableTimes: AvailableTime[];
+}
+
+export interface AvailableTime {
+  id: string;
+  weekday: number;
+  startTime: string;
+  endTime: string;
 }

@@ -14,7 +14,7 @@ import { Plus, Trash2, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { Clinic } from "@/types/clinic";
 import { ClinicFormDialog } from "@/components/dialog/clinic-form-dialog";
-import { ConfirmDeleteDialog } from "@/components/dialog/confirm-delete-dialog";
+import { ConfirmDeleteDialog } from "@/components/dialog/confirm-dialog";
 import Link from "next/link";
 
 export default function PlatformClinicList() {

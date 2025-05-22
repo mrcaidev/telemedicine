@@ -16,12 +16,14 @@ import { toast } from "sonner";
 import Image from "next/image";
 import { Doctor } from "@/types/doctor";
 import { DoctorFormDialog } from "@/components/dialog/doctor-form-dialog";
-import { ConfirmDeleteDialog } from "@/components/dialog/confirm-delete-dialog";
+import { ConfirmDialog } from "@/components/dialog/confirm-dialog";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 export default function ClinicDoctorList() {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const router = useRouter();
 
   const { data: session } = useSession();
   const id = session?.user?.clinicId;
@@ -35,7 +37,7 @@ export default function ClinicDoctorList() {
           description: "can't load doctors, please try again later.",
         })
       );
-  }, [refreshTrigger]);
+  }, [refreshTrigger, id]);
   const refreshDoctors = () => setRefreshTrigger((prev) => prev + 1);
 
   const handleDelete = async (id: string) => {
@@ -85,7 +87,12 @@ export default function ClinicDoctorList() {
         <TableBody>
           {doctors.map((doctor) => (
             <TableRow key={doctor.id}>
-              <TableCell>
+              <TableCell
+                className="hover:bg-gray-100 cursor-pointer"
+                onClick={() =>
+                  router.push(`/dashboard/clinic/doctors/${doctor.id}`)
+                }
+              >
                 <Avatar className="h-8 w-8">
                   <Image
                     src={doctor.avatarURL || "/p.png"}
@@ -95,7 +102,12 @@ export default function ClinicDoctorList() {
                   />
                 </Avatar>
               </TableCell>
-              <TableCell>{`${doctor.firstName} ${doctor.lastName}`}</TableCell>
+              <TableCell
+                className="hover:bg-gray-100 cursor-pointer"
+                onClick={() =>
+                  router.push(`/dashboard/clinic/doctors/${doctor.id}`)
+                }
+              >{`${doctor.firstName} ${doctor.lastName}`}</TableCell>
               <TableCell>{doctor.email}</TableCell>
               <TableCell>{doctor.gender}</TableCell>
               <TableCell>{doctor.specialties.join(", ")}</TableCell>
@@ -113,8 +125,9 @@ export default function ClinicDoctorList() {
                     <Pencil className="w-4 h-4" />
                   </Button>
                 </DoctorFormDialog>
-                <ConfirmDeleteDialog
+                <ConfirmDialog
                   onConfirm={() => handleDelete(doctor.id)}
+                  title="Confirm Deletion"
                   description={`Are you sure you want to delete "${doctor.firstName} ${doctor.lastName}"? This action cannot be undone.`}
                 >
                   <Button
@@ -124,7 +137,7 @@ export default function ClinicDoctorList() {
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>
-                </ConfirmDeleteDialog>
+                </ConfirmDialog>
               </TableCell>
             </TableRow>
           ))}

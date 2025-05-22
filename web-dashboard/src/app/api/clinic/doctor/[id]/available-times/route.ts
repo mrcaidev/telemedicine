@@ -4,9 +4,8 @@ import { authOptions } from "@/lib/authOptions";
 
 const BACKEND_API =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080/api";
-
 export async function GET(
-  req: NextRequest,
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   const { id } = await params;
@@ -17,54 +16,37 @@ export async function GET(
   }
 
   try {
-    const headers = {
-      Authorization: `Bearer ${session.user.token}`,
-      "Content-Type": "application/json",
-    };
+    const res = await fetch(`${BACKEND_API}/doctor-availabilities/${id}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${session.user.token}`,
+        "Content-Type": "application/json",
+      },
+    });
 
-    const [doctorRes, timesRes] = await Promise.all([
-      fetch(`${BACKEND_API}/doctors/${id}`, { headers }),
-      fetch(`${BACKEND_API}/doctor-availabilities/${id}`, {
-        headers,
-      }),
-    ]);
-
-    if (!doctorRes.ok || !timesRes.ok) {
-      return NextResponse.json(
-        { error: "One or both resources failed to load." },
-        { status: 500 }
-      );
-    }
-
-    const doctorData = await doctorRes.json();
-    const timeData = await timesRes.json();
-
-    const merged = {
-      ...doctorData.data,
-      availableTimes: timeData.data,
-    };
-
-    return NextResponse.json(merged, { status: 200 });
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    return NextResponse.json(data, { status: 200 });
   } catch {
     return NextResponse.json({ error: "Get doctor failed" }, { status: 500 });
   }
 }
 
-export async function PATCH(
-  req: NextRequest,
+export async function POST(
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   const { id } = await params;
 
-  const body = await req.json();
   const session = await getServerSession(authOptions);
   if (!session || !session.user || !session.user.token) {
     return new Response("Unauthorized", { status: 401 });
   }
 
   try {
-    const res = await fetch(`${BACKEND_API}/doctors/${id}`, {
-      method: "PATCH",
+    const body = await request.json();
+    const res = await fetch(`${BACKEND_API}/doctor-availabilities/${id}`, {
+      method: "POST",
       headers: {
         Authorization: `Bearer ${session.user.token}`,
         "Content-Type": "application/json",
@@ -72,20 +54,20 @@ export async function PATCH(
       body: JSON.stringify(body),
     });
 
+    if (!res.ok) throw new Error();
     const data = await res.json();
-    return NextResponse.json(data, { status: res.status });
+    return NextResponse.json(data, { status: 200 });
   } catch {
-    return NextResponse.json(
-      { error: "Update doctor failed" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Create failed" }, { status: 500 });
   }
 }
 
 export async function DELETE(
-  _: NextRequest,
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const { searchParams } = new URL(request.url);
+  const availabilityId = searchParams.get("availabilityId");
   const { id } = await params;
 
   const session = await getServerSession(authOptions);
@@ -94,13 +76,16 @@ export async function DELETE(
   }
 
   try {
-    const res = await fetch(`${BACKEND_API}/doctors/${id}`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${session.user.token}`,
-        "Content-Type": "application/json",
-      },
-    });
+    const res = await fetch(
+      `${BACKEND_API}/doctor-availabilities/${id}/${availabilityId}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${session.user.token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
     if (!res.ok) throw new Error();
 

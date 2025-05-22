@@ -20,9 +20,9 @@ type ConfirmDeleteDialogProps = {
   children: ReactNode;
 };
 
-export function ConfirmDeleteDialog({
-  title = "Confirm Deletion",
-  description = "Are you sure you want to delete this item? This action cannot be undone.",
+export function ConfirmDialog({
+  title = "Confirm Action",
+  description = "Are you sure you want to do the action? This action cannot be undone.",
   onConfirm,
   children,
 }: ConfirmDeleteDialogProps) {

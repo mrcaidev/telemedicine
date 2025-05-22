@@ -9,17 +9,10 @@ export function useAppointments() {
   const fetchAppointments = async (cursor?: string) => {
     setLoading(true);
 
-    const apiBase =
-      process.env.NEXT_PUBLIC_API_BASE_URL ||
-      "http://127.0.0.1:4523/m1/6162561-5854630-default";
+    let query = `?limit=10&sortBy=endAt&sortOrder=asc`;
+    if (cursor) query += `&cursor=${encodeURIComponent(cursor)}`;
 
-    const url = new URL("/api/doctor/appointments", apiBase);
-    url.searchParams.set("limit", "10");
-    url.searchParams.set("sortBy", "endAt");
-    url.searchParams.set("sortOrder", "asc");
-    if (cursor) url.searchParams.set("cursor", cursor);
-
-    const res = await fetch(url.toString());
+    const res = await fetch(`/api/doctor/appointments${query}`);
     const json = await res.json();
     console.log("✅ API response:", json);
     console.log("cursor", json.data.nextCursor);
