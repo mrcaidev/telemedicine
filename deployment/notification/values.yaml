@@ -13,6 +13,3 @@ resources:
 minReplicas: 1
 maxReplicas: 1
 kafkaCertsNeeded: false
-secrets:
-  RESEND_API_KEY: mock-api-key
-  KAFKA_BROKERS: kafka:9092

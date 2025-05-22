@@ -1,3 +1,14 @@
 apiVersion: v2
 name: smart-assistant
 version: 0.1.0
+dependencies:
+  - name: mongodb
+    version: ~16.5.11
+    repository: https://charts.bitnami.com/bitnami
+    alias: mongo
+    condition: mongo.enabled
+  - name: redis
+    version: ~21.1.6
+    repository: https://charts.bitnami.com/bitnami
+    alias: redis
+    condition: redis.enabled

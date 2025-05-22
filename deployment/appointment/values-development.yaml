@@ -1,0 +1,17 @@
+host: localhost
+minReplicas: 1
+maxReplicas: 1
+kafkaCertsNeeded: false
+secrets:
+  POSTGRES_URL: postgres://dev:dev@appointment-postgres:5432/dev
+  KAFKA_BROKERS: kafka:9092
+
+postgres:
+  enabled: true
+  auth:
+    username: dev
+    password: dev
+    database: dev
+  primary:
+    initdb:
+      scriptsConfigMap: appointment-postgres-initdb

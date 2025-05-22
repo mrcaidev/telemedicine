@@ -1,0 +1,20 @@
+host: localhost
+minReplicas: 1
+maxReplicas: 1
+kafkaCertsNeeded: false
+secrets:
+  JWT_SECRET: a-string-secret-at-least-256-bits-long
+  SUPER_ADMIN_TOKEN: i-am-a-super-admin
+  GOOGLE_OAUTH_CLIENT_IDS: 234782665622-nchrj8b3tl88ngd15i371huiei5tne6k.apps.googleusercontent.com,234782665622-4n06echhmlaaniba6up6mp7t0nbup9iv.apps.googleusercontent.com,234782665622-ml21883i8km05ls3t6eschrapvqb6rge.apps.googleusercontent.com
+  POSTGRES_URL: postgres://dev:dev@user-postgres:5432/dev
+  KAFKA_BROKERS: kafka:9092
+
+postgres:
+  enabled: true
+  auth:
+    username: dev
+    password: dev
+    database: dev
+  primary:
+    initdb:
+      scriptsConfigMap: user-postgres-initdb

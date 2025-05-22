@@ -1,0 +1,21 @@
+host: localhost
+minReplicas: 1
+maxReplicas: 1
+kafkaCertsNeeded: false
+secrets:
+  OPENAI_API_KEY: sk-test
+  MONGO_URL: mongodb://dev:dev@smart-assistant-mongo:27017/?authSource=smart_assistant
+  REDIS_URL: redis://default:dev@smart-assistant-redis-master:6379
+
+mongo:
+  auth:
+    usernames:
+      - dev
+    passwords:
+      - dev
+    databases:
+      - smart_assistant
+
+redis:
+  auth:
+    password: dev

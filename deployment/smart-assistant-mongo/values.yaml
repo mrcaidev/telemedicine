@@ -1,7 +1,0 @@
-auth:
-  usernames:
-    - dev
-  passwords:
-    - dev
-  databases:
-    - smart_assistant
