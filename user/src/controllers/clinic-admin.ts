@@ -1,11 +1,11 @@
 import {
   emailSchema,
   firstNameSchema,
-  idSchema,
   lastNameSchema,
   passwordSchema,
+  uuidSchema,
 } from "@/common/schema";
-import { authGuard } from "@/middleware/auth-guard";
+import { rbac } from "@/middleware/rbac";
 import { validator } from "@/middleware/validator";
 import * as clinicAdminService from "@/services/clinic-admin";
 import { Hono } from "hono";
@@ -15,8 +15,8 @@ export const clinicAdminController = new Hono();
 
 clinicAdminController.get(
   "/",
-  authGuard(["platform_admin"]),
-  validator("query", v.object({ clinicId: v.optional(idSchema) })),
+  rbac(["platform_admin"]),
+  validator("query", v.object({ clinicId: v.optional(uuidSchema) })),
   async (c) => {
     const query = c.req.valid("query");
     const clinicAdmins = await clinicAdminService.findMany(query);
@@ -26,24 +26,24 @@ clinicAdminController.get(
 
 clinicAdminController.get(
   "/:id",
-  authGuard(["platform_admin"]),
-  validator("param", v.object({ id: idSchema })),
+  rbac(["platform_admin"]),
+  validator("param", v.object({ id: uuidSchema })),
   async (c) => {
     const { id } = c.req.valid("param");
-    const clinicAdmin = await clinicAdminService.findOneById(id);
+    const clinicAdmin = await clinicAdminService.findById(id);
     return c.json({ code: 0, message: "", data: clinicAdmin });
   },
 );
 
 clinicAdminController.post(
   "/",
-  authGuard(["platform_admin"]),
+  rbac(["platform_admin"]),
   validator(
     "json",
     v.object({
       email: emailSchema,
       password: passwordSchema,
-      clinicId: idSchema,
+      clinicId: uuidSchema,
       firstName: firstNameSchema,
       lastName: lastNameSchema,
     }),
@@ -51,15 +51,15 @@ clinicAdminController.post(
   async (c) => {
     const data = c.req.valid("json");
     const actor = c.get("actor");
-    const clinicAdmin = await clinicAdminService.createOne(data, actor);
+    const clinicAdmin = await clinicAdminService.create(data, actor);
     return c.json({ code: 0, message: "", data: clinicAdmin }, 201);
   },
 );
 
 clinicAdminController.patch(
   "/:id",
-  authGuard(["platform_admin"]),
-  validator("param", v.object({ id: idSchema })),
+  rbac(["platform_admin"]),
+  validator("param", v.object({ id: uuidSchema })),
   validator(
     "json",
     v.object({
@@ -70,19 +70,19 @@ clinicAdminController.patch(
   async (c) => {
     const { id } = c.req.valid("param");
     const data = c.req.valid("json");
-    const clinicAdmin = await clinicAdminService.updateOneById(id, data);
+    const clinicAdmin = await clinicAdminService.updateById(id, data);
     return c.json({ code: 0, message: "", data: clinicAdmin });
   },
 );
 
 clinicAdminController.delete(
   "/:id",
-  authGuard(["platform_admin"]),
-  validator("param", v.object({ id: idSchema })),
+  rbac(["platform_admin"]),
+  validator("param", v.object({ id: uuidSchema })),
   async (c) => {
     const { id } = c.req.valid("param");
     const actor = c.get("actor");
-    await clinicAdminService.deleteOneById(id, actor);
+    await clinicAdminService.deleteById(id, actor);
     return c.json({ code: 0, message: "", data: null });
   },
 );

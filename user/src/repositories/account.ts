@@ -1,111 +1,124 @@
-import { camelToSnakeJson, snakeToCamelJson } from "@/utils/case";
-import type { Account, PartiallyRequired } from "@/utils/types";
+import { camelToSnakeJson } from "@/utils/case";
+import type {
+  Account,
+  PartiallyRequired,
+  PrivateAccount,
+  Role,
+} from "@/utils/types";
 import { sql } from "bun";
 
-export async function findOneById(id: string) {
-  const [row] = await sql`
-    select id, role, email
+type Row = {
+  id: string;
+  role: Role;
+  email: string;
+  created_at: Date;
+};
+
+function normalizeRow(row: Row): Account {
+  return {
+    id: row.id,
+    role: row.role,
+    email: row.email,
+    createdAt: row.created_at.toISOString(),
+  };
+}
+
+type PrivateRow = Row & { password_hash: string | null };
+
+function normalizePrivateRow(row: PrivateRow): PrivateAccount {
+  return {
+    ...normalizeRow(row),
+    passwordHash: row.password_hash,
+  };
+}
+
+export async function selectOneById(id: string) {
+  const [row] = (await sql`
+    select id, role, email, created_at
     from accounts
     where id = ${id} and deleted_at is null
-  `;
+  `) as Row[];
 
   if (!row) {
     return null;
   }
 
-  return snakeToCamelJson(row) as Account;
+  return normalizeRow(row);
 }
 
-export async function findOneByEmail(email: string) {
-  const [row] = await sql`
-    select id, role, email
+export async function selectOneByEmail(email: string) {
+  const [row] = (await sql`
+    select id, role, email, created_at
     from accounts
     where email = ${email} and deleted_at is null
-  `;
+  `) as Row[];
 
   if (!row) {
     return null;
   }
 
-  return snakeToCamelJson(row) as Account;
+  return normalizeRow(row);
 }
 
-export async function findOneWithPasswordHashById(id: string) {
-  const [row] = await sql`
-    select id, role, email, password_hash
+export async function selectOnePrivateById(id: string) {
+  const [row] = (await sql`
+    select id, role, email, password_hash, created_at
     from accounts
     where id = ${id} and deleted_at is null
-  `;
+  `) as PrivateRow[];
 
   if (!row) {
     return null;
   }
 
-  return snakeToCamelJson(row) as Account & { passwordHash: string };
+  return normalizePrivateRow(row);
 }
 
-export async function findOneWithPasswordHashByEmail(email: string) {
-  const [row] = await sql`
-    select id, role, email, password_hash
+export async function selectOnePrivateByEmail(email: string) {
+  const [row] = (await sql`
+    select id, role, email, password_hash, created_at
     from accounts
     where email = ${email} and deleted_at is null
-  `;
+  `) as PrivateRow[];
 
   if (!row) {
     return null;
   }
 
-  return snakeToCamelJson(row) as Account & { passwordHash: string };
+  return normalizePrivateRow(row);
 }
 
-export async function createOne(
-  data: PartiallyRequired<Account, "role" | "email"> & {
-    passwordHash?: string;
-  },
+export async function insertOne(
+  data: PartiallyRequired<PrivateAccount, "role" | "email">,
 ) {
-  const [row] = await sql`
+  const [row] = (await sql`
     insert into accounts ${sql(camelToSnakeJson(data))}
-    returning id, role, email
-  `;
+    returning id, role, email, created_at
+  `) as Row[];
 
   if (!row) {
-    throw new Error("failed to create account");
+    throw new Error("failed to insert account");
   }
 
-  return snakeToCamelJson(row) as Account;
+  return normalizeRow(row);
 }
 
-export async function updateOneEmailById(id: string, email: string) {
-  const [row] = await sql`
-    update accounts
-    set email = ${email}
-    where id = ${id}
-    returning id, role, email
-  `;
-
-  if (!row) {
-    throw new Error("failed to update account");
-  }
-
-  return snakeToCamelJson(row) as Account;
-}
-
-export async function updateOnePasswordHashById(
+export async function updateOneById(
   id: string,
-  passwordHash: string,
+  data: Partial<Pick<PrivateAccount, "email" | "passwordHash">>,
 ) {
-  const [row] = await sql`
+  const [row] = (await sql`
     update accounts
-    set password_hash = ${passwordHash}
+    set ${sql(camelToSnakeJson(data))}
     where id = ${id}
-    returning id, role, email
-  `;
+    returning id, role, email, created_at
+  `) as Row[];
 
   if (!row) {
     throw new Error("failed to update account");
   }
 
-  return snakeToCamelJson(row) as Account;
+  return normalizeRow(row);
 }
 
 export async function deleteOneById(id: string) {

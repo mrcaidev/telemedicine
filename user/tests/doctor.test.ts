@@ -19,25 +19,10 @@ import {
 } from "./utils/data";
 import { DELETE, GET, PATCH, POST } from "./utils/request";
 
-const publishDoctorCreatedEventSpy = spyOn(
-  producer,
-  "publishDoctorCreatedEvent",
-);
-
-const publishDoctorUpdatedEventSpy = spyOn(
-  producer,
-  "publishDoctorUpdatedEvent",
-);
-
-const publishDoctorDeletedEventSpy = spyOn(
-  producer,
-  "publishDoctorDeletedEvent",
-);
+const produceEventSpy = spyOn(producer, "produceEvent");
 
 afterEach(() => {
-  publishDoctorCreatedEventSpy.mockClear();
-  publishDoctorUpdatedEventSpy.mockClear();
-  publishDoctorDeletedEventSpy.mockClear();
+  produceEventSpy.mockClear();
 });
 
 afterAll(() => {
@@ -130,7 +115,7 @@ describe("GET /doctors/{id}", () => {
 
 describe("POST /doctors", () => {
   it("creates doctor if ok", async () => {
-    publishDoctorCreatedEventSpy.mockResolvedValueOnce();
+    produceEventSpy.mockResolvedValueOnce();
     const res = await POST(
       "/doctors",
       {
@@ -156,11 +141,16 @@ describe("POST /doctors", () => {
         gender: "male",
         description: "",
         specialties: [],
+        createdAt: expect.any(String),
       },
     });
-    expect(publishDoctorCreatedEventSpy).toHaveBeenCalledTimes(1);
-    // @ts-ignore
-    expect(publishDoctorCreatedEventSpy).toHaveBeenNthCalledWith(1, json.data);
+    expect(produceEventSpy).toHaveBeenCalledTimes(1);
+    expect(produceEventSpy).toHaveBeenNthCalledWith(
+      1,
+      "DoctorCreated",
+      // @ts-ignore
+      json.data,
+    );
   });
 
   it("returns 401 if user has not logged in", async () => {
@@ -173,7 +163,7 @@ describe("POST /doctors", () => {
     const json = await res.json();
     expect(res.status).toEqual(401);
     expect(json).toEqual(errorResponseTemplate);
-    expect(publishDoctorCreatedEventSpy).toHaveBeenCalledTimes(0);
+    expect(produceEventSpy).toHaveBeenCalledTimes(0);
   });
 
   it("returns 403 if user is platform admin", async () => {
@@ -190,7 +180,7 @@ describe("POST /doctors", () => {
     const json = await res.json();
     expect(res.status).toEqual(403);
     expect(json).toEqual(errorResponseTemplate);
-    expect(publishDoctorCreatedEventSpy).toHaveBeenCalledTimes(0);
+    expect(produceEventSpy).toHaveBeenCalledTimes(0);
   });
 
   it("returns 403 if user is doctor", async () => {
@@ -207,7 +197,7 @@ describe("POST /doctors", () => {
     const json = await res.json();
     expect(res.status).toEqual(403);
     expect(json).toEqual(errorResponseTemplate);
-    expect(publishDoctorCreatedEventSpy).toHaveBeenCalledTimes(0);
+    expect(produceEventSpy).toHaveBeenCalledTimes(0);
   });
 
   it("returns 403 if user is patient", async () => {
@@ -224,7 +214,7 @@ describe("POST /doctors", () => {
     const json = await res.json();
     expect(res.status).toEqual(403);
     expect(json).toEqual(errorResponseTemplate);
-    expect(publishDoctorCreatedEventSpy).toHaveBeenCalledTimes(0);
+    expect(produceEventSpy).toHaveBeenCalledTimes(0);
   });
 
   it("returns 409 if email has already been registered", async () => {
@@ -241,7 +231,7 @@ describe("POST /doctors", () => {
     const json = await res.json();
     expect(res.status).toEqual(409);
     expect(json).toEqual(errorResponseTemplate);
-    expect(publishDoctorCreatedEventSpy).toHaveBeenCalledTimes(0);
+    expect(produceEventSpy).toHaveBeenCalledTimes(0);
   });
 });
 
@@ -256,6 +246,8 @@ describe("GET /doctors/search", () => {
         doctors: [
           {
             id: "df9ffcca-1415-4837-95fa-83288e199d99",
+            role: "doctor",
+            email: "christa@gmail.com",
             clinic: mockData.clinic,
             firstName: "Christa",
             lastName: "Conn",
@@ -263,9 +255,12 @@ describe("GET /doctors/search", () => {
             gender: "male",
             description: "Very good at Surgery",
             specialties: ["surgery"],
+            createdAt: "2025-05-14T07:27:50.926Z",
           },
           {
             id: "04cd46f0-c785-48cc-bde1-898aac54c425",
+            role: "doctor",
+            email: "rory@gmail.com",
             clinic: mockData.clinic,
             firstName: "Rory",
             lastName: "Greenfelder",
@@ -273,6 +268,7 @@ describe("GET /doctors/search", () => {
             gender: "male",
             description: "Good at both Cardiology and Surgery",
             specialties: ["cardiology"],
+            createdAt: "2025-05-14T08:27:50.926Z",
           },
         ],
         nextCursor: null,
@@ -290,6 +286,8 @@ describe("GET /doctors/search", () => {
         doctors: [
           {
             id: "04cd46f0-c785-48cc-bde1-898aac54c425",
+            role: "doctor",
+            email: "rory@gmail.com",
             clinic: mockData.clinic,
             firstName: "Rory",
             lastName: "Greenfelder",
@@ -297,6 +295,7 @@ describe("GET /doctors/search", () => {
             gender: "male",
             description: "Good at both Cardiology and Surgery",
             specialties: ["cardiology"],
+            createdAt: "2025-05-14T08:27:50.926Z",
           },
         ],
         nextCursor: null,
@@ -311,18 +310,7 @@ describe("GET /doctors/search", () => {
     expect(json).toEqual({
       ...successResponseTemplate,
       data: {
-        doctors: [
-          {
-            id: mockData.doctor.id,
-            clinic: mockData.doctor.clinic,
-            firstName: mockData.doctor.firstName,
-            lastName: mockData.doctor.lastName,
-            avatarUrl: mockData.doctor.avatarUrl,
-            gender: mockData.doctor.gender,
-            description: mockData.doctor.description,
-            specialties: mockData.doctor.specialties,
-          },
-        ],
+        doctors: [mockData.doctor],
         nextCursor: null,
       },
     });
@@ -348,6 +336,8 @@ describe("GET /doctors/search", () => {
         doctors: [
           {
             id: "df9ffcca-1415-4837-95fa-83288e199d99",
+            role: "doctor",
+            email: "christa@gmail.com",
             clinic: mockData.clinic,
             firstName: "Christa",
             lastName: "Conn",
@@ -355,11 +345,14 @@ describe("GET /doctors/search", () => {
             gender: "male",
             description: "Very good at Surgery",
             specialties: ["surgery"],
+            createdAt: "2025-05-14T07:27:50.926Z",
           },
         ],
         nextCursor: expect.any(Number),
       },
     });
+    // @ts-ignore
+    console.log(json1.data.nextCursor);
 
     const res2 = await GET(
       // @ts-ignore
@@ -373,6 +366,8 @@ describe("GET /doctors/search", () => {
         doctors: [
           {
             id: "04cd46f0-c785-48cc-bde1-898aac54c425",
+            role: "doctor",
+            email: "rory@gmail.com",
             clinic: mockData.clinic,
             firstName: "Rory",
             lastName: "Greenfelder",
@@ -380,6 +375,7 @@ describe("GET /doctors/search", () => {
             gender: "male",
             description: "Good at both Cardiology and Surgery",
             specialties: ["cardiology"],
+            createdAt: "2025-05-14T08:27:50.926Z",
           },
         ],
         nextCursor: null,
@@ -408,7 +404,7 @@ describe("PATCH /doctors/{id}", () => {
   });
 
   it("updates doctor", async () => {
-    publishDoctorUpdatedEventSpy.mockResolvedValueOnce();
+    produceEventSpy.mockResolvedValueOnce();
     const res = await PATCH(
       `/doctors/${targetId}`,
       {
@@ -433,10 +429,11 @@ describe("PATCH /doctors/{id}", () => {
         description: "Vox clam sol vulgaris demo una universe cicuta",
         gender: "female",
         specialties: [],
+        createdAt: expect.any(String),
       },
     });
-    expect(publishDoctorUpdatedEventSpy).toHaveBeenCalledTimes(1);
-    expect(publishDoctorUpdatedEventSpy).toHaveBeenNthCalledWith(1, {
+    expect(produceEventSpy).toHaveBeenCalledTimes(1);
+    expect(produceEventSpy).toHaveBeenNthCalledWith(1, "DoctorUpdated", {
       id: targetId,
       role: "doctor",
       email: "Dawson_Wisoky@gmail.com",
@@ -447,6 +444,7 @@ describe("PATCH /doctors/{id}", () => {
       description: "Vox clam sol vulgaris demo una universe cicuta",
       gender: "female",
       specialties: [],
+      createdAt: expect.any(String),
     });
   });
 
@@ -542,7 +540,7 @@ describe("DELETE /doctors/{id}", () => {
   });
 
   it("deletes doctor", async () => {
-    publishDoctorDeletedEventSpy.mockResolvedValueOnce();
+    produceEventSpy.mockResolvedValueOnce();
     const res = await DELETE(`/doctors/${targetId}`, {
       headers: mockData.clinicAdminAuthHeaders,
     });
@@ -552,8 +550,8 @@ describe("DELETE /doctors/{id}", () => {
       ...successResponseTemplate,
       data: null,
     });
-    expect(publishDoctorDeletedEventSpy).toHaveBeenCalledTimes(1);
-    expect(publishDoctorDeletedEventSpy).toHaveBeenNthCalledWith(1, {
+    expect(produceEventSpy).toHaveBeenCalledTimes(1);
+    expect(produceEventSpy).toHaveBeenNthCalledWith(1, "DoctorDeleted", {
       id: targetId,
     });
   });

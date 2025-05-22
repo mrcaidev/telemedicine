@@ -53,6 +53,7 @@ describe("POST /clinics", () => {
       data: {
         id: uuidTemplate,
         name: "clinic2",
+        createdAt: expect.any(String),
       },
     });
   });
@@ -128,6 +129,7 @@ describe("PATCH /clinics/{id}", () => {
       data: {
         id: targetClinicId,
         name: "cursus",
+        createdAt: expect.any(String),
       },
     });
   });

@@ -65,6 +65,7 @@ describe("POST /platform-admins", () => {
         id: uuidTemplate,
         role: "platform_admin",
         email: "platform-admin2@example.com",
+        createdAt: expect.any(String),
       },
     });
   });

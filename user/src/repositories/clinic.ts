@@ -1,62 +1,76 @@
-import { camelToSnakeJson, snakeToCamelJson } from "@/utils/case";
+import { camelToSnakeJson } from "@/utils/case";
 import type { Clinic, PartiallyRequired } from "@/utils/types";
 import { sql } from "bun";
 
-export async function findAll() {
-  const rows = await sql`
-    select id, name
-    from clinics
-    where deleted_at is null
-  `;
+type Row = {
+  id: string;
+  name: string;
+  created_at: Date;
+};
 
-  return rows.map(snakeToCamelJson) as Clinic[];
+function normalizeRow(row: Row): Clinic {
+  return {
+    id: row.id,
+    name: row.name,
+    createdAt: row.created_at.toISOString(),
+  };
 }
 
-export async function findOneById(id: string) {
-  const [row] = await sql`
-    select id, name
+export async function selectMany() {
+  const rows = (await sql`
+    select id, name, created_at
+    from clinics
+    where deleted_at is null
+  `) as Row[];
+
+  return rows.map(normalizeRow);
+}
+
+export async function selectOneById(id: string) {
+  const [row] = (await sql`
+    select id, name, created_at
     from clinics
     where id = ${id} and deleted_at is null
-  `;
+  `) as Row[];
 
   if (!row) {
     return null;
   }
 
-  return snakeToCamelJson(row) as Clinic;
+  return normalizeRow(row);
 }
 
-export async function createOne(
+export async function insertOne(
   data: PartiallyRequired<Clinic, "name"> & { createdBy: string },
 ) {
   const [row] = await sql`
     insert into clinics ${sql(camelToSnakeJson(data))}
-    returning id, name
+    returning id, name, created_at
   `;
 
   if (!row) {
-    throw new Error("failed to create clinic");
+    throw new Error("failed to insert clinic");
   }
 
-  return snakeToCamelJson(row) as Clinic;
+  return normalizeRow(row);
 }
 
 export async function updateOneById(
   id: string,
   data: Partial<Pick<Clinic, "name">>,
 ) {
-  const [row] = await sql`
+  const [row] = (await sql`
     update clinics
     set ${sql(camelToSnakeJson(data))}
     where id = ${id}
-    returning id, name
-  `;
+    returning id, name, created_at
+  `) as Row[];
 
   if (!row) {
     throw new Error("failed to update clinic");
   }
 
-  return snakeToCamelJson(row) as Clinic;
+  return normalizeRow(row);
 }
 
 export async function deleteOneById(id: string, deletedBy: string) {

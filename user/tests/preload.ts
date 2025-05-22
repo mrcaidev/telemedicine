@@ -16,8 +16,8 @@ beforeAll(async () => {
     insert into platform_admin_profiles (id) values
     ('e4c315ef-0f8d-4456-a69e-c971b5e25ebc');
 
-    insert into clinics (id, name, created_by) values
-    ('f5dc8bbb-079b-41a0-8f52-8e25b5c71401', 'Test Clinic', 'e4c315ef-0f8d-4456-a69e-c971b5e25ebc');
+    insert into clinics (id, name, created_at, created_by) values
+    ('f5dc8bbb-079b-41a0-8f52-8e25b5c71401', 'Test Clinic', '2025-05-14T08:27:50.926Z', 'e4c315ef-0f8d-4456-a69e-c971b5e25ebc');
 
     insert into clinic_admin_profiles (id, clinic_id, first_name, last_name, created_by) values
     ('b7aa316d-d7ef-4b35-8075-a5440922b030', 'f5dc8bbb-079b-41a0-8f52-8e25b5c71401', 'Charlie', 'Avery', 'e4c315ef-0f8d-4456-a69e-c971b5e25ebc');

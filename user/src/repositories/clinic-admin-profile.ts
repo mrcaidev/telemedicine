@@ -1,105 +1,182 @@
-import { camelToSnakeJson, snakeToCamelJson } from "@/utils/case";
+import { camelToSnakeJson } from "@/utils/case";
 import type {
   ClinicAdmin,
   ClinicAdminFullProfile,
   ClinicAdminProfile,
+  Role,
 } from "@/utils/types";
 import { sql } from "bun";
 
-export async function findManyFull(query: { clinicId?: string }) {
-  const rows = await sql`
-    select cap.id, cap.first_name, cap.last_name, a.role, a.email, c.id as clinic_id, c.name as clinic_name
-    from clinic_admin_profiles cap
-    left outer join accounts a on cap.id = a.id
-    left outer join clinics c on cap.clinic_id = c.id
-    ${query.clinicId ? sql`where cap.clinic_id = ${query.clinicId}` : sql``}
-  `;
+type ProfileRow = {
+  id: string;
+  clinic_id: string;
+  first_name: string;
+  last_name: string;
+};
 
-  // @ts-ignore
-  return rows.map((row) => {
-    const { clinicId, clinicName, ...rest } = snakeToCamelJson(row);
-    return {
-      ...rest,
-      clinic: { id: clinicId, name: clinicName },
-    };
-  }) as ClinicAdmin[];
+function normalizeProfileRow(row: ProfileRow): ClinicAdminProfile {
+  return {
+    id: row.id,
+    clinicId: row.clinic_id,
+    firstName: row.first_name,
+    lastName: row.last_name,
+  };
 }
 
-export async function findOneById(id: string) {
-  const [row] = await sql`
+type FullProfileRow = {
+  id: string;
+  first_name: string;
+  last_name: string;
+  clinic_id: string;
+  clinic_name: string;
+  clinic_created_at: Date;
+};
+
+function normalizeFullProfileRow(row: FullProfileRow): ClinicAdminFullProfile {
+  return {
+    id: row.id,
+    firstName: row.first_name,
+    lastName: row.last_name,
+    clinic: {
+      id: row.clinic_id,
+      name: row.clinic_name,
+      createdAt: row.clinic_created_at.toISOString(),
+    },
+  };
+}
+
+type Row = {
+  id: string;
+  role: Role;
+  email: string;
+  created_at: Date;
+  first_name: string;
+  last_name: string;
+  clinic_id: string;
+  clinic_name: string;
+  clinic_created_at: Date;
+};
+
+function normalizeRow(row: Row): ClinicAdmin {
+  return {
+    id: row.id,
+    role: row.role,
+    email: row.email,
+    createdAt: row.created_at.toISOString(),
+    firstName: row.first_name,
+    lastName: row.last_name,
+    clinic: {
+      id: row.clinic_id,
+      name: row.clinic_name,
+      createdAt: row.clinic_created_at.toISOString(),
+    },
+  };
+}
+
+export async function selectMany(query: { clinicId?: string }) {
+  const rows = (await sql`
+    select id, role, email, created_at, first_name, last_name, clinic_id, clinic_name, clinic_created_at
+    from clinic_admins
+    where true
+    ${query.clinicId ? sql`and clinic_id = ${query.clinicId}` : sql``}
+  `) as Row[];
+
+  return rows.map(normalizeRow);
+}
+
+export async function selectOneProfileById(id: string) {
+  const [row] = (await sql`
     select id, clinic_id, first_name, last_name
     from clinic_admin_profiles
     where id = ${id}
-  `;
+  `) as ProfileRow[];
 
   if (!row) {
     return null;
   }
 
-  return snakeToCamelJson(row) as ClinicAdminProfile;
+  return normalizeProfileRow(row);
 }
 
-export async function findOneFullById(id: string) {
-  const [row] = await sql`
-    select cap.id, cap.first_name, cap.last_name, c.id as clinic_id, c.name as clinic_name
-    from clinic_admin_profiles cap
-    left outer join clinics c on cap.clinic_id = c.id
-    where cap.id = ${id}
-  `;
+export async function selectOneFullProfileById(id: string) {
+  const [row] = (await sql`
+    select id, first_name, last_name, clinic_id, clinic_name, clinic_created_at
+    from clinic_admin_full_profiles
+    where id = ${id}
+  `) as FullProfileRow[];
 
   if (!row) {
     return null;
   }
 
-  const { clinicId, clinicName, ...rest } = snakeToCamelJson(row);
-  return {
-    ...rest,
-    clinic: { id: clinicId, name: clinicName },
-  } as ClinicAdminFullProfile;
+  return normalizeFullProfileRow(row);
 }
 
-export async function createOne(
+export async function selectOneById(id: string) {
+  const [row] = (await sql`
+    select id, role, email, created_at, first_name, last_name, clinic_id, clinic_name, clinic_created_at
+    from clinic_admins
+    where id = ${id}
+  `) as Row[];
+
+  if (!row) {
+    return null;
+  }
+
+  return normalizeRow(row);
+}
+
+export async function insertOne(
   data: ClinicAdminProfile & { createdBy: string },
 ) {
-  const [row] = await sql`
+  const [inserted] = (await sql`
     insert into clinic_admin_profiles ${sql(camelToSnakeJson(data))}
-    returning id, clinic_id, first_name, last_name
-  `;
+    returning id
+  `) as { id: string }[];
 
-  if (!row) {
-    throw new Error("failed to create clinic admin profile");
+  if (!inserted) {
+    throw new Error("failed to insert clinic admin profile");
   }
 
-  return snakeToCamelJson(row) as ClinicAdminProfile;
+  const [row] = (await sql`
+    select id, role, email, created_at, first_name, last_name, clinic_id, clinic_name, clinic_created_at
+    from clinic_admins
+    where id = ${inserted.id}
+  `) as Row[];
+
+  if (!row) {
+    throw new Error("failed to insert clinic admin profile");
+  }
+
+  return normalizeRow(row);
 }
 
 export async function updateOneById(
   id: string,
   data: Partial<Pick<ClinicAdminProfile, "firstName" | "lastName">>,
 ) {
-  const [row] = await sql`
-    with updated as (
-      update clinic_admin_profiles
-      set ${sql(camelToSnakeJson(data))}
-      where id = ${id}
-      returning id, clinic_id, first_name, last_name
-    )
-    select u.id, u.first_name, u.last_name, a.role, a.email, c.id as clinic_id, c.name as clinic_name
-    from updated u
-    left outer join accounts a on u.id = a.id
-    left outer join clinics c on u.clinic_id = c.id
-    where a.id = ${id}
-  `;
+  const [updated] = (await sql`
+    update clinic_admin_profiles
+    set ${sql(camelToSnakeJson(data))}
+    where id = ${id}
+    returning id
+  `) as { id: string }[];
+
+  if (!updated) {
+    throw new Error("failed to update clinic admin profile");
+  }
+
+  const [row] = (await sql`
+    select id, role, email, created_at, first_name, last_name, clinic_id, clinic_name, clinic_created_at
+    from clinic_admins
+    where id = ${updated.id}
+  `) as Row[];
 
   if (!row) {
     throw new Error("failed to update clinic admin profile");
   }
 
-  const { clinicId, clinicName, ...rest } = snakeToCamelJson(row);
-  return {
-    ...rest,
-    clinic: { id: clinicId, name: clinicName },
-  } as ClinicAdmin;
+  return normalizeRow(row);
 }
 
 export async function deleteOneById(id: string, deletedBy: string) {

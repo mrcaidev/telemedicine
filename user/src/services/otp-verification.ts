@@ -1,4 +1,4 @@
-import { publishEmailRequestedEvent } from "@/events/producer";
+import { produceEvent } from "@/events/producer";
 import * as otpVerificationRepository from "@/repositories/otp-verification";
 import { HTTPException } from "hono/http-exception";
 
@@ -10,7 +10,7 @@ function generateOtp() {
 export async function sendOtp(email: string) {
   // 与上一次请求 OTP 的时间间隔不能小于 1 分钟。
   const lastOtpVerification =
-    await otpVerificationRepository.findLastOneByEmail(email);
+    await otpVerificationRepository.selectLastOneByEmail(email);
   if (
     lastOtpVerification &&
     Date.now() < new Date(lastOtpVerification.sentAt).getTime() + 60 * 1000
@@ -25,7 +25,7 @@ export async function sendOtp(email: string) {
   const otp = generateOtp();
 
   // 立即发送邮件。
-  await publishEmailRequestedEvent({
+  await produceEvent("EmailRequested", {
     subject: "Your One-Time Password",
     to: [email],
     cc: [],
@@ -34,13 +34,13 @@ export async function sendOtp(email: string) {
   });
 
   // 插入 OTP 发送记录。
-  await otpVerificationRepository.createOne({ email, otp });
+  await otpVerificationRepository.insertOne({ email, otp });
 }
 
 export async function verifyOtp(email: string, otp: string) {
   // 如果找不到待验证的 OTP 记录，说明用户还没有发送过新的 OTP。
   const lastOtpVerification =
-    await otpVerificationRepository.findLastOneByEmail(email);
+    await otpVerificationRepository.selectLastOneByEmail(email);
   if (!lastOtpVerification || lastOtpVerification.verifiedAt) {
     throw new HTTPException(422, {
       message:

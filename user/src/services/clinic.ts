@@ -1,40 +1,39 @@
 import * as clinicRepository from "@/repositories/clinic";
-import type { Account } from "@/utils/types";
+import type { Actor } from "@/utils/types";
 import { HTTPException } from "hono/http-exception";
 
-export async function findAll() {
-  return await clinicRepository.findAll();
+export async function findMany() {
+  return await clinicRepository.selectMany();
 }
 
-export async function findOneById(id: string) {
-  const clinic = await clinicRepository.findOneById(id);
+export async function findById(id: string) {
+  const clinic = await clinicRepository.selectOneById(id);
   if (!clinic) {
-    throw new HTTPException(404, { message: "This clinic does not exist" });
+    throw new HTTPException(404, { message: "Clinic not found" });
   }
   return clinic;
 }
 
-export async function createOne(data: { name: string }, actor: Account) {
-  const clinic = await clinicRepository.createOne({
+export async function create(data: { name: string }, actor: Actor) {
+  return await clinicRepository.insertOne({
     name: data.name,
     createdBy: actor.id,
   });
-  return clinic;
 }
 
-export async function updateOneById(id: string, data: { name?: string }) {
-  const existingClinic = await clinicRepository.findOneById(id);
+export async function updateById(id: string, data: { name?: string }) {
+  const existingClinic = await clinicRepository.selectOneById(id);
   if (!existingClinic) {
-    throw new HTTPException(404, { message: "This clinic does not exist" });
+    throw new HTTPException(404, { message: "Clinic not found" });
   }
 
   return await clinicRepository.updateOneById(id, data);
 }
 
-export async function deleteOneById(id: string, actor: Account) {
-  const existingClinic = await clinicRepository.findOneById(id);
+export async function deleteById(id: string, actor: Actor) {
+  const existingClinic = await clinicRepository.selectOneById(id);
   if (!existingClinic) {
-    throw new HTTPException(404, { message: "This clinic does not exist" });
+    throw new HTTPException(404, { message: "Clinic not found" });
   }
 
   await clinicRepository.deleteOneById(id, actor.id);
