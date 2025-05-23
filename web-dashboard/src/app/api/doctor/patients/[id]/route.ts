@@ -20,25 +20,60 @@ export async function GET(
   const patientId = id;
 
   try {
-    const response = await fetch(`${BACKEND_API}/patients/${patientId}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
+    const headers = {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    };
+
+    // const [patientRes, medicalRecordsRes] = await Promise.all([
+    //   fetch(`${BACKEND_API}/patients/${patientId}`, { headers }),
+    //   fetch(`${BACKEND_API}/medical-records/${patientId}`, { headers }),
+    // ]);
+
+    const patientRes = await fetch(`${BACKEND_API}/patients/${patientId}`, {
+      headers,
     });
 
-    if (!response.ok) {
-      return NextResponse.json(
-        { message: "Failed to fetch" },
-        { status: response.status }
-      );
+    const medicalRecordsRes = {
+      ok: true,
+      status: 200,
+      json: async () => ({
+        data: [
+          {
+            id: "rec001",
+            date: "2024-12-01T10:00:00Z",
+            diagnosis: "Type 2 Diabetes",
+            notes:
+              "Patient reports fatigue and increased thirst. Prescribed Metformin.",
+            doctorName: "Dr. Tan Wei Ming",
+          },
+          {
+            id: "rec002",
+            date: "2023-08-15T09:30:00Z",
+            diagnosis: "Hypertension",
+            notes:
+              "Blood pressure measured at 145/95. Recommended dietary changes.",
+            doctorName: "Dr. Sarah Lim",
+          },
+        ],
+      }),
+    };
+
+    if (!patientRes.ok || !medicalRecordsRes.ok) {
+      return NextResponse.json({ message: "Failed to fetch" }, { status: 500 });
     }
 
-    const data = await response.json();
+    const patientData = await patientRes.json();
+    const medicalRecordsData = await medicalRecordsRes.json();
+
+    const data = {
+      ...patientData.data,
+      medicalRecords: medicalRecordsData.data,
+    };
 
     return NextResponse.json({ data }, { status: 200 });
   } catch (error) {
-    console.error("Error fetching appointment detail:", error);
+    console.error("Error fetching patient detail:", error);
     return NextResponse.json({ message: "Internal error" }, { status: 500 });
   }
 }

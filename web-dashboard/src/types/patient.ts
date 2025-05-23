@@ -7,3 +7,11 @@ export interface RawPatient {
   gender: "male" | "female";
   birthDate?: string;
 }
+
+export interface MedicalRecord {
+  id: string;
+  date: string;
+  diagnosis: string;
+  notes?: string;
+  doctorName?: string;
+}

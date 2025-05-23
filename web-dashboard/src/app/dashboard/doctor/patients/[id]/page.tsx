@@ -6,17 +6,22 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { UserCircle } from "lucide-react";
 import { ArrowLeft } from "lucide-react";
-import { RawPatient } from "@/types/patient";
+import { RawPatient, MedicalRecord } from "@/types/patient";
+import MedicalRecordCard from "@/components/medical-record/medical-record";
 
 export default function PatientDetailPage() {
   const { id } = useParams();
   const router = useRouter();
   const [patient, setPatient] = useState<RawPatient | null>(null);
+  const [records, setRecords] = useState<MedicalRecord[]>([]);
 
   useEffect(() => {
     fetch(`/api/doctor/patients/${id}`)
       .then((res) => res.json())
-      .then((data) => setPatient(data.data.data));
+      .then((data) => {
+        setPatient(data.data);
+        setRecords(data.data.medicalRecords);
+      });
   }, [id]);
 
   if (!patient) return <div>Loading...</div>;
@@ -66,6 +71,14 @@ export default function PatientDetailPage() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* 医疗记录 */}
+      <div className="space-y-4">
+        <h2 className="text-xl font-semibold">Medical Records</h2>
+        {records.map((rec) => (
+          <MedicalRecordCard key={rec.id} record={rec} />
+        ))}
       </div>
     </div>
   );

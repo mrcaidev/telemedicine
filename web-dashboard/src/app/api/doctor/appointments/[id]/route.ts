@@ -51,3 +51,43 @@ export async function GET(
     return NextResponse.json({ message: "Internal error" }, { status: 500 });
   }
 }
+
+export async function POST(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const session = await getServerSession(authOptions);
+
+  if (!session || session.user.role !== "doctor") {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
+
+  const token = session.user.token;
+  const { id } = await params;
+  const appointmentId = id;
+
+  try {
+    const response = await fetch(
+      `${BACKEND_API}/appointments/${appointmentId}/request-reschedule`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      return NextResponse.json(
+        { message: "Failed to send request" },
+        { status: response.status }
+      );
+    }
+
+    return NextResponse.json({ message: "Request sent successfully" }, { status: 200 });
+  } catch (error) {
+    console.error("Error sending request:", error);
+    return NextResponse.json({ message: "Internal error" }, { status: 500 });
+  }
+}

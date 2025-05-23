@@ -15,7 +15,7 @@ import { Plus, Trash2, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { ClinicAdmin } from "@/types/clinic-admin";
 import { ClinicAdminFormDialog } from "@/components/dialog/clinic-admin-form-dialog";
-import { ConfirmDeleteDialog } from "@/components/dialog/confirm-dialog";
+import { ConfirmDialog } from "@/components/dialog/confirm-dialog";
 
 export default function ClinicDetailPage() {
   const { id } = useParams();
@@ -98,7 +98,7 @@ export default function ClinicDetailPage() {
                     </Button>
                   </ClinicAdminFormDialog>
 
-                  <ConfirmDeleteDialog
+                  <ConfirmDialog
                     onConfirm={() => handleDelete(admin.id)}
                     description={`Delete admin ${admin.firstName} ${admin.lastName}?`}
                   >
@@ -109,7 +109,7 @@ export default function ClinicDetailPage() {
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>
-                  </ConfirmDeleteDialog>
+                  </ConfirmDialog>
                 </TableCell>
               </TableRow>
             ))
