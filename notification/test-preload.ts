@@ -1,5 +1,4 @@
 import { afterAll, mock } from "bun:test";
-import { consumer, producer } from "@/events/kafka";
 
 mock.module("resend", () => ({
   Resend: class {
@@ -11,9 +10,36 @@ mock.module("resend", () => ({
   },
 }));
 
-afterAll(async () => {
-  await producer.disconnect();
-  console.log("kafka producer disconnected");
-  await consumer.disconnect();
-  console.log("kafka consumer disconnected");
-});
+if (Bun.env.UNIT_TEST) {
+  mock.module("kafkajs", () => ({
+    Kafka: class {
+      producer() {
+        return {
+          connect: async () => {},
+          disconnect: async () => {},
+        };
+      }
+      consumer() {
+        return {
+          connect: async () => {},
+          disconnect: async () => {},
+          subscribe: async () => {},
+          run: async () => {},
+        };
+      }
+    },
+    logLevel: {
+      ERROR: 1,
+    },
+  }));
+}
+
+if (Bun.env.INTEGRATION_TEST) {
+  afterAll(async () => {
+    const { producer, consumer } = await import("@/events/kafka");
+    await producer.disconnect();
+    console.log("kafka producer disconnected");
+    await consumer.disconnect();
+    console.log("kafka consumer disconnected");
+  });
+}
