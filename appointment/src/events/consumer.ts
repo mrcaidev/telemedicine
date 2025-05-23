@@ -142,7 +142,7 @@ export async function consumeAppointmentCancelledEvent(
   }
 
   // 让 notification 服务撤销定时邮件。
-  await requestNotification.post(
-    `/scheduled-emails/${emailSchedule.emailId}/cancel`,
+  await requestNotification.delete<null>(
+    `/scheduled-emails/${emailSchedule.emailId}`,
   );
 }

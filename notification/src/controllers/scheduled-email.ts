@@ -14,7 +14,6 @@ import * as v from "valibot";
 
 export const scheduledEmailController = new Hono();
 
-// POST /scheduled-emails
 scheduledEmailController.post(
   "/",
   validator(
@@ -35,9 +34,8 @@ scheduledEmailController.post(
   },
 );
 
-// POST /scheduled-emails/{id}/reschedule
-scheduledEmailController.post(
-  "/:id/reschedule",
+scheduledEmailController.patch(
+  "/:id",
   validator("param", v.object({ id: idSchema })),
   validator("json", v.object({ scheduledAt: scheduledAtSchema })),
   async (c) => {
@@ -48,9 +46,8 @@ scheduledEmailController.post(
   },
 );
 
-// POST /scheduled-emails/{id}/cancel
-scheduledEmailController.post(
-  "/:id/cancel",
+scheduledEmailController.delete(
+  "/:id",
   validator("param", v.object({ id: idSchema })),
   async (c) => {
     const { id } = c.req.valid("param");
