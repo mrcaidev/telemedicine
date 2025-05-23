@@ -6,22 +6,21 @@ import { scheduledEmailController } from "./controllers/scheduled-email";
 
 const app = new Hono();
 
-// Liveness 探针。
 app.get("/livez", (c) => {
   return c.text("live");
 });
 
-// Readiness 探针。
 app.get("/readyz", (c) => {
   return c.text("ready");
 });
 
-// 注册所有 API。
 app.route("/scheduled-emails", scheduledEmailController);
 
-// 集中处理错误。
 app.onError((error, c) => {
   if (isValiError(error)) {
+    if (Bun.env.NODE_ENV === "development") {
+      console.error(error);
+    }
     return c.json({ code: 400, message: error.message, data: null }, 400);
   }
 
