@@ -4,5 +4,5 @@ maxReplicas: 1
 kafkaCertsNeeded: false
 secrets:
   OPENAI_API_KEY: sk-test
-  MONGO_URL: mongodb://smart_assistant_username:smart_assistant_password@mongo:27017/?authSource=smart_assistant_db
+  MONGO_URL: mongodb://smart_assistant_username:smart_assistant_password@mongodb:27017/?authSource=smart_assistant_db
   REDIS_URL: redis://default:default@redis-master:6379

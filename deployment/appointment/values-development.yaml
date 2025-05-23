@@ -3,5 +3,5 @@ minReplicas: 1
 maxReplicas: 1
 kafkaCertsNeeded: false
 secrets:
-  POSTGRES_URL: postgres://appointment_username:appointment_password@postgres:5432/appointment_db
+  POSTGRES_URL: postgres://appointment_username:appointment_password@postgresql:5432/appointment_db
   KAFKA_BROKERS: kafka:9092
