@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "bun run --hot src/index.ts",
-    "build": "bun build --outdir dist --target bun --minify src/index.ts",
+    "build": "bun build --outdir dist --target bun src/index.ts",
     "check": "tsc && biome check"
   },
   "dependencies": {
