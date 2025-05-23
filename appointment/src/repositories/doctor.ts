@@ -19,3 +19,14 @@ export async function findOneById(id: string) {
 export async function createOne(data: Doctor) {
   await sql`insert into doctors ${sql(camelToSnakeJson(data))}`;
 }
+
+export async function updateOneById(
+  id: string,
+  data: Partial<Pick<Doctor, "firstName" | "lastName" | "avatarUrl">>,
+) {
+  await sql`
+    update doctors
+    set ${sql(camelToSnakeJson(data))}
+    where id = ${id}
+  `;
+}

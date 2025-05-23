@@ -8,7 +8,9 @@ import type {
   AppointmentBookedEvent,
   AppointmentCancelledEvent,
   DoctorCreatedEvent,
+  DoctorUpdatedEvent,
   PatientCreatedEvent,
+  PatientUpdatedEvent,
 } from "./types";
 
 // 订阅主题。
@@ -57,9 +59,25 @@ export async function consumePatientCreatedEvent(event: PatientCreatedEvent) {
   });
 }
 
+export async function consumePatientUpdatedEvent(event: PatientUpdatedEvent) {
+  await patientRepository.updateOneById(event.id, {
+    email: event.email,
+    nickname: event.nickname,
+    avatarUrl: event.avatarUrl,
+  });
+}
+
 export async function consumeDoctorCreatedEvent(event: DoctorCreatedEvent) {
   await doctorRepository.createOne({
     id: event.id,
+    firstName: event.firstName,
+    lastName: event.lastName,
+    avatarUrl: event.avatarUrl,
+  });
+}
+
+export async function consumeDoctorUpdatedEvent(event: DoctorUpdatedEvent) {
+  await doctorRepository.updateOneById(event.id, {
     firstName: event.firstName,
     lastName: event.lastName,
     avatarUrl: event.avatarUrl,

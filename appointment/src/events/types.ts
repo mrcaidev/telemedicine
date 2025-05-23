@@ -8,28 +8,46 @@ export type EmailRequestedEvent = {
   content: string;
 };
 
-export type PatientCreatedEvent = {
+type FullPatient = {
   id: string;
   role: "patient";
   email: string;
+  createdAt: string;
   nickname: string | null;
   avatarUrl: string | null;
   gender: "male" | "female" | null;
   birthDate: string | null;
 };
 
-export type DoctorCreatedEvent = {
+export type PatientCreatedEvent = FullPatient;
+
+export type PatientUpdatedEvent = FullPatient;
+
+export type PatientDeletedEvent = Pick<FullPatient, "id">;
+
+type FullDoctor = {
   id: string;
   role: "doctor";
   email: string;
-  clinic: { id: string; name: string };
+  createdAt: string;
   firstName: string;
   lastName: string;
   avatarUrl: string | null;
   gender: "male" | "female";
   description: string;
   specialties: string[];
+  clinic: {
+    id: string;
+    name: string;
+    createdAt: string;
+  };
 };
+
+export type DoctorCreatedEvent = FullDoctor;
+
+export type DoctorUpdatedEvent = FullDoctor;
+
+export type DoctorDeletedEvent = Pick<FullDoctor, "id">;
 
 export type AppointmentBookedEvent = FullAppointment;
 
