@@ -2,3 +2,4 @@ host: telemedicine.ink
 minReplicas: 1
 maxReplicas: 3
 kafkaCertsNeeded: false
+secrets: {}

@@ -1,61 +1,68 @@
 TAG=$(git rev-parse HEAD)
-echo "📌 Pinned version to $TAG"
+echo "📌 Pinned version to ${TAG}"
 
 echo "⚙️ Configuring Helm..."
 helm repo add traefik https://traefik.github.io/charts
 helm repo add bitnami https://charts.bitnami.com/bitnami
 
-echo "🚀 Deploying traefik..."
-helm install traefik traefik/traefik --values ./deployment/traefik/values.yaml
+echo "🚀 Deploying Kafka..."
+helm install kafka bitnami/kafka --values ./deployment/kafka/values-development.yaml
 
-echo "🚀 Deploying kafka..."
-helm install kafka bitnami/kafka --values ./deployment/kafka/values.yaml
+echo "🚀 Deploying PostgreSQL..."
+helm install postgresql bitnami/postgresql --values ./deployment/postgresql/values-development.yaml
 
-echo "📦 Building auth-gateway..."
-docker build -t mrcaidev/telemedicine-auth-gateway:$TAG ./auth-gateway
+echo "🚀 Deploying MongoDB..."
+helm install mongodb bitnami/mongodb --values ./deployment/mongodb/values-development.yaml
 
-echo "🚀 Deploying auth-gateway..."
-minikube image load mrcaidev/telemedicine-auth-gateway:$TAG
-helm install auth-gateway ./deployment/auth-gateway --set image=mrcaidev/telemedicine-auth-gateway:$TAG
+echo "🚀 Deploying Redis..."
+helm install redis bitnami/redis --values ./deployment/redis/values-development.yaml
 
-echo "📦 Building notification..."
-docker build -t mrcaidev/telemedicine-notification:$TAG ./notification
+echo "🚀 Deploying Traefik..."
+helm install traefik traefik/traefik --values ./deployment/traefik/values.yaml --values ./deployment/traefik/values-development.yaml
 
-echo "🚀 Deploying notification..."
-minikube image load mrcaidev/telemedicine-notification:$TAG
-helm install notification ./deployment/notification --set image=mrcaidev/telemedicine-notification:$TAG
+echo "📦 Building Auth Gateway..."
+docker build -t mrcaidev/telemedicine-auth-gateway:${TAG} ./auth-gateway
 
-echo "🚀 Deploying user-postgres..."
-kubectl create cm user-postgres-initdb --from-file=./user/init/postgres
-helm install user-postgres bitnami/postgresql --values ./deployment/user-postgres/values.yaml
+echo "🚀 Deploying Auth Gateway..."
+minikube image load mrcaidev/telemedicine-auth-gateway:${TAG}
+helm install auth-gateway ./deployment/auth-gateway --values ./deployment/auth-gateway/values-development.yaml --set image=mrcaidev/telemedicine-auth-gateway:${TAG}
 
-echo "📦 Building user..."
-docker build -t mrcaidev/telemedicine-user:$TAG ./user
+echo "📦 Building Notification..."
+docker build -t mrcaidev/telemedicine-notification:${TAG} ./notification
 
-echo "🚀 Deploying user..."
-minikube image load mrcaidev/telemedicine-user:$TAG
-helm install user ./deployment/user --set image=mrcaidev/telemedicine-user:$TAG
+echo "🚀 Deploying Notification..."
+minikube image load mrcaidev/telemedicine-notification:${TAG}
+helm install notification ./deployment/notification --values ./deployment/notification/values-development.yaml --set image=mrcaidev/telemedicine-notification:${TAG}
 
-echo "🚀 Deploying appointment-postgres..."
-kubectl create cm appointment-postgres-initdb --from-file=./appointment/init/postgres
-helm install appointment-postgres bitnami/postgresql --values ./deployment/appointment-postgres/values.yaml
+echo "📦 Building User..."
+docker build -t mrcaidev/telemedicine-user:${TAG} ./user
 
-echo "📦 Building appointment..."
-docker build -t mrcaidev/telemedicine-appointment:$TAG ./appointment
+echo "🚀 Deploying User..."
+minikube image load mrcaidev/telemedicine-user:${TAG}
+helm install user ./deployment/user --values ./deployment/user/values-development.yaml --set image=mrcaidev/telemedicine-user:${TAG}
 
-echo "🚀 Deploying appointment..."
-minikube image load mrcaidev/telemedicine-appointment:$TAG
-helm install appointment ./deployment/appointment --set image=mrcaidev/telemedicine-appointment:$TAG
+echo "🧬 Initializing User..."
+kubectl run postgresql-init-user --image docker.io/bitnami/postgresql --env="PGPASSWORD=user_password" --command -- sleep infinity
+kubectl cp ./user/init/postgres/* postgresql-init-user:/tmp
+kubectl exec postgresql-init-user -- psql -h postgresql -p 5432 -U user_username -d user_db -f /tmp/init.sql
+kubectl delete pod postgresql-init-user
 
-echo "🚀 Deploying smart-assistant-mongo..."
-helm install smart-assistant-mongo bitnami/mongodb --values ./deployment/smart-assistant-mongo/values.yaml
+echo "📦 Building Appointment..."
+docker build -t mrcaidev/telemedicine-appointment:${TAG} ./appointment
 
-echo "🚀 Deploying smart-assistant-redis..."
-helm install smart-assistant-redis bitnami/redis --values ./deployment/smart-assistant-redis/values.yaml
+echo "🚀 Deploying Appointment..."
+minikube image load mrcaidev/telemedicine-appointment:${TAG}
+helm install appointment ./deployment/appointment --values ./deployment/appointment/values-development.yaml --set image=mrcaidev/telemedicine-appointment:${TAG}
 
-echo "📦 Building smart-assistant..."
-docker build -t mrcaidev/telemedicine-smart-assistant:$TAG ./smart-assistant
+echo "🧬 Initializing Appointment..."
+kubectl run postgresql-init-appointment --image docker.io/bitnami/postgresql --env="PGPASSWORD=appointment_password" --command -- sleep infinity
+kubectl cp ./appointment/init/postgres/* postgresql-init-appointment:/tmp
+kubectl exec postgresql-init-appointment -- psql -h postgresql -p 5432 -U appointment_username -d appointment_db -f /tmp/init.sql
+kubectl delete pod postgresql-init-appointment
 
-echo "🚀 Deploying smart-assistant..."
-minikube image load mrcaidev/telemedicine-smart-assistant:$TAG
-helm install smart-assistant ./deployment/smart-assistant --set image=mrcaidev/telemedicine-smart-assistant:$TAG
+echo "📦 Building Smart Assistant..."
+docker build -t mrcaidev/telemedicine-smart-assistant:${TAG} ./smart-assistant
+
+echo "🚀 Deploying Smart Assistant..."
+minikube image load mrcaidev/telemedicine-smart-assistant:${TAG}
+helm install smart-assistant ./deployment/smart-assistant --values ./deployment/smart-assistant/values-development.yaml --set image=mrcaidev/telemedicine-smart-assistant:${TAG}

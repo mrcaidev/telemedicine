@@ -1,0 +1,6 @@
+host: localhost
+minReplicas: 1
+maxReplicas: 1
+kafkaCertsNeeded: false
+secrets:
+  JWT_SECRET: a-string-secret-at-least-256-bits-long

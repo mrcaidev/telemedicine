@@ -1,0 +1,11 @@
+auth:
+  postgresPassword: postgres
+
+primary:
+  initdb:
+    scripts:
+      init.sql: |
+        create user user_username with password 'user_password';
+        create user appointment_username with password 'appointment_password';
+        create database user_db with owner user_username;
+        create database appointment_db with owner appointment_username;

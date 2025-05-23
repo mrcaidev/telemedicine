@@ -1,7 +1,7 @@
 auth:
   usernames:
-    - dev
+    - smart_assistant_username
   passwords:
-    - dev
+    - smart_assistant_password
   databases:
     - smart_assistant
