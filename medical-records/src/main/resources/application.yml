@@ -1,0 +1,111 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: medical-records
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3307/records_db?useUnicode=true&characterEncoding=utf-8&allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: root
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      # 发生错误后的重试次数
+      retries: 3
+      # 当有多个消息要被发送到同一个分区时，生产者会把它们放在同一个批次里
+      batch-size: 16384
+      # 生产者内存缓冲区的大小
+      buffer-memory: 33554432
+      # key的序列化方式
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      # value的序列化方式
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      # acks=0 不等待确认，acks=1 等待leader确认，acks=all(-1) 等待所有副本确认
+      acks: 1
+    consumer:
+      # 消费者组ID
+      group-id: records-service
+      # 是否自动提交offset
+      enable-auto-commit: true
+      # 自动提交的频率
+      auto-commit-interval: 1000
+      # key反序列化器
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      # value反序列化器
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      # 当各分区下有已提交的offset时，从提交的offset开始消费；无提交的offset时，从头开始消费
+      auto-offset-reset: earliest
+      properties:
+        spring.json.trusted.packages: "*"
+
+eureka:
+  client:
+    # 不向 eureka server 注册自己
+    register-with-eureka: false
+    # 不从 eureka server 获取信息
+    fetch-registry: false
+#    service-url:
+#      defaultZone: http://localhost:8761/eureka/
+#  instance:
+#    instance-id: ${spring.application.name}:${server.port}
+#    prefer-ip-address: true
+
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: true
+  global-config:
+    db-config:
+      id-type: ASSIGN_ID
+
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
+    swagger-model-name: 实体类列表
+    enable-group: true
+    enable-request-cache: true
+  production: false
+  basic:
+    enable: false
+
+# SpringDoc配置
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    disable-swagger-default-url: false
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+  group-configs:
+    - group: 默认分组
+      paths-to-match: /**
+      packages-to-scan: com.medical.records.controller
+
+## 通知相关的Kafka主题配置
+#notification:
+#  kafka:
+#    topics:
+#      appointment-created: appointment-created-topic
+#      appointment-rescheduled: appointment-rescheduled-topic
+#      appointment-cancelled: appointment-cancelled-topic
+# 通知相关的Kafka主题配置
+notification:
+  kafka:
+    topics:
+      records-created: records-created-topic
+      records-rescheduled: records-rescheduled-topic
+      records-cancelled: records-cancelled-topic
+
+gemini:
+    api-key: your_gemini_api_key
+    endpoint: https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent
+    timeout: 30000  # 30秒
+
+qwen:
+  baseURL: https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions
+  apiKey: sk-d864316d4bc44adba8cd0dc4f57c2ef9
+  model: qwen-turbo
+  timeout: -1
