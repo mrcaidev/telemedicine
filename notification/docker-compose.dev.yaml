@@ -19,7 +19,7 @@ services:
   init-kafka:
     image: bitnami/kafka
     init: true
-    command: sh -c /init/init.sh
+    command: sh /init/init.sh
     volumes:
       - ./init/kafka:/init
     depends_on:
