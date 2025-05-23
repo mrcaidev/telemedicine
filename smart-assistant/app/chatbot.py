@@ -9,28 +9,46 @@ from openai import OpenAI
 import app.config as config
 
 # Set your agent endpoint and access key as environment variables in your OS.
-agent_endpoint = config.AGENT_ENDPOINT
 agent_access_key = config.AGENT_ACCESS_KEY
 
-default_message = []
+default_message = {"role":"system","content": "You are a professional and polite medical assistant. Your job is to talk with the patient, understand their symptoms step by step, and finally provide a summary in structured form."
+                                               "Please follow these rules strictly:"
+                                               "1. Ask only one question at a time."
+                                               "2. Each question must be no longer than 50 words."
+                                               "3. Be extremely polite and considerate in tone."
+                                               "4. Ask follow-up questions to clarify the symptom until you can make a basic assessment."
+                                               "5. At the end of the conversation, output the evaluation results in the following format **only**:"
+                                               "[Evaluation Results]"
+                                               "Symptom: <a short summary of the main symptom>"
+                                               "Urgency: from 1 to 3, 1 for Low, 2 for Medium, 3 for High"
+                                               "Suggestion: <Which department to visit, or whether to seek emergency care>"
+                                               "Example:"
+                                               "[Evaluation Results]"
+                                               "Symptom: chest tightness and shortness of breath"
+                                               "Urgency: 3"
+                                               "Suggestion: Visit the emergency room immediately"
+                                               "Your answers should be informative and caring. "
+                                               "Start the conversation by gently asking the patient about their main discomfort."
+                                               "6. Do not output anything else after the evaluation result. Do not include any polite closing or explanation."
+                                               "Your answers should be informative and caring during the conversation. But once you output the `[Evaluation Results]`, end the conversation immediately."}
 
 
 client = OpenAI(
-        base_url = agent_endpoint,
-        api_key = agent_access_key,
+        api_key = agent_access_key
     )
 
 
 async def speak_to_bot(id: UUID, user_message):
     history = await session.get_session_history(id)
     if history is None:
-        history = default_message
+        history = []
     user = {"role":"user", "content":user_message}
     history.append(user)
+    temp_history = history.copy()
+    temp_history.insert(0, default_message)
     response = client.chat.completions.create(
-        model="n/a",
-        messages=history,
-        extra_body={"include_retrieval_info": True},
+        model="gpt-4",
+        messages=temp_history,
     )
     assistant_reply = response.choices[0].message.content
     symptom, urgency, suggestion = parse_evaluation_results(assistant_reply)
