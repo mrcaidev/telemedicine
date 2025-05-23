@@ -3,7 +3,6 @@ import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { isValiError } from "valibot";
 import { authController } from "./controllers/auth";
-import { authGatewayController } from "./controllers/auth-gateway";
 import { clinicController } from "./controllers/clinic";
 import { clinicAdminController } from "./controllers/clinic-admin";
 import { doctorController } from "./controllers/doctor";
@@ -25,20 +24,22 @@ app.get("/readyz", async (c) => {
   return c.text("ready");
 });
 
-// 注册所有 API。
-app.route("/auth-gateway", authGatewayController);
+// API 端点。
 app.route("/auth", authController);
 app.route("/oauth", oauthController);
 app.route("/otp", otpVerificationController);
-app.route("/patients", patientController);
-app.route("/doctors", doctorController);
-app.route("/clinic-admins", clinicAdminController);
 app.route("/platform-admins", platformAdminController);
 app.route("/clinics", clinicController);
+app.route("/clinic-admins", clinicAdminController);
+app.route("/doctors", doctorController);
+app.route("/patients", patientController);
 
 // 集中处理错误。
 app.onError((error, c) => {
   if (isValiError(error)) {
+    if (Bun.env.NODE_ENV === "development") {
+      console.error(error);
+    }
     return c.json({ code: 400, message: error.message, data: null }, 400);
   }
 

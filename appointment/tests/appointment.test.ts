@@ -224,7 +224,12 @@ describe("POST /appointments", () => {
     expect(res.status).toEqual(201);
     expect(json).toEqual({
       ...successResponseTemplate,
-      data: { ...appointmentTemplate, remark: "" },
+      data: {
+        ...appointmentTemplate,
+        startAt: expect.stringMatching(/T01:00:00.000Z$/),
+        endAt: expect.stringMatching(/T02:00:00.000Z$/),
+        remark: "",
+      },
     });
     expect(publishAppointmentBookedEventSpy).toHaveBeenCalledTimes(1);
     expect(requestNotificationPostSpy).toHaveBeenCalledTimes(1);

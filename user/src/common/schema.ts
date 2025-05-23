@@ -1,13 +1,13 @@
 import * as v from "valibot";
 
-export const idSchema = v.pipe(
+export const uuidSchema = v.pipe(
   v.string("id should be a uuid"),
   v.uuid("id should be a uuid"),
 );
 
 export const emailSchema = v.pipe(
-  v.string("email should be a valid address"),
-  v.email("email should be a valid address"),
+  v.string("email should be a valid email address"),
+  v.email("email should be a valid email address"),
 );
 
 export const passwordSchema = v.pipe(
@@ -36,10 +36,10 @@ export const passwordSchema = v.pipe(
   ),
 );
 
-export const otpSchema = v.pipe(
-  v.string("otp should be 6 digits"),
-  v.length(6, "otp should be 6 digits"),
-  v.digits("otp should be 6 digits"),
+export const clinicNameSchema = v.pipe(
+  v.string("name should be 1-30 characters long"),
+  v.minLength(1, "name should be 1-30 characters long"),
+  v.maxLength(30, "name should be 1-30 characters long"),
 );
 
 export const firstNameSchema = v.pipe(
@@ -57,4 +57,27 @@ export const lastNameSchema = v.pipe(
 export const genderSchema = v.union(
   [v.literal("male"), v.literal("female")],
   "gender should be either male or female",
+);
+
+export const doctorDescriptionSchema = v.pipe(
+  v.string("description should be 1-200 characters long"),
+  v.minLength(1, "description should be 1-200 characters long"),
+  v.maxLength(200, "description should be 1-200 characters long"),
+);
+
+export const nicknameSchema = v.pipe(
+  v.string("nickname should be 1-20 characters long"),
+  v.minLength(1, "nickname should be 1-20 characters long"),
+  v.maxLength(20, "nickname should be 1-20 characters long"),
+);
+
+export const birthDateSchema = v.pipe(
+  v.string("birthDate should be an ISO 8601 date"),
+  v.isoDate("birthDate should be an ISO 8601 date"),
+);
+
+export const otpSchema = v.pipe(
+  v.string("otp should be 6 digits"),
+  v.length(6, "otp should be 6 digits"),
+  v.digits("otp should be 6 digits"),
 );

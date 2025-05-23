@@ -1,20 +1,34 @@
+export type Prettify<T> = { [K in keyof T]: T[K] } & {};
+
+export type PartiallyRequired<T, K extends keyof T> = Prettify<
+  Required<Pick<T, K>> & Partial<T>
+>;
+
 export type Role = "platform_admin" | "clinic_admin" | "doctor" | "patient";
 
 export type Account = {
   id: string;
   role: Role;
   email: string;
+  createdAt: string;
 };
+
+export type PrivateAccount = Prettify<
+  Account & { passwordHash: string | null }
+>;
+
+export type Actor = Pick<Account, "id" | "role" | "email">;
 
 export type PlatformAdminProfile = {
   id: string;
 };
 
-export type PlatformAdmin = Account & PlatformAdminProfile;
+export type PlatformAdmin = Prettify<Account & PlatformAdminProfile>;
 
 export type Clinic = {
   id: string;
   name: string;
+  createdAt: string;
 };
 
 export type ClinicAdminProfile = {
@@ -24,11 +38,11 @@ export type ClinicAdminProfile = {
   lastName: string;
 };
 
-export type ClinicAdminFullProfile = Omit<ClinicAdminProfile, "clinicId"> & {
-  clinic: Clinic;
-};
+export type ClinicAdminFullProfile = Prettify<
+  Omit<ClinicAdminProfile, "clinicId"> & { clinic: Clinic }
+>;
 
-export type ClinicAdmin = Account & ClinicAdminFullProfile;
+export type ClinicAdmin = Prettify<Account & ClinicAdminFullProfile>;
 
 export type Gender = "male" | "female";
 
@@ -43,11 +57,11 @@ export type DoctorProfile = {
   specialties: string[];
 };
 
-export type DoctorFullProfile = Omit<DoctorProfile, "clinicId"> & {
-  clinic: Clinic;
-};
+export type DoctorFullProfile = Prettify<
+  Omit<DoctorProfile, "clinicId"> & { clinic: Clinic }
+>;
 
-export type Doctor = Account & DoctorFullProfile;
+export type Doctor = Prettify<Account & DoctorFullProfile>;
 
 export type PatientProfile = {
   id: string;
@@ -57,15 +71,15 @@ export type PatientProfile = {
   birthDate: string | null;
 };
 
-export type Patient = Account & PatientProfile;
+export type Patient = Prettify<Account & PatientProfile>;
 
-export type UserProfile =
+export type Profile =
   | PlatformAdminProfile
   | ClinicAdminProfile
   | DoctorProfile
   | PatientProfile;
 
-export type UserFullProfile =
+export type FullProfile =
   | PlatformAdminProfile
   | ClinicAdminFullProfile
   | DoctorFullProfile
@@ -83,7 +97,9 @@ export type OtpVerification = {
 
 export type GoogleIdentity = {
   id: string;
+  userId: string;
   googleId: string;
+  createdAt: string;
 };
 
 export type AuditLog = {
@@ -95,8 +111,9 @@ export type AuditLog = {
     | "register_with_google"
     | "link_to_google"
     | "log_in_with_google"
+    | "update_email"
+    | "update_password"
+    | "reset_password"
     | "log_out";
   createdAt: string;
 };
-
-export type PartiallyRequired<T, K extends keyof T> = Pick<T, K> & Partial<T>;

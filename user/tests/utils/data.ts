@@ -23,15 +23,34 @@ export const uuidTemplate = expect.stringMatching(
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,
 );
 
+export const doctorTemplate = expect.objectContaining({
+  id: uuidTemplate,
+  role: "doctor",
+  email: expect.any(String),
+  createdAt: expect.any(String),
+  firstName: expect.any(String),
+  lastName: expect.any(String),
+  avatarUrl: null,
+  description: expect.any(String),
+  gender: expect.stringMatching(/male|female/),
+  specialties: expect.any(Array),
+  clinic: expect.objectContaining({
+    id: uuidTemplate,
+    name: expect.any(String),
+  }),
+});
+
 const mockPlatformAdmin: PlatformAdmin = {
   id: "e4c315ef-0f8d-4456-a69e-c971b5e25ebc",
   role: "platform_admin",
   email: "platform-admin@example.com",
+  createdAt: "2025-05-14T08:27:50.926Z",
 };
 
 const mockClinic: Clinic = {
   id: "f5dc8bbb-079b-41a0-8f52-8e25b5c71401",
   name: "Test Clinic",
+  createdAt: "2025-05-14T08:27:50.926Z",
 };
 
 const mockClinicAdmin: ClinicAdmin = {
@@ -41,6 +60,7 @@ const mockClinicAdmin: ClinicAdmin = {
   clinic: mockClinic,
   firstName: "Charlie",
   lastName: "Avery",
+  createdAt: "2025-05-14T08:27:50.926Z",
 };
 
 const mockDoctor: Doctor = {
@@ -54,6 +74,7 @@ const mockDoctor: Doctor = {
   description: "",
   gender: "male",
   specialties: [],
+  createdAt: "2025-05-14T06:27:50.926Z",
 };
 
 const mockPatient: Patient = {
@@ -64,6 +85,7 @@ const mockPatient: Patient = {
   avatarUrl: null,
   gender: null,
   birthDate: null,
+  createdAt: "2025-05-14T08:27:50.926Z",
 };
 
 export const mockData = {

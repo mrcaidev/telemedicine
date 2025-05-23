@@ -12,13 +12,10 @@ import { sql } from "bun";
 import { errorResponseTemplate, successResponseTemplate } from "./utils/data";
 import { POST } from "./utils/request";
 
-const publishEmailRequestedEventSpy = spyOn(
-  producer,
-  "publishEmailRequestedEvent",
-);
+const produceEventSpy = spyOn(producer, "produceEvent");
 
 afterEach(() => {
-  publishEmailRequestedEventSpy.mockClear();
+  produceEventSpy.mockClear();
 });
 
 afterAll(() => {
@@ -27,13 +24,13 @@ afterAll(() => {
 
 describe("POST /otp", () => {
   it("sends otp if ok", async () => {
-    publishEmailRequestedEventSpy.mockResolvedValueOnce();
+    produceEventSpy.mockResolvedValueOnce();
     const res = await POST("/otp", { email: "me@example.com" });
     const json = await res.json();
     expect(res.status).toEqual(201);
     expect(json).toEqual({ ...successResponseTemplate, data: null });
-    expect(publishEmailRequestedEventSpy).toHaveBeenCalledTimes(1);
-    expect(publishEmailRequestedEventSpy).toHaveBeenNthCalledWith(1, {
+    expect(produceEventSpy).toHaveBeenCalledTimes(1);
+    expect(produceEventSpy).toHaveBeenNthCalledWith(1, "EmailRequested", {
       subject: expect.any(String),
       to: ["me@example.com"],
       cc: [],
@@ -51,6 +48,6 @@ describe("POST /otp", () => {
     const json = await res.json();
     expect(res.status).toEqual(429);
     expect(json).toEqual(errorResponseTemplate);
-    expect(publishEmailRequestedEventSpy).toHaveBeenCalledTimes(0);
+    expect(produceEventSpy).toHaveBeenCalledTimes(0);
   });
 });

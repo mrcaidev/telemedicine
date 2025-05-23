@@ -59,30 +59,37 @@ jobs:
             ${{ vars.DOCKERHUB_USERNAME }}/telemedicine-user:latest
             ${{ vars.DOCKERHUB_USERNAME }}/telemedicine-user:${{ needs.set-env.outputs.tag }}
 
-  # deploy:
-  #   name: Deploy
-  #   needs:
-  #     - set-env
-  #     - build-push
-  #   runs-on: ubuntu-latest
-  #   environment: ${{ needs.set-env.outputs.environment }}
-  #   steps:
-  #     - name: Check out repository
-  #       uses: actions/checkout@v4
+  deploy:
+    name: Deploy
+    needs:
+      - set-env
+      - build-push
+    if: vars.DEPLOYMENT_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    environment: ${{ needs.set-env.outputs.environment }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
 
-  #     - name: Log in to DigitalOcean
-  #       uses: digitalocean/action-doctl@v2
-  #       with:
-  #         token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+      - name: Log in to DigitalOcean
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
 
-  #     - name: Connect to Kubernetes
-  #       run: doctl kubernetes cluster kubeconfig save --expiry-seconds 600 ${{ vars.K8S_CLUSTER_NAME }}
+      - name: Connect to Kubernetes
+        run: doctl kubernetes cluster kubeconfig save --expiry-seconds 600 ${{ vars.K8S_CLUSTER_NAME }}
 
-  #     - name: Deploy to Kubernetes
-  #       run: |
-  #         helm upgrade --install user ${{ github.workspace }}/deployment/user \
-  #           --values ${{ github.workspace }}/deployment/user/values-${{ needs.set-env.outputs.environment }}.yaml \
-  #           --set image=${{ vars.DOCKERHUB_USERNAME }}/telemedicine-user:${{ needs.set-env.outputs.tag }} \
-  #           --set secrets.JWT_SECRET=${{ secrets.JWT_SECRET }} \
-  #           --set secrets.POSTGRES_URL=postgresql://${{ secrets.USER_POSTGRES_USER }}:${{ secrets.USER_POSTGRES_PASSWORD }}@user-postgres-postgresql:5432/${{ secrets.USER_POSTGRES_DB }} \
-  #           --set secrets.KAFKA_BROKERS=${{ secrets.KAFKA_BROKERS }}
+      - name: Deploy to Kubernetes
+        run: |
+          helm upgrade --install user ${{ github.workspace }}/deployment/user \
+            --values ${{ github.workspace }}/deployment/user/values.yaml \
+            --values ${{ github.workspace }}/deployment/user/values-${{ needs.set-env.outputs.environment }}.yaml \
+            --set image=${{ vars.DOCKERHUB_USERNAME }}/telemedicine-user:${{ needs.set-env.outputs.tag }} \
+            --set secrets.JWT_SECRET=${{ secrets.JWT_SECRET }} \
+            --set secrets.SUPER_ADMIN_TOKEN=${{ secrets.SUPER_ADMIN_TOKEN }} \
+            --set secrets.POSTGRES_URL=${{ secrets.USER_POSTGRES_URL }} \
+            --set secrets.KAFKA_BROKERS=${{ secrets.KAFKA_BROKERS }} \
+            --set secrets.KAFKA_SECURITY_PROTOCOL=${{ secrets.KAFKA_SECURITY_PROTOCOL }} \
+            --set secrets.KAFKA_SSL_CA=${{ secrets.KAFKA_SSL_CA }} \
+            --set secrets.KAFKA_SSL_KEY=${{ secrets.KAFKA_SSL_KEY }} \
+            --set secrets.KAFKA_SSL_CERT=${{ secrets.KAFKA_SSL_CERT }}

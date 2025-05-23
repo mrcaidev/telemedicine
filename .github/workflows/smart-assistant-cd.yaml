@@ -58,3 +58,34 @@ jobs:
           tags: |
             ${{ vars.DOCKERHUB_USERNAME }}/telemedicine-smart-assistant:latest
             ${{ vars.DOCKERHUB_USERNAME }}/telemedicine-smart-assistant:${{ needs.set-env.outputs.tag }}
+
+  deploy:
+    name: Deploy
+    needs:
+      - set-env
+      - build-push
+    if: vars.DEPLOYMENT_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    environment: ${{ needs.set-env.outputs.environment }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Log in to DigitalOcean
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+
+      - name: Connect to Kubernetes
+        run: doctl kubernetes cluster kubeconfig save --expiry-seconds 600 ${{ vars.K8S_CLUSTER_NAME }}
+
+      - name: Deploy to Kubernetes
+        run: |
+          helm upgrade --install smart-assistant ${{ github.workspace }}/deployment/smart-assistant \
+            --values ${{ github.workspace }}/deployment/smart-assistant/values.yaml \
+            --values ${{ github.workspace }}/deployment/smart-assistant/values-${{ needs.set-env.outputs.environment }}.yaml \
+            --set image=${{ vars.DOCKERHUB_USERNAME }}/telemedicine-smart-assistant:${{ needs.set-env.outputs.tag }} \
+            --set secrets.AGENT_ENDPOINT=${{ secrets.AGENT_ENDPOINT }} \
+            --set secrets.AGENT_ACCESS_KEY=${{ secrets.AGENT_ACCESS_KEY }} \
+            --set secrets.MONGO_URL=${{ secrets.SMART_ASSISTANT_MONGO_URL }} \
+            --set secrets.REDIS_URL=${{ secrets.SMART_ASSISTANT_REDIS_URL }}

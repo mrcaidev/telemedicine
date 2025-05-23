@@ -1,11 +1,73 @@
-import { describe, expect, it } from "bun:test";
+import { afterAll, beforeAll, describe, expect, it } from "bun:test";
+import { sql } from "bun";
 import {
   errorResponseTemplate,
   mockData,
   successResponseTemplate,
   uuidTemplate,
 } from "./utils/data";
-import { GET, POST } from "./utils/request";
+import { DELETE, GET, PATCH, POST } from "./utils/request";
+
+describe("GET /clinic-admins", () => {
+  it("returns all clinic admins if ok", async () => {
+    const res = await GET("/clinic-admins", {
+      headers: mockData.platformAdminAuthHeaders,
+    });
+    const json = await res.json();
+    expect(res.status).toEqual(200);
+    expect(json).toEqual({
+      ...successResponseTemplate,
+      data: expect.arrayContaining([mockData.clinicAdmin]),
+    });
+  });
+
+  it("returns clinic admins within clinic if given clinicId", async () => {
+    const res = await GET(
+      "/clinic-admins?clinicId=00000000-0000-0000-0000-000000000000",
+      { headers: mockData.platformAdminAuthHeaders },
+    );
+    const json = await res.json();
+    expect(res.status).toEqual(200);
+    expect(json).toEqual({
+      ...successResponseTemplate,
+      data: [],
+    });
+  });
+
+  it("returns 401 if user has not logged in", async () => {
+    const res = await GET("/clinic-admins");
+    const json = await res.json();
+    expect(res.status).toEqual(401);
+    expect(json).toEqual(errorResponseTemplate);
+  });
+
+  it("returns 403 if user is clinic admin", async () => {
+    const res = await GET("/clinic-admins", {
+      headers: mockData.clinicAdminAuthHeaders,
+    });
+    const json = await res.json();
+    expect(res.status).toEqual(403);
+    expect(json).toEqual(errorResponseTemplate);
+  });
+
+  it("returns 403 if user is doctor", async () => {
+    const res = await GET("/clinic-admins", {
+      headers: mockData.doctorAuthHeaders,
+    });
+    const json = await res.json();
+    expect(res.status).toEqual(403);
+    expect(json).toEqual(errorResponseTemplate);
+  });
+
+  it("returns 403 if user is patient", async () => {
+    const res = await GET("/clinic-admins", {
+      headers: mockData.patientAuthHeaders,
+    });
+    const json = await res.json();
+    expect(res.status).toEqual(403);
+    expect(json).toEqual(errorResponseTemplate);
+  });
+});
 
 describe("GET /clinic-admins/{id}", () => {
   it("returns clinic admin if ok", async () => {
@@ -89,6 +151,7 @@ describe("POST /clinic-admins", () => {
         clinic: mockData.clinic,
         firstName: "Alice",
         lastName: "Cooper",
+        createdAt: expect.any(String),
       },
     });
   });
@@ -188,6 +251,193 @@ describe("POST /clinic-admins", () => {
     );
     const json = await res.json();
     expect(res.status).toEqual(409);
+    expect(json).toEqual(errorResponseTemplate);
+  });
+});
+
+describe("PATCH /clinic-admins/{id}", () => {
+  const targetId = crypto.randomUUID();
+
+  beforeAll(async () => {
+    await sql`
+      insert into accounts (id, role, email) values
+      (${targetId}, 'clinic_admin', 'Kane_Hintz@gmail.com')
+    `;
+    await sql`
+      insert into clinic_admin_profiles (id, first_name, last_name, clinic_id, created_by) values
+      (${targetId}, 'Kane', 'Hintz', ${mockData.clinic.id}, ${mockData.platformAdmin.id})
+    `;
+  });
+
+  afterAll(async () => {
+    await sql`delete from clinic_admin_profiles where id = ${targetId}`;
+    await sql`delete from accounts where id = ${targetId}`;
+  });
+
+  it("updates clinic admin", async () => {
+    const res = await PATCH(
+      `/clinic-admins/${targetId}`,
+      {
+        firstName: "Bob",
+        lastName: "Marley",
+      },
+      { headers: mockData.platformAdminAuthHeaders },
+    );
+    const json = await res.json();
+    expect(res.status).toEqual(200);
+    expect(json).toEqual({
+      ...successResponseTemplate,
+      data: {
+        id: targetId,
+        role: "clinic_admin",
+        email: "Kane_Hintz@gmail.com",
+        clinic: mockData.clinic,
+        firstName: "Bob",
+        lastName: "Marley",
+        createdAt: expect.any(String),
+      },
+    });
+  });
+
+  it("returns 401 if user has not logged in", async () => {
+    const res = await PATCH(`/clinic-admins/${targetId}`, {
+      firstName: "Bob",
+      lastName: "Marley",
+    });
+    const json = await res.json();
+    expect(res.status).toEqual(401);
+    expect(json).toEqual(errorResponseTemplate);
+  });
+
+  it("returns 403 if user is clinic admin", async () => {
+    const res = await PATCH(
+      `/clinic-admins/${targetId}`,
+      {
+        firstName: "Bob",
+        lastName: "Marley",
+      },
+      { headers: mockData.clinicAdminAuthHeaders },
+    );
+    const json = await res.json();
+    expect(res.status).toEqual(403);
+    expect(json).toEqual(errorResponseTemplate);
+  });
+
+  it("returns 403 if user is doctor", async () => {
+    const res = await PATCH(
+      `/clinic-admins/${targetId}`,
+      {
+        firstName: "Bob",
+        lastName: "Marley",
+      },
+      { headers: mockData.doctorAuthHeaders },
+    );
+    const json = await res.json();
+    expect(res.status).toEqual(403);
+    expect(json).toEqual(errorResponseTemplate);
+  });
+
+  it("returns 403 if user is patient", async () => {
+    const res = await PATCH(
+      `/clinic-admins/${targetId}`,
+      {
+        firstName: "Bob",
+        lastName: "Marley",
+      },
+      { headers: mockData.patientAuthHeaders },
+    );
+    const json = await res.json();
+    expect(res.status).toEqual(403);
+    expect(json).toEqual(errorResponseTemplate);
+  });
+
+  it("returns 404 if clinic admin does not exist", async () => {
+    const res = await PATCH(
+      "/clinic-admins/00000000-0000-0000-0000-000000000000",
+      {
+        firstName: "Bob",
+        lastName: "Marley",
+      },
+      { headers: mockData.platformAdminAuthHeaders },
+    );
+    const json = await res.json();
+    expect(res.status).toEqual(404);
+    expect(json).toEqual(errorResponseTemplate);
+  });
+});
+
+describe("DELETE /clinic-admins/{id}", () => {
+  const targetId = crypto.randomUUID();
+
+  beforeAll(async () => {
+    await sql`
+      insert into accounts (id, role, email) values
+      (${targetId}, 'clinic_admin', 'Kraig_Ritchie@gmail.com')
+    `;
+    await sql`
+      insert into clinic_admin_profiles (id, first_name, last_name, clinic_id, created_by) values
+      (${targetId}, 'Kraig', 'Ritchie', ${mockData.clinic.id}, ${mockData.platformAdmin.id})
+    `;
+  });
+
+  afterAll(async () => {
+    await sql`delete from clinic_admin_profiles where id = ${targetId}`;
+    await sql`delete from accounts where id = ${targetId}`;
+  });
+
+  it("deletes clinic admin", async () => {
+    const res = await DELETE(`/clinic-admins/${targetId}`, {
+      headers: mockData.platformAdminAuthHeaders,
+    });
+    const json = await res.json();
+    expect(res.status).toEqual(200);
+    expect(json).toEqual({
+      ...successResponseTemplate,
+      data: null,
+    });
+  });
+
+  it("returns 401 if user is not authenticated", async () => {
+    const res = await DELETE(`/clinic-admins/${targetId}`);
+    const json = await res.json();
+    expect(res.status).toEqual(401);
+    expect(json).toEqual(errorResponseTemplate);
+  });
+
+  it("returns 403 if user is clinic admin", async () => {
+    const res = await DELETE(`/clinic-admins/${targetId}`, {
+      headers: mockData.clinicAdminAuthHeaders,
+    });
+    const json = await res.json();
+    expect(res.status).toEqual(403);
+    expect(json).toEqual(errorResponseTemplate);
+  });
+
+  it("returns 403 if user is doctor", async () => {
+    const res = await DELETE(`/clinic-admins/${targetId}`, {
+      headers: mockData.doctorAuthHeaders,
+    });
+    const json = await res.json();
+    expect(res.status).toEqual(403);
+    expect(json).toEqual(errorResponseTemplate);
+  });
+
+  it("returns 403 if user is patient", async () => {
+    const res = await DELETE(`/clinic-admins/${targetId}`, {
+      headers: mockData.patientAuthHeaders,
+    });
+    const json = await res.json();
+    expect(res.status).toEqual(403);
+    expect(json).toEqual(errorResponseTemplate);
+  });
+
+  it("returns 404 if clinic admin does not exist", async () => {
+    const res = await DELETE(
+      "/clinic-admins/00000000-0000-0000-0000-000000000000",
+      { headers: mockData.platformAdminAuthHeaders },
+    );
+    const json = await res.json();
+    expect(res.status).toEqual(404);
     expect(json).toEqual(errorResponseTemplate);
   });
 });

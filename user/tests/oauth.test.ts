@@ -13,14 +13,11 @@ import { mockData, successResponseTemplate, uuidTemplate } from "./utils/data";
 import { POST } from "./utils/request";
 
 const verifyGoogleIdTokenSpy = spyOn(idTokenUtils, "verifyGoogleIdToken");
-const publishPatientCreatedEvent = spyOn(
-  producer,
-  "publishPatientCreatedEvent",
-);
+const produceEventSpy = spyOn(producer, "produceEvent");
 
 afterEach(() => {
   verifyGoogleIdTokenSpy.mockClear();
-  publishPatientCreatedEvent.mockClear();
+  produceEventSpy.mockClear();
 });
 
 afterAll(() => {
@@ -39,7 +36,7 @@ describe("POST /oauth/google/login", () => {
       given_name: "Maeve",
       family_name: "Harris",
     });
-    publishPatientCreatedEvent.mockResolvedValue();
+    produceEventSpy.mockResolvedValue();
     const res1 = await POST("/oauth/google/login", { idToken: "..." });
     const json1 = await res1.json();
     expect(res1.status).toEqual(201);
@@ -53,13 +50,18 @@ describe("POST /oauth/google/login", () => {
         avatarUrl: "https://example.com/avatar.jpg",
         gender: null,
         birthDate: null,
+        createdAt: expect.any(String),
         token: expect.any(String),
       },
     });
-    expect(publishPatientCreatedEvent).toHaveBeenCalledTimes(1);
+    expect(produceEventSpy).toHaveBeenCalledTimes(1);
     // @ts-ignore
     const { token, ...patient } = json1.data;
-    expect(publishPatientCreatedEvent).toHaveBeenNthCalledWith(1, patient);
+    expect(produceEventSpy).toHaveBeenNthCalledWith(
+      1,
+      "PatientCreated",
+      patient,
+    );
 
     // 第二次之后不再创建新用户。
     const res2 = await POST("/oauth/google/login", { idToken: "..." });
@@ -72,7 +74,7 @@ describe("POST /oauth/google/login", () => {
         token: expect.any(String),
       },
     });
-    expect(publishPatientCreatedEvent).toHaveBeenCalledTimes(1);
+    expect(produceEventSpy).toHaveBeenCalledTimes(1);
   });
 
   it("links google identity to existing patient if google email exists", async () => {
@@ -96,7 +98,7 @@ describe("POST /oauth/google/login", () => {
         token: expect.any(String),
       },
     });
-    expect(publishPatientCreatedEvent).toHaveBeenCalledTimes(0);
+    expect(produceEventSpy).toHaveBeenCalledTimes(0);
 
     // 第二次直接登录。
     const res2 = await POST("/oauth/google/login", { idToken: "..." });
@@ -109,6 +111,6 @@ describe("POST /oauth/google/login", () => {
         token: expect.any(String),
       },
     });
-    expect(publishPatientCreatedEvent).toHaveBeenCalledTimes(0);
+    expect(produceEventSpy).toHaveBeenCalledTimes(0);
   });
 });
