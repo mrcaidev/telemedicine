@@ -82,10 +82,8 @@ jobs:
       - name: Deploy to Kubernetes
         run: |
           helm upgrade --install smart-assistant ${{ github.workspace }}/deployment/smart-assistant \
-            --values ${{ github.workspace }}/deployment/smart-assistant/values.yaml \
             --values ${{ github.workspace }}/deployment/smart-assistant/values-${{ needs.set-env.outputs.environment }}.yaml \
             --set image=${{ vars.DOCKERHUB_USERNAME }}/telemedicine-smart-assistant:${{ needs.set-env.outputs.tag }} \
-            --set secrets.AGENT_ENDPOINT=${{ secrets.AGENT_ENDPOINT }} \
-            --set secrets.AGENT_ACCESS_KEY=${{ secrets.AGENT_ACCESS_KEY }} \
-            --set secrets.MONGO_URL=${{ secrets.SMART_ASSISTANT_MONGO_URL }} \
-            --set secrets.REDIS_URL=${{ secrets.SMART_ASSISTANT_REDIS_URL }}
+            --set secrets.OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} \
+            --set secrets.MONGO_URL=${{ secrets.MONGO_URL }} \
+            --set secrets.REDIS_URL=${{ secrets.REDIS_URL }}

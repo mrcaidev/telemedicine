@@ -82,7 +82,6 @@ jobs:
       - name: Deploy to Kubernetes
         run: |
           helm upgrade --install notification ${{ github.workspace }}/deployment/notification \
-            --values ${{ github.workspace }}/deployment/notification/values.yaml \
             --values ${{ github.workspace }}/deployment/notification/values-${{ needs.set-env.outputs.environment }}.yaml \
             --set image=${{ vars.DOCKERHUB_USERNAME }}/telemedicine-notification:${{ needs.set-env.outputs.tag }} \
             --set secrets.RESEND_API_KEY=${{ secrets.RESEND_API_KEY }} \
