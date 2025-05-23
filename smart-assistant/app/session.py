@@ -9,7 +9,7 @@ import app.config as config
 from pymongo import MongoClient
 
 client = MongoClient(config.MONGO_URL,uuidRepresentation='standard')
-db = client['smart_assistant']
+db = client[config.MONGO_DB_NAME]
 collection = db['session']
 
 async def insert_session(user_id:UUID, id:UUID):
