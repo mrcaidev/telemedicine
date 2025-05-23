@@ -17,7 +17,9 @@ import type {
 await consumer.subscribe({
   topics: [
     "PatientCreated",
+    "PatientUpdated",
     "DoctorCreated",
+    "DoctorUpdated",
     "AppointmentBooked",
     "AppointmentCancelled",
   ],
@@ -39,8 +41,12 @@ await consumer.run({
 
     if (topic === "PatientCreated") {
       await consumePatientCreatedEvent(json);
+    } else if (topic === "PatientUpdated") {
+      await consumePatientUpdatedEvent(json);
     } else if (topic === "DoctorCreated") {
       await consumeDoctorCreatedEvent(json);
+    } else if (topic === "DoctorUpdated") {
+      await consumeDoctorUpdatedEvent(json);
     } else if (topic === "AppointmentBooked") {
       await consumeAppointmentBookedEvent(json);
     } else if (topic === "AppointmentCancelled") {
