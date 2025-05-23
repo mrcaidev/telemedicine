@@ -14,4 +14,3 @@ REDIS_URL = os.getenv("REDIS_URL")
 
 #MongoDB config
 MONGO_URL = os.getenv("MONGO_URL")
-MONGO_DB_NAME = os.getenv("MONGO_DB_NAME", "smart_assistant")

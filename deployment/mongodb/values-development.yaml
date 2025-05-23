@@ -4,4 +4,4 @@ auth:
   passwords:
     - smart_assistant_password
   databases:
-    - smart_assistant_db
+    - smart_assistant
