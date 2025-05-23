@@ -30,6 +30,9 @@ jobs:
       - name: Check code
         run: bun run check
 
+      - name: Run unit tests
+        run: bun run unit-test --coverage
+
       - name: Run integration tests
         run: |
           docker compose -f docker-compose.test.yaml up -d --build
