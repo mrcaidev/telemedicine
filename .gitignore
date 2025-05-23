@@ -4,5 +4,4 @@
 *.key
 *.log
 *.pem
-*.tgz
 .DS_Store

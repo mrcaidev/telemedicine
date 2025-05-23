@@ -3,9 +3,3 @@ minReplicas: 1
 maxReplicas: 3
 kafkaCertsNeeded: true
 secrets: {}
-
-mongo:
-  enabled: false
-
-redis:
-  enabled: false

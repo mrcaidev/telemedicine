@@ -3,6 +3,3 @@ minReplicas: 1
 maxReplicas: 3
 kafkaCertsNeeded: true
 secrets: {}
-
-postgres:
-  enabled: false
