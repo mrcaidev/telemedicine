@@ -146,8 +146,8 @@ public class MedicalRecordController {
     }
 
     /**
-     * 获取病例总结（调⽤gemini
-     * api）
+     * 获取病例总结
+     *
      * @param id
      * @return
      */

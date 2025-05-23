@@ -10,7 +10,7 @@ import com.medical.records.model.dto.MedicalRecordUpdateDTO;
 import com.medical.records.model.entity.MedicalRecord;
 import com.medical.records.model.vo.MedicalRecordVO;
 import com.medical.records.repository.MedicalRecordRepository;
-import com.medical.records.service.GeminiService;
+
 import com.medical.records.service.MedicalRecordService;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,8 +29,6 @@ import java.util.List;
 @Service
 public class MedicalRecordServiceImpl extends ServiceImpl<MedicalRecordRepository, MedicalRecord> implements MedicalRecordService {
 
-    @Autowired
-    private GeminiService geminiService;
     @Resource
     private QWenConfig qWenConfig;
 

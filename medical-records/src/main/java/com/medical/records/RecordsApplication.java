@@ -11,7 +11,7 @@ import org.springframework.kafka.annotation.EnableKafka;
  */
 @SpringBootApplication
 @EnableFeignClients(basePackages = "com.medical")
-@EnableKafka
+//@EnableKafka
 @MapperScan("com.medical.records.repository")
 public class RecordsApplication {
     public static void main(String[] args) {
