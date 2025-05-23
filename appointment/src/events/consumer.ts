@@ -8,14 +8,18 @@ import type {
   AppointmentBookedEvent,
   AppointmentCancelledEvent,
   DoctorCreatedEvent,
+  DoctorUpdatedEvent,
   PatientCreatedEvent,
+  PatientUpdatedEvent,
 } from "./types";
 
 // 订阅主题。
 await consumer.subscribe({
   topics: [
     "PatientCreated",
+    "PatientUpdated",
     "DoctorCreated",
+    "DoctorUpdated",
     "AppointmentBooked",
     "AppointmentCancelled",
   ],
@@ -37,8 +41,12 @@ await consumer.run({
 
     if (topic === "PatientCreated") {
       await consumePatientCreatedEvent(json);
+    } else if (topic === "PatientUpdated") {
+      await consumePatientUpdatedEvent(json);
     } else if (topic === "DoctorCreated") {
       await consumeDoctorCreatedEvent(json);
+    } else if (topic === "DoctorUpdated") {
+      await consumeDoctorUpdatedEvent(json);
     } else if (topic === "AppointmentBooked") {
       await consumeAppointmentBookedEvent(json);
     } else if (topic === "AppointmentCancelled") {
@@ -57,9 +65,25 @@ export async function consumePatientCreatedEvent(event: PatientCreatedEvent) {
   });
 }
 
+export async function consumePatientUpdatedEvent(event: PatientUpdatedEvent) {
+  await patientRepository.updateOneById(event.id, {
+    email: event.email,
+    nickname: event.nickname,
+    avatarUrl: event.avatarUrl,
+  });
+}
+
 export async function consumeDoctorCreatedEvent(event: DoctorCreatedEvent) {
   await doctorRepository.createOne({
     id: event.id,
+    firstName: event.firstName,
+    lastName: event.lastName,
+    avatarUrl: event.avatarUrl,
+  });
+}
+
+export async function consumeDoctorUpdatedEvent(event: DoctorUpdatedEvent) {
+  await doctorRepository.updateOneById(event.id, {
     firstName: event.firstName,
     lastName: event.lastName,
     avatarUrl: event.avatarUrl,

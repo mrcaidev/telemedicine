@@ -33,3 +33,14 @@ export async function findOneWithEmailById(id: string) {
 export async function createOne(data: Patient & { email: string }) {
   await sql`insert into patients ${sql(camelToSnakeJson(data))}`;
 }
+
+export async function updateOneById(
+  id: string,
+  data: Partial<Pick<Patient, "nickname" | "avatarUrl">> & { email?: string },
+) {
+  await sql`
+    update patients
+    set ${sql(camelToSnakeJson(data))}
+    where id = ${id}
+  `;
+}
