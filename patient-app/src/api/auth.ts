@@ -48,6 +48,22 @@ export function useLogInWithGoogleMutation() {
   });
 }
 
+export function useLogOutMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation<null, Error, void>({
+    mutationFn: async () => {
+      return await request.post("/auth/logout");
+    },
+    onSuccess: async () => {
+      await tokenStore.remove();
+
+      queryClient.cancelQueries();
+      queryClient.clear();
+    },
+  });
+}
+
 export function useSendOtpMutation() {
   return useMutation<null, Error, { email: string }>({
     mutationFn: async (variables) => {
