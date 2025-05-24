@@ -79,7 +79,11 @@ export default function PlatformClinicList() {
           {clinics.map((clinic) => (
             <TableRow key={clinic.id}>
               <TableCell>
-                <Link href={`/dashboard/platform/clinics/${clinic.id}`}>
+                <Link
+                  href={`/dashboard/platform/clinics/${
+                    clinic.id
+                  }?name=${encodeURIComponent(clinic.name)}`}
+                >
                   {clinic.name}
                 </Link>
               </TableCell>
