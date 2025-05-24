@@ -1,20 +1,22 @@
 import { Kafka, type KafkaConfig, logLevel } from "kafkajs";
+import { consumeEmailRequestedEvent } from "./consumer";
 
+// 读取 Kafka 配置。
 async function readConfig() {
   const baseConfig: KafkaConfig = {
     clientId: "notification",
-    brokers: Bun.env.KAFKA_BROKERS.split(","),
+    brokers: Bun.env.KAFKA_BROKERS?.split(","),
     logLevel: logLevel.ERROR,
   };
 
-  const protocol = Bun.env.KAFKA_SECURITY_PROTOCOL || "PLAINTEXT";
+  const securityProtocol = Bun.env.KAFKA_SECURITY_PROTOCOL || "PLAINTEXT";
 
-  if (protocol === "PLAINTEXT") {
+  if (securityProtocol === "PLAINTEXT") {
     console.log("kafka is using PLAINTEXT protocol");
     return baseConfig;
   }
 
-  if (protocol === "SASL_SSL") {
+  if (securityProtocol === "SASL_SSL") {
     console.log("kafka is using SASL_SSL protocol");
 
     if (
@@ -31,16 +33,16 @@ async function readConfig() {
 
     return {
       ...baseConfig,
-      ssl: { ca },
       sasl: {
         mechanism: "plain",
         username: Bun.env.KAFKA_SASL_USERNAME,
         password: Bun.env.KAFKA_SASL_PASSWORD,
       },
+      ssl: { ca },
     } satisfies KafkaConfig;
   }
 
-  if (protocol === "SSL") {
+  if (securityProtocol === "SSL") {
     console.log("kafka is using SSL protocol");
 
     if (
@@ -61,17 +63,12 @@ async function readConfig() {
 
     return {
       ...baseConfig,
-      ssl: {
-        rejectUnauthorized: false,
-        ca,
-        key,
-        cert,
-      },
+      ssl: { ca, key, cert, rejectUnauthorized: false },
     } satisfies KafkaConfig;
   }
 
   throw new Error(
-    `kafka ${protocol} protocol is not supported. Supported protocols are PLAINTEXT, SASL_SSL and SSL`,
+    `kafka ${securityProtocol} protocol is not supported. Supported protocols are PLAINTEXT, SASL_SSL and SSL`,
   );
 }
 const config = await readConfig();
@@ -80,15 +77,37 @@ const config = await readConfig();
 const kafka = new Kafka(config);
 console.log("kafka client initialized");
 
-// 初始化生产者。
+// 连接生产者。
 export const producer = kafka.producer();
 await producer.connect();
 console.log("kafka producer connected");
 
-// 初始化消费者。
+// 连接消费者。
 export const consumer = kafka.consumer({ groupId: "notification" });
 await consumer.connect();
 console.log("kafka consumer connected");
+
+// 消费者订阅主题。
+await consumer.subscribe({ topics: ["EmailRequested"] });
+console.log("kafka consumer subscribed to topics");
+
+// 启动消费者。
+await consumer.run({
+  eachMessage: async ({ topic, message }) => {
+    const text = message.value?.toString();
+    if (!text) {
+      return;
+    }
+    const json = JSON.parse(text);
+    if (!json) {
+      return;
+    }
+    if (topic === "EmailRequested") {
+      await consumeEmailRequestedEvent(json);
+    }
+  },
+});
+console.log("kafka consumer is running");
 
 // 优雅处理错误。
 for (const errorType of ["unhandledRejection", "uncaughtException"]) {

@@ -2,7 +2,6 @@
   "compilerOptions": {
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
-    "exactOptionalPropertyTypes": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitOverride": true,
     "noImplicitReturns": true,
@@ -13,10 +12,7 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "noUncheckedSideEffectImports": true,
-    "paths": {
-      "@/*": ["./src/*"],
-      "~/*": ["./tests/*"]
-    },
+    "paths": { "@/*": ["./src/*"] },
     "resolveJsonModule": true,
     "noEmit": true,
     "allowJs": true,
