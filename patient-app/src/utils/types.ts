@@ -1,26 +1,31 @@
+export type Gender = "male" | "female";
+
 export type Patient = {
   id: string;
   role: "patient";
   email: string;
+  createdAt: string;
   nickname: string | null;
   avatarUrl: string | null;
-  gender: "male" | "female" | null;
+  gender: Gender | null;
   birthDate: string | null;
 };
 
 export type Clinic = {
   id: string;
   name: string;
+  createdAt: string;
 };
 
 export type Doctor = {
   id: string;
   role: "doctor";
   email: string;
+  createdAt: string;
   firstName: string;
   lastName: string;
   avatarUrl: string | null;
-  gender: "male" | "female";
+  gender: Gender;
   description: string;
   specialties: string[];
   clinic: Clinic;

@@ -29,13 +29,3 @@ export function formatDate(date: string) {
 export function formatTime(time: string) {
   return dayjs(time, "HH:mm").format("LT");
 }
-
-export function computeNextDateOfWeekday(weekday: number) {
-  const targetDateObject = dayjs().day(weekday);
-
-  if (dayjs().day() <= weekday) {
-    return targetDateObject;
-  }
-
-  return targetDateObject.add(1, "week");
-}
