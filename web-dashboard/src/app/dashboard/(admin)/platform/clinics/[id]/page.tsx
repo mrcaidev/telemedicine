@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -15,20 +15,20 @@ import { Plus, Trash2, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { ClinicAdmin } from "@/types/clinic-admin";
 import { ClinicAdminFormDialog } from "@/components/dialog/clinic-admin-form-dialog";
-import { ConfirmDeleteDialog } from "@/components/dialog/confirm-dialog";
+import { ConfirmDialog } from "@/components/dialog/confirm-dialog";
 
 export default function ClinicDetailPage() {
   const { id } = useParams();
   const [admins, setAdmins] = useState<ClinicAdmin[]>([]);
-  const [clinicName, setClinicName] = useState<string>("");
+
+  const searchParams = useSearchParams();
+  const clinicName = searchParams.get("name") || "";
 
   useEffect(() => {
     fetch(`/api/platform/clinic-admin?clinicId=${id}`)
       .then((res) => res.json())
       .then((data) => {
         setAdmins(data.data.data);
-        console.log(data.data.data);
-        setClinicName(data.data.data[0].clinic.name);
       })
       .catch(() => {
         toast.error("Failed to load clinic admins");
@@ -57,7 +57,7 @@ export default function ClinicDetailPage() {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-xl font-semibold">Clinic: {clinicName || id}</h1>
+        <h1 className="text-xl font-semibold">Clinic: {clinicName || " "}</h1>
 
         <ClinicAdminFormDialog
           clinicId={id as string}
@@ -98,7 +98,7 @@ export default function ClinicDetailPage() {
                     </Button>
                   </ClinicAdminFormDialog>
 
-                  <ConfirmDeleteDialog
+                  <ConfirmDialog
                     onConfirm={() => handleDelete(admin.id)}
                     description={`Delete admin ${admin.firstName} ${admin.lastName}?`}
                   >
@@ -109,7 +109,7 @@ export default function ClinicDetailPage() {
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>
-                  </ConfirmDeleteDialog>
+                  </ConfirmDialog>
                 </TableCell>
               </TableRow>
             ))
