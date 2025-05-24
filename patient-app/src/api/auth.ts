@@ -71,3 +71,24 @@ export function useSendOtpMutation() {
     },
   });
 }
+
+export function useUpdateEmailMutation() {
+  return useMutation<null, Error, { email: string; otp: string }>({
+    mutationFn: async (variables) => {
+      return await request.put("/auth/me/email", variables);
+    },
+    // onSuccess 什么也不用干，因为更新邮箱后必须强制登出，
+    // 登出时反正会把所有缓存都清除。
+  });
+}
+
+export function useUpdatePasswordMutation() {
+  return useMutation<null, Error, { oldPassword: string; newPassword: string }>(
+    {
+      mutationFn: async (variables) => {
+        return await request.put("/auth/me/password", variables);
+      },
+      // onSuccess 什么也不用干，因为更新密码不会影响任何缓存。
+    },
+  );
+}
