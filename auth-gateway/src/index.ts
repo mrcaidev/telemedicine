@@ -33,4 +33,11 @@ app.get("/auth", async (c) => {
   }
 });
 
+app.get("/whoami", async (c) => {
+  const id = c.req.header("X-User-Id") ?? null;
+  const role = c.req.header("X-User-Role") ?? null;
+  const email = c.req.header("X-User-Email") ?? null;
+  return c.json({ id, role, email });
+});
+
 export default app;

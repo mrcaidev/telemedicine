@@ -110,3 +110,25 @@ describe("GET /auth", () => {
     expect(res.headers.get("X-User-Email")).toEqual(user.email);
   });
 });
+
+describe("GET /whoami", () => {
+  it("returns user", async () => {
+    const res = await app.request("/whoami", {
+      headers: {
+        "X-User-Id": user.id,
+        "X-User-Role": user.role,
+        "X-User-Email": user.email,
+      },
+    });
+    const json = await res.json();
+    expect(res.status).toEqual(200);
+    expect(json).toEqual(user);
+  });
+
+  it("returns null if unauthenticated", async () => {
+    const res = await app.request("/whoami");
+    const json = await res.json();
+    expect(res.status).toEqual(200);
+    expect(json).toEqual({ id: null, role: null, email: null });
+  });
+});
