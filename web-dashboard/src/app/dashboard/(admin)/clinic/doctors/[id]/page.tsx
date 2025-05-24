@@ -19,7 +19,7 @@ import {
   Doctor,
   // , AvailableTime
 } from "@/types/doctor";
-import { RawAppointment } from "@/types/appointment";
+// import { RawAppointment } from "@/types/appointment";
 // import { toast } from "sonner";
 // import { RescheduleDialog } from "@/components/dialog/appointment-schedule-dialog";
 
