@@ -15,10 +15,13 @@ import {
   CalendarClock,
 } from "lucide-react";
 import Image from "next/image";
-import { Doctor, AvailableTime } from "@/types/doctor";
+import {
+  Doctor,
+  // , AvailableTime
+} from "@/types/doctor";
 import { RawAppointment } from "@/types/appointment";
-import { toast } from "sonner";
-import { RescheduleDialog } from "@/components/dialog/appointment-schedule-dialog";
+// import { toast } from "sonner";
+// import { RescheduleDialog } from "@/components/dialog/appointment-schedule-dialog";
 
 const weekdayMap = [
   "Sunday",
@@ -65,7 +68,7 @@ export default function DoctorDetailPage() {
   const { id } = useParams();
   const router = useRouter();
   const [doctor, setDoctor] = useState<Doctor | null>(null);
-  const [appointments, setAppointments] = useState<RawAppointment[]>([]);
+  // const [appointments, setAppointments] = useState<RawAppointment[]>([]);
 
   function GenderIcon({ gender }: { gender: string }) {
     if (gender === "female") return <Venus className="w-4 h-4 text-pink-500" />;
@@ -94,9 +97,9 @@ export default function DoctorDetailPage() {
   // }, [id]);
 
   // Dialog state
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [selectedAppt, setSelectedAppt] = useState<RawAppointment | null>(null);
-  
+  // const [dialogOpen, setDialogOpen] = useState(false);
+  // const [selectedAppt, setSelectedAppt] = useState<RawAppointment | null>(null);
+
   // const handleOpen = (appt: RawAppointment) => {
   //   setSelectedAppt(appt);
   //   setDialogOpen(true);
