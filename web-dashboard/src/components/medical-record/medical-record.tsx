@@ -6,35 +6,65 @@ interface MedicalRecordCardProps {
 }
 
 export default function MedicalRecordCard({ record }: MedicalRecordCardProps) {
-  const date = new Date(record.date).toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
+  const format = (date?: string) =>
+    date ? new Date(date).toLocaleDateString() : "N/A";
 
   return (
-    <div className="border rounded-xl shadow-sm bg-white p-5 space-y-3">
-      <div className="flex items-center gap-2 text-sm text-gray-500">
-        <CalendarDays className="w-4 h-4" />
-        {date}
-      </div>
+    <div className="border rounded-lg p-4 shadow-sm space-y-2">
+      <div className="text-gray-600 text-sm">Record Date</div>
+      <div className="text-base font-medium">{format(record.recordDate)}</div>
 
-      <div className="flex items-center gap-2 font-medium text-gray-800">
-        <Stethoscope className="w-5 h-5 text-blue-500" />
-        {record.diagnosis}
-      </div>
-
-      {record.notes && (
-        <p className="text-sm text-gray-700 whitespace-pre-line flex gap-2">
-          <StickyNote className="w-4 h-4 text-gray-400 mt-0.5" />
-          <span>{record.notes}</span>
-        </p>
+      {record.subjectiveNotes && (
+        <div>
+          <div className="text-gray-600 text-sm">Subjective Notes</div>
+          <div>{record.subjectiveNotes}</div>
+        </div>
       )}
 
-      {record.doctorName && (
-        <p className="text-xs text-right text-gray-500 italic">
-          - Dr. {record.doctorName}
-        </p>
+      {record.assessmentDiagnosisDesc && (
+        <div>
+          <div className="text-gray-600 text-sm">Diagnosis</div>
+          <div>{record.assessmentDiagnosisDesc}</div>
+        </div>
+      )}
+
+      {(record.objectiveBloodPressure ||
+        record.objectiveHeartRate ||
+        record.objectiveTemperature) && (
+        <div className="grid grid-cols-2 gap-2">
+          {record.objectiveBloodPressure && (
+            <div>
+              <div className="text-gray-600 text-sm">Blood Pressure</div>
+              <div>{record.objectiveBloodPressure}</div>
+            </div>
+          )}
+          {record.objectiveHeartRate && (
+            <div>
+              <div className="text-gray-600 text-sm">Heart Rate</div>
+              <div>{record.objectiveHeartRate} bpm</div>
+            </div>
+          )}
+          {record.objectiveTemperature && (
+            <div>
+              <div className="text-gray-600 text-sm">Temperature</div>
+              <div>{record.objectiveTemperature} °C</div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {record.planMedicationName && (
+        <div>
+          <div className="text-gray-600 text-sm">Medication Plan</div>
+          <div>{record.planMedicationName}</div>
+        </div>
+      )}
+
+      {record.planFollowupDate && (
+        <div>
+          <div className="text-gray-600 text-sm">Follow-up Date</div>
+          <div>{format(record.planFollowupDate)}</div>
+        </div>
       )}
     </div>
   );

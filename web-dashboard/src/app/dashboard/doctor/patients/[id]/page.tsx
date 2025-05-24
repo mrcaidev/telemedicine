@@ -20,7 +20,7 @@ export default function PatientDetailPage() {
       .then((res) => res.json())
       .then((data) => {
         setPatient(data.data);
-        setRecords(data.data.medicalRecords);
+        setRecords(data.data.medicalRecords.medicalRecords);
       });
   }, [id]);
 
