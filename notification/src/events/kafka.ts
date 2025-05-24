@@ -1,4 +1,5 @@
 import { Kafka, type KafkaConfig, logLevel } from "kafkajs";
+import { consumeEmailRequestedEvent } from "./consumer";
 
 // 读取 Kafka 配置。
 async function readConfig() {
@@ -76,15 +77,37 @@ const config = await readConfig();
 const kafka = new Kafka(config);
 console.log("kafka client initialized");
 
-// 初始化生产者。
+// 连接生产者。
 export const producer = kafka.producer();
 await producer.connect();
 console.log("kafka producer connected");
 
-// 初始化消费者。
+// 连接消费者。
 export const consumer = kafka.consumer({ groupId: "notification" });
 await consumer.connect();
 console.log("kafka consumer connected");
+
+// 消费者订阅主题。
+await consumer.subscribe({ topics: ["EmailRequested"] });
+console.log("kafka consumer subscribed to topics");
+
+// 启动消费者。
+await consumer.run({
+  eachMessage: async ({ topic, message }) => {
+    const text = message.value?.toString();
+    if (!text) {
+      return;
+    }
+    const json = JSON.parse(text);
+    if (!json) {
+      return;
+    }
+    if (topic === "EmailRequested") {
+      await consumeEmailRequestedEvent(json);
+    }
+  },
+});
+console.log("kafka consumer is running");
 
 // 优雅处理错误。
 for (const errorType of ["unhandledRejection", "uncaughtException"]) {

@@ -76,27 +76,29 @@ describe("schedule", () => {
 describe("reschedule", () => {
   it("reschedules email", async () => {
     const id = crypto.randomUUID();
-    const scheduledAt = new Date().toISOString();
+    const rescheduledAt = new Date().toISOString();
     resendEmailsUpdateSpy.mockResolvedValueOnce({
       data: { id, object: "email" },
       error: null,
     });
-    await scheduledEmailService.reschedule(id, scheduledAt);
+    await scheduledEmailService.reschedule(id, rescheduledAt);
     expect(resendEmailsUpdateSpy).toHaveBeenCalledTimes(1);
     expect(resendEmailsUpdateSpy).toHaveBeenNthCalledWith(1, {
       id,
-      scheduledAt,
+      scheduledAt: rescheduledAt,
     });
   });
 
   it("throws if resend fails", async () => {
-    const id = crypto.randomUUID();
-    const scheduledAt = new Date().toISOString();
     resendEmailsUpdateSpy.mockResolvedValueOnce({
       data: null,
       error: { name: "invalid_api_Key", message: "message" },
     });
-    const fn = () => scheduledEmailService.reschedule(id, scheduledAt);
+    const fn = () =>
+      scheduledEmailService.reschedule(
+        crypto.randomUUID(),
+        new Date().toISOString(),
+      );
     expect(fn).toThrow(HTTPException);
   });
 });
@@ -114,12 +116,11 @@ describe("cancel", () => {
   });
 
   it("throws if resend fails", async () => {
-    const id = crypto.randomUUID();
     resendEmailsCancelSpy.mockResolvedValueOnce({
       data: null,
       error: { name: "invalid_api_Key", message: "message" },
     });
-    const fn = () => scheduledEmailService.cancel(id);
+    const fn = () => scheduledEmailService.cancel(crypto.randomUUID());
     expect(fn).toThrow(HTTPException);
   });
 });

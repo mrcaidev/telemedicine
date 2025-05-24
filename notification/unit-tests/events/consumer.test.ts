@@ -9,6 +9,7 @@ import {
 } from "bun:test";
 import { consumeEmailRequestedEvent } from "@/events/consumer";
 import { resend } from "@/utils/resend";
+
 const resendEmailsSendSpy = spyOn(resend.emails, "send");
 
 afterEach(() => {

@@ -134,7 +134,7 @@ describe("POST /scheduled-emails", () => {
   });
 });
 
-describe("PATCH /scheduled-emails/:id", () => {
+describe("PATCH /scheduled-emails/{id}", () => {
   it("returns 400 if scheduledAt is in the past", async () => {
     const res = await PATCH(`/scheduled-emails/${crypto.randomUUID()}`, {
       scheduledAt: new Date().toISOString(),
@@ -171,7 +171,7 @@ describe("PATCH /scheduled-emails/:id", () => {
   });
 });
 
-describe("DELETE /scheduled-emails/:id", () => {
+describe("DELETE /scheduled-emails/{id}", () => {
   it("returns 502 if resend fails", async () => {
     resendEmailsCancelSpy.mockResolvedValueOnce({
       data: null,

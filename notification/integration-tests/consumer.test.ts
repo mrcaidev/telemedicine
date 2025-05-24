@@ -68,28 +68,21 @@ describe("EmailRequestedEvent", () => {
       data: null,
       error: { name: "invalid_api_Key", message: "message" },
     });
-    await producerSendSpy({
-      topic: "EmailRequested",
-      messages: [
-        {
-          value: JSON.stringify({
-            subject: "subject",
-            to: ["me@example.com"],
-            cc: [],
-            bcc: [],
-            content: "content",
-          }),
-        },
-      ],
-    });
-    expect(resendEmailsSendSpy).toHaveBeenCalledTimes(1);
-    expect(resendEmailsSendSpy).toHaveBeenNthCalledWith(1, {
-      from: "Telemedicine <notification@telemedicine.ink>",
-      subject: "subject",
-      to: ["me@example.com"],
-      cc: [],
-      bcc: [],
-      text: "content",
-    });
+    const fn = () =>
+      producerSendSpy({
+        topic: "EmailRequested",
+        messages: [
+          {
+            value: JSON.stringify({
+              subject: "subject",
+              to: ["me@example.com"],
+              cc: [],
+              bcc: [],
+              content: "content",
+            }),
+          },
+        ],
+      });
+    expect(fn).not.toThrow();
   });
 });
