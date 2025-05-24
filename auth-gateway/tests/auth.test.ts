@@ -9,7 +9,7 @@ const user = {
 } as const;
 
 describe("GET /auth", () => {
-  it("sets X-User-* headers if ok", async () => {
+  it("sets X-User-* headers", async () => {
     const token = await sign(user, Bun.env.JWT_SECRET);
     const res = await app.request("/auth", {
       headers: { Authorization: `Bearer ${token}` },
@@ -20,7 +20,7 @@ describe("GET /auth", () => {
     expect(res.headers.get("X-User-Email")).toEqual(user.email);
   });
 
-  it("returns 204 if no Authorization header", async () => {
+  it("returns 204 if Authorization header is not found", async () => {
     const res = await app.request("/auth");
     expect(res.status).toEqual(204);
     expect(res.headers.get("X-User-Id")).toEqual(null);
@@ -48,20 +48,9 @@ describe("GET /auth", () => {
     expect(res.headers.get("X-User-Email")).toEqual(null);
   });
 
-  it("returns 204 if token is malformed", async () => {
+  it("returns 204 if token is invalid", async () => {
     const res = await app.request("/auth", {
-      headers: { Authorization: "Bearer invalid" },
-    });
-    expect(res.status).toEqual(204);
-    expect(res.headers.get("X-User-Id")).toEqual(null);
-    expect(res.headers.get("X-User-Role")).toEqual(null);
-    expect(res.headers.get("X-User-Email")).toEqual(null);
-  });
-
-  it("returns 204 if token signature is invalid", async () => {
-    const token = await sign(user, "invalid-jwt-secret");
-    const res = await app.request("/auth", {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { Authorization: "Bearer 0" },
     });
     expect(res.status).toEqual(204);
     expect(res.headers.get("X-User-Id")).toEqual(null);
@@ -71,6 +60,17 @@ describe("GET /auth", () => {
 
   it("returns 204 if token has expired", async () => {
     const token = await sign({ ...user, exp: -1 }, Bun.env.JWT_SECRET);
+    const res = await app.request("/auth", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    expect(res.status).toEqual(204);
+    expect(res.headers.get("X-User-Id")).toEqual(null);
+    expect(res.headers.get("X-User-Role")).toEqual(null);
+    expect(res.headers.get("X-User-Email")).toEqual(null);
+  });
+
+  it("returns 204 if token signature mismatches", async () => {
+    const token = await sign(user, "another-jwt-secret");
     const res = await app.request("/auth", {
       headers: { Authorization: `Bearer ${token}` },
     });
