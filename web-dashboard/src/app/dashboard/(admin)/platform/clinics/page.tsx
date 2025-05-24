@@ -14,7 +14,7 @@ import { Plus, Trash2, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { Clinic } from "@/types/clinic";
 import { ClinicFormDialog } from "@/components/dialog/clinic-form-dialog";
-import { ConfirmDeleteDialog } from "@/components/dialog/confirm-dialog";
+import { ConfirmDialog } from "@/components/dialog/confirm-dialog";
 import Link from "next/link";
 
 export default function PlatformClinicList() {
@@ -79,7 +79,11 @@ export default function PlatformClinicList() {
           {clinics.map((clinic) => (
             <TableRow key={clinic.id}>
               <TableCell>
-                <Link href={`/dashboard/platform/clinics/${clinic.id}`}>
+                <Link
+                  href={`/dashboard/platform/clinics/${
+                    clinic.id
+                  }?name=${encodeURIComponent(clinic.name)}`}
+                >
                   {clinic.name}
                 </Link>
               </TableCell>
@@ -99,7 +103,7 @@ export default function PlatformClinicList() {
                     <Pencil className="w-4 h-4" />
                   </Button>
                 </ClinicFormDialog>
-                <ConfirmDeleteDialog
+                <ConfirmDialog
                   onConfirm={() => handleDelete(clinic.id)}
                   description={`Are you sure you want to delete "${clinic.name}"? This action cannot be undone.`}
                 >
@@ -110,7 +114,7 @@ export default function PlatformClinicList() {
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>
-                </ConfirmDeleteDialog>
+                </ConfirmDialog>
               </TableCell>
             </TableRow>
           ))}
