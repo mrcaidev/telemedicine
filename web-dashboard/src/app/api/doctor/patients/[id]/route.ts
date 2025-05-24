@@ -30,6 +30,7 @@ export async function GET(
       fetch(`${BACKEND_API}/medical-records?patientId=${patientId}`, { headers }),
     ]);
 
+
     if (!patientRes.ok || !medicalRecordsRes.ok) {
       return NextResponse.json({ message: "Failed to fetch" }, { status: 500 });
     }
