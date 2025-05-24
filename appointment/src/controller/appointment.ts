@@ -1,4 +1,4 @@
-import { idSchema, remarkSchema } from "@/common/schema";
+import { idSchema, remarkSchema, statusSchema } from "@/common/schema";
 import { authGuard } from "@/middleware/auth-guard";
 import { validator } from "@/middleware/validator";
 import * as appointmentService from "@/services/appointment";
@@ -13,6 +13,7 @@ appointmentController.get(
   validator(
     "query",
     v.object({
+      status: v.optional(statusSchema, "normal,to_be_rescheduled,cancelled"),
       sortBy: v.optional(
         v.union(
           [v.literal("startAt"), v.literal("endAt")],

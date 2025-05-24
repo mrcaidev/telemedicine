@@ -12,9 +12,9 @@ import type {
 import { sql } from "bun";
 
 export async function findAll(query: {
+  status?: AppointmentStatus[];
   patientId?: string;
   doctorId?: string;
-  status?: AppointmentStatus;
   sortBy: "startAt" | "endAt";
   sortOrder: "asc" | "desc";
   limit: number;
@@ -26,9 +26,9 @@ export async function findAll(query: {
     left outer join patients p on a.patient_id = p.id
     left outer join doctors d on a.doctor_id = d.id
     where true
+    ${query.status ? sql`and a.status in (${sql.unsafe(query.status.map((s) => `'${s}'`).join(","))})` : sql``}
     ${query.patientId ? sql`and a.patient_id = ${query.patientId}` : sql``}
     ${query.doctorId ? sql`and a.doctor_id = ${query.doctorId}` : sql``}
-    ${query.status ? sql`and a.status = ${query.status}` : sql``}
     ${!query.cursor ? sql`` : query.sortOrder === "asc" ? sql`and ${sql.unsafe(camelToSnakeString(query.sortBy))} > ${query.cursor}` : sql`and ${sql.unsafe(camelToSnakeString(query.sortBy))} < ${query.cursor}`}
     order by ${sql.unsafe(camelToSnakeString(query.sortBy))} ${sql.unsafe(query.sortOrder)}
     limit ${query.limit}
