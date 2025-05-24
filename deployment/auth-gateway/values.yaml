@@ -2,6 +2,8 @@ image: mrcaidev/telemedicine-auth-gateway
 port: 3000
 livenessProbe: /livez
 readinessProbe: /readyz
+paths:
+  - /whoami
 resources:
   requests:
     cpu: 100m

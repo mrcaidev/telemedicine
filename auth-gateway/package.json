@@ -4,15 +4,15 @@
   "type": "module",
   "scripts": {
     "dev": "bun run --hot src/index.ts",
-    "build": "bun build --outdir dist --target bun --minify src/index.ts",
+    "build": "bun build --outdir dist --target bun src/index.ts",
     "check": "tsc && biome check"
   },
   "dependencies": {
-    "hono": "^4.7.9"
+    "hono": "^4.7.10"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
-    "@types/bun": "^1.2.13",
+    "@types/bun": "^1.2.14",
     "typescript": "^5.8.3"
   }
 }
