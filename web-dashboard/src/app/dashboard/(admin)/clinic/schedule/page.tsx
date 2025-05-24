@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Doctor } from "@/types/doctor";
 import { ConfirmDialog } from "@/components/dialog/confirm-dialog";
 import { ScheduleDialog } from "@/components/dialog/clinic-schedule-dialog";
+import { useSession } from "next-auth/react";
 
 const weekdays = [
   "Sunday",
@@ -48,18 +49,30 @@ export default function SchedulePage() {
     endTime: string;
   } | null>(null);
 
+  const { data: session } = useSession();
+  const id = session?.user?.clinicId;
+
   // 可以优化，使用只返回医生id和姓名的接口
   useEffect(() => {
-    fetch("/api/clinic/doctor")
+    fetch(`/api/clinic/doctor?clinicId=${id}`)
       .then((res) => res.json())
-      .then((data) => setDoctors(data.data.doctors));
-  }, []);
+      .then((data) => {
+        console.log("/api/clinic/doctor", data);
+        setDoctors(data.data.doctors);
+      });
+  }, [id]);
 
   useEffect(() => {
     if (selectedId) {
       fetch(`/api/clinic/doctor/${selectedId}/available-times`)
         .then((res) => res.json())
-        .then((data) => setAvailableTimes(data.data || []));
+        .then((data) => {
+          console.log(
+            `/api/clinic/doctor/${selectedId}/available-times`,
+            data
+          );
+          setAvailableTimes(data.data || []);
+        });
     }
   }, [selectedId]);
 
