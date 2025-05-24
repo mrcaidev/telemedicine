@@ -1,5 +1,4 @@
 import { MedicalRecord } from "@/types/patient";
-import { CalendarDays, Stethoscope, StickyNote } from "lucide-react";
 
 interface MedicalRecordCardProps {
   record: MedicalRecord;
