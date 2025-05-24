@@ -1,4 +1,4 @@
-import type { Appointment } from "@/utils/types";
+import type { Appointment, AppointmentStatus } from "@/utils/types";
 import {
   type QueryKey,
   useInfiniteQuery,
@@ -9,6 +9,7 @@ import {
 import { request } from "./request";
 
 type UseAppointmentsInfiniteQueryOptions = {
+  status?: AppointmentStatus[];
   limit?: number;
   sortBy?: "startAt" | "endAt";
   sortOrder?: "asc" | "desc";
@@ -17,7 +18,12 @@ type UseAppointmentsInfiniteQueryOptions = {
 export function useAppointmentsInfiniteQuery(
   options: UseAppointmentsInfiniteQueryOptions = {},
 ) {
-  const { limit = 10, sortBy = "endAt", sortOrder = "asc" } = options;
+  const {
+    status = [],
+    limit = 10,
+    sortBy = "endAt",
+    sortOrder = "asc",
+  } = options;
 
   return useInfiniteQuery<
     { appointments: Appointment[]; nextCursor: string | null },
@@ -26,7 +32,7 @@ export function useAppointmentsInfiniteQuery(
     QueryKey,
     string | null
   >({
-    queryKey: ["appointments", { limit, sortBy, sortOrder }],
+    queryKey: ["appointments", { status, limit, sortBy, sortOrder }],
     queryFn: async ({ pageParam: cursor }) => {
       const params = new URLSearchParams({
         limit: String(limit),
@@ -34,6 +40,9 @@ export function useAppointmentsInfiniteQuery(
         sortOrder,
         ...(cursor && { cursor }),
       });
+      if (status.length > 0) {
+        params.set("status", status.join(","));
+      }
       return await request.get(`/appointments?${params}`);
     },
     initialPageParam: null,

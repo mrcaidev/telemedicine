@@ -83,7 +83,10 @@ function UpcomingAppointment() {
     data: appointments,
     error,
     isPending,
-  } = useAppointmentsInfiniteQuery({ limit: 1 });
+  } = useAppointmentsInfiniteQuery({
+    status: ["normal", "to_be_rescheduled"],
+    limit: 1,
+  });
 
   if (isPending) {
     return <HighlightedAppointmentSkeleton />;
