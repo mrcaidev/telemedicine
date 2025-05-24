@@ -9,4 +9,5 @@ FROM oven/bun:alpine
 WORKDIR /app
 COPY --from=builder /code/dist .
 ENV NODE_ENV=production
+ENV TZ=Asia/Singapore
 CMD ["bun", "run", "index.js"]
