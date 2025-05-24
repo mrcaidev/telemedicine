@@ -10,7 +10,7 @@ import { HTTPException } from "hono/http-exception";
 
 export async function findAll(
   query: {
-    status?: AppointmentStatus;
+    status?: AppointmentStatus[];
     sortBy: "startAt" | "endAt";
     sortOrder: "asc" | "desc";
     limit: number;

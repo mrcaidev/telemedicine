@@ -6,6 +6,7 @@ import {
 } from "react";
 import { Pressable } from "react-native";
 import { TextClassNameContext } from "./text";
+import { cn } from "./utils";
 
 export const buttonVariants = cva(
   "group flex-row items-center justify-center gap-2 rounded-md disabled:opacity-50",
@@ -45,7 +46,7 @@ export const buttonTextVariants = cva("text-foreground text-base font-medium", {
     },
     size: {
       default: "",
-      sm: "",
+      sm: "text-sm",
       lg: "text-lg",
       icon: "",
     },
@@ -68,7 +69,7 @@ export const Button = forwardRef<ElementRef<typeof Pressable>, ButtonProps>(
         <Pressable
           ref={ref}
           role="button"
-          className={buttonVariants({ variant, size, className })}
+          className={cn(buttonVariants({ variant, size }), className)}
           {...props}
         />
       </TextClassNameContext.Provider>

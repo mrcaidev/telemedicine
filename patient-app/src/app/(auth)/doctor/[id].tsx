@@ -94,8 +94,9 @@ export default function DoctorPage() {
         <Avatar alt="Doctor avatar" className="size-28">
           <AvatarImage source={{ uri: doctor.avatarUrl ?? undefined }} />
           <AvatarFallback>
-            <Muted>
-              {doctor.firstName[0]} {doctor.lastName[0]}
+            <Muted className="text-4xl">
+              {doctor.firstName[0]}
+              {doctor.lastName[0]}
             </Muted>
           </AvatarFallback>
         </Avatar>
@@ -114,21 +115,29 @@ export default function DoctorPage() {
       </View>
       <View className="gap-2 mx-6 mt-6">
         <Text className="text-lg font-medium">Introduction</Text>
-        {doctor.description.split("\n").map((line, index) => (
-          // biome-ignore lint/suspicious/noArrayIndexKey: immutable
-          <P key={index} className="text-muted-foreground text-sm">
-            {line}
-          </P>
-        ))}
+        {doctor.description === "" ? (
+          <P className="text-muted-foreground text-sm">No introduction yet</P>
+        ) : (
+          doctor.description.split("\n").map((line, index) => (
+            // biome-ignore lint/suspicious/noArrayIndexKey: immutable
+            <P key={index} className="text-muted-foreground text-sm">
+              {line}
+            </P>
+          ))
+        )}
       </View>
       <View className="gap-2 mx-6 mt-6">
         <Text className="text-lg font-medium">Specialties</Text>
         <View className="flex-row items-center gap-1 flex-wrap">
-          {doctor.specialties.map((specialty) => (
-            <Badge key={specialty} variant="outline">
-              <Text>{specialty}</Text>
-            </Badge>
-          ))}
+          {doctor.specialties.length === 0 ? (
+            <P className="text-muted-foreground text-sm">No specialties yet</P>
+          ) : (
+            doctor.specialties.map((specialty) => (
+              <Badge key={specialty} variant="outline">
+                <Text>{specialty}</Text>
+              </Badge>
+            ))
+          )}
         </View>
       </View>
       <View className="gap-2 mx-6 mt-6">

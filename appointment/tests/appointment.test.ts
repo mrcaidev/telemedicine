@@ -71,6 +71,80 @@ describe("GET /appointments", () => {
     }
   });
 
+  it("filters by status", async () => {
+    const res1 = await GET(
+      "/appointments?status=normal&cursor=2000-01-01T00:00:00.000Z",
+      { headers: mockData.patientAuthHeaders },
+    );
+    const json1 = await res1.json();
+    expect(res1.status).toEqual(200);
+    expect(json1).toEqual({
+      ...successResponseTemplate,
+      data: {
+        appointments: expect.arrayContaining([appointmentTemplate]),
+        nextCursor: null,
+      },
+    });
+    // @ts-ignore
+    for (const appointment of json1.data.appointments) {
+      expect(appointment.status).toEqual("normal");
+    }
+
+    const res2 = await GET(
+      "/appointments?status=to_be_rescheduled&cursor=2000-01-01T00:00:00.000Z",
+      { headers: mockData.patientAuthHeaders },
+    );
+    const json2 = await res2.json();
+    expect(res2.status).toEqual(200);
+    expect(json2).toEqual({
+      ...successResponseTemplate,
+      data: {
+        appointments: expect.arrayContaining([appointmentTemplate]),
+        nextCursor: null,
+      },
+    });
+    // @ts-ignore
+    for (const appointment of json2.data.appointments) {
+      expect(appointment.status).toEqual("to_be_rescheduled");
+    }
+
+    const res3 = await GET(
+      "/appointments?status=cancelled&cursor=2000-01-01T00:00:00.000Z",
+      { headers: mockData.patientAuthHeaders },
+    );
+    const json3 = await res3.json();
+    expect(res3.status).toEqual(200);
+    expect(json3).toEqual({
+      ...successResponseTemplate,
+      data: {
+        appointments: expect.arrayContaining([appointmentTemplate]),
+        nextCursor: null,
+      },
+    });
+    // @ts-ignore
+    for (const appointment of json3.data.appointments) {
+      expect(appointment.status).toEqual("cancelled");
+    }
+
+    const res4 = await GET(
+      "/appointments?status=normal,to_be_rescheduled&cursor=2000-01-01T00:00:00.000Z",
+      { headers: mockData.patientAuthHeaders },
+    );
+    const json4 = await res4.json();
+    expect(res4.status).toEqual(200);
+    expect(json4).toEqual({
+      ...successResponseTemplate,
+      data: {
+        appointments: expect.arrayContaining([appointmentTemplate]),
+        nextCursor: null,
+      },
+    });
+    // @ts-ignore
+    for (const appointment of json4.data.appointments) {
+      expect(appointment.status).toBeOneOf(["normal", "to_be_rescheduled"]);
+    }
+  });
+
   it("paginates", async () => {
     const res1 = await GET("/appointments?limit=1", {
       headers: mockData.patientAuthHeaders,

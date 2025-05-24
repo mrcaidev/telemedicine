@@ -3,7 +3,6 @@
   "compilerOptions": {
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
-    "exactOptionalPropertyTypes": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitOverride": true,
     "noImplicitReturns": true,
@@ -16,7 +15,6 @@
     "paths": { "@/*": ["./src/*"] },
     "erasableSyntaxOnly": true,
     "verbatimModuleSyntax": true,
-    "moduleDetection": "force",
     "incremental": true
   },
   "include": [
