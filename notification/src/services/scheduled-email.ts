@@ -17,10 +17,7 @@ export async function schedule(email: Email, scheduledAt: string) {
     throw new HTTPException(502, { message: error.message });
   }
 
-  console.log(
-    `scheduled email ${data!.id} at ${scheduledAt}:`,
-    JSON.stringify(email),
-  );
+  console.log(`scheduled email ${data!.id} at ${scheduledAt}`);
 
   return data!.id;
 }

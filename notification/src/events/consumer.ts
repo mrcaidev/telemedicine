@@ -1,28 +1,5 @@
 import { resend } from "@/utils/resend";
 import type { Email } from "@/utils/types";
-import { consumer } from "./kafka";
-
-await consumer.subscribe({ topics: ["EmailRequested"] });
-console.log("kafka consumer subscribed to topics");
-
-await consumer.run({
-  eachMessage: async ({ topic, message }) => {
-    const text = message.value?.toString();
-    if (!text) {
-      return;
-    }
-
-    const json = JSON.parse(text);
-    if (!json) {
-      return;
-    }
-
-    if (topic === "EmailRequested") {
-      await consumeEmailRequestedEvent(json);
-    }
-  },
-});
-console.log("kafka consumer is running");
 
 type EmailRequestedEvent = Email;
 
@@ -41,5 +18,5 @@ export async function consumeEmailRequestedEvent(event: EmailRequestedEvent) {
     return;
   }
 
-  console.log(`sent email: ${data!.id}`);
+  console.log(`sent email ${data!.id}`);
 }
