@@ -1,8 +1,8 @@
 import { tokenStore } from "@/utils/secure-store";
 import type { Patient } from "@/utils/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { request } from "./request";
 import { useMeQuery } from "./auth";
+import { request } from "./request";
 
 export function useCreatePatientMutation() {
   const queryClient = useQueryClient();
