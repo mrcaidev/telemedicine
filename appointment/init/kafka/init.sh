@@ -1,10 +1,10 @@
-kafka-topics.sh --bootstrap-server kafka:9092 --create --topic PatientCreated
-kafka-topics.sh --bootstrap-server kafka:9092 --create --topic PatientUpdated
-kafka-topics.sh --bootstrap-server kafka:9092 --create --topic PatientDeleted
-kafka-topics.sh --bootstrap-server kafka:9092 --create --topic DoctorCreated
-kafka-topics.sh --bootstrap-server kafka:9092 --create --topic DoctorUpdated
-kafka-topics.sh --bootstrap-server kafka:9092 --create --topic DoctorDeleted
-kafka-topics.sh --bootstrap-server kafka:9092 --create --topic AppointmentBooked
-kafka-topics.sh --bootstrap-server kafka:9092 --create --topic AppointmentRescheduled
-kafka-topics.sh --bootstrap-server kafka:9092 --create --topic AppointmentCancelled
-kafka-topics.sh --bootstrap-server kafka:9092 --create --topic EmailRequested
+kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic PatientCreated
+kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic PatientUpdated
+kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic PatientDeleted
+kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic DoctorCreated
+kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic DoctorUpdated
+kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic DoctorDeleted
+kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic AppointmentBooked
+kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic AppointmentRescheduled
+kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic AppointmentCancelled
+kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic EmailRequested
