@@ -39,3 +39,20 @@ doctorAvailabilityController.post(
     return c.json({ code: 0, message: "", data: doctorAvailability }, 201);
   },
 );
+
+doctorAvailabilityController.delete(
+  "/:doctorId/:id",
+  rbac(["clinic_admin"]),
+  validator(
+    "param",
+    v.object({
+      doctorId: v.pipe(v.string(), v.uuid()),
+      id: v.pipe(v.string(), v.uuid()),
+    }),
+  ),
+  async (c) => {
+    const { id } = c.req.valid("param");
+    await doctorAvailabilityService.deleteOneById(id);
+    return c.json({ code: 0, message: "", data: null });
+  },
+);
