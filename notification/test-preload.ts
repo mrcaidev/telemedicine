@@ -35,8 +35,9 @@ if (Bun.env.UNIT_TEST) {
 }
 
 if (Bun.env.INTEGRATION_TEST) {
+  const { producer, consumer } = await import("@/events/kafka");
+
   afterAll(async () => {
-    const { producer, consumer } = await import("@/events/kafka");
     await producer.disconnect();
     console.log("kafka producer disconnected");
     await consumer.disconnect();
