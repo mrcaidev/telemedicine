@@ -103,6 +103,20 @@ appointmentController.post(
 );
 
 appointmentController.post(
+  "/:id/reschedule",
+  rbac(["clinic_admin"]),
+  validator("param", v.object({ id: v.pipe(v.string(), v.uuid()) })),
+  validator("json", v.object({ availabilityId: v.pipe(v.string(), v.uuid()) })),
+  async (c) => {
+    const { id } = c.req.valid("param");
+    const data = c.req.valid("json");
+    const actor = c.get("actor");
+    const appointment = await appointmentService.reschedule(id, data, actor);
+    return c.json({ code: 0, message: "", data: appointment });
+  },
+);
+
+appointmentController.post(
   "/:id/cancel",
   rbac(["patient"]),
   validator("param", v.object({ id: v.pipe(v.string(), v.uuid()) })),

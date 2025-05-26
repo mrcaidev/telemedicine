@@ -1,6 +1,7 @@
 import { produceEvent } from "@/events/producer";
 import * as appointmentRepository from "@/repositories/appointment";
 import * as doctorAvailabilityRepository from "@/repositories/doctor-availability";
+import { requestUser } from "@/utils/request";
 import type { Actor, AppointmentStatus } from "@/utils/types";
 import dayjs, { type Dayjs } from "dayjs";
 import { HTTPException } from "hono/http-exception";
@@ -114,6 +115,64 @@ export async function requestReschedule(id: string, actor: Actor) {
   const newAppointment = await appointmentRepository.updateOneById(id, {
     status: "to_be_rescheduled",
   });
+
+  return newAppointment;
+}
+
+export async function reschedule(
+  id: string,
+  data: { availabilityId: string },
+  actor: Actor,
+) {
+  const oldAppointment = await appointmentRepository.selectOneFull({ id });
+
+  if (!oldAppointment) {
+    throw new HTTPException(404, { message: "Appointment not found" });
+  }
+
+  // 当前用户必须是预约的医生所属诊所的管理员。
+  const fullActor = await requestUser.get<{
+    clinic: { id: string; name: string };
+  }>("/auth/me", {
+    headers: {
+      "X-User-Id": actor.id,
+      "X-User-Role": actor.role,
+      "X-User-Email": actor.email,
+    },
+  });
+
+  if (oldAppointment.clinicId !== fullActor.clinic.id) {
+    throw new HTTPException(403, { message: "Permission denied" });
+  }
+
+  // 预约必须处于待重排状态。
+  if (oldAppointment.status !== "to_be_rescheduled") {
+    throw new HTTPException(409, {
+      message: "This appointment cannot be rescheduled",
+    });
+  }
+
+  const doctorAvailability = await doctorAvailabilityRepository.selectOne({
+    id: data.availabilityId,
+  });
+
+  if (!doctorAvailability) {
+    throw new HTTPException(404, { message: "Doctor availability not found" });
+  }
+
+  // 计算出空闲时间段在下一周内对应的绝对时间。
+  const date = computeNextDateOfWeekday(doctorAvailability.weekday);
+  const startAt = dateTimeToTimestamp(date, doctorAvailability.startTime);
+  const endAt = dateTimeToTimestamp(date, doctorAvailability.endTime);
+
+  const newAppointment = await appointmentRepository.updateOneById(id, {
+    doctorId: doctorAvailability.doctorId,
+    startAt,
+    endAt,
+    status: "normal",
+  });
+
+  await produceEvent("AppointmentRescheduled", newAppointment);
 
   return newAppointment;
 }

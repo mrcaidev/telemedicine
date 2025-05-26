@@ -43,3 +43,14 @@ export async function insertOne(data: AppointmentReminderEmail) {
 
   return normalizeRow(row);
 }
+
+export async function updateOneByAppointmentId(
+  appointmentId: string,
+  data: Partial<Pick<AppointmentReminderEmail, "scheduledAt">>,
+) {
+  await sql`
+    update appointment_reminder_emails
+    set ${sql(decamelizeKeys(data))}
+    where appointment_id = ${appointmentId}
+  `;
+}

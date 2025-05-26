@@ -89,6 +89,62 @@ export async function consumeAppointmentBookedEvent(
   });
 }
 
+export async function consumeAppointmentRescheduledEvent(
+  event: EventRegistry["AppointmentRescheduled"],
+) {
+  // 马上给病人发送一封邮件，告知预约已被重排。
+  const patientWithEmail = await patientRepository.selectOneWithEmail({
+    id: event.patient.id,
+  });
+
+  if (!patientWithEmail) {
+    console.error("Patient not found:", event.patient.id);
+    return;
+  }
+
+  await produceEvent("EmailRequested", {
+    subject: "Your Appointment Has Been Rescheduled",
+    to: [patientWithEmail.email],
+    cc: [],
+    bcc: [],
+    content: `Dear ${patientWithEmail.nickname ?? patientWithEmail.email},\nWe hope this message finds you well.\nWe are writing to inform you that your upcoming appointment has been rescheduled due to unforeseen circumstances. We sincerely apologize for any inconvenience this may cause and appreciate your understanding.\nYour new appointment details are as follows:\n- Date: ${dayjs(event.startAt).format("dddd, LL")}\n- Time: ${dayjs(event.startAt).format("LT")} - ${dayjs(event.endAt).format("LT")}\n- Doctor: ${event.doctor.firstName} ${event.doctor.lastName}\nIf the new time does not work for you, you are welcome to cancel the appointment on our platform.\nThank you for your patience and flexibility. If you have any questions or need assistance, please don't hesitate to contact our support team.\nWarm regards,\nTelemedicine`,
+  });
+
+  // 找出旧预约的提醒邮件。
+  const appointmentReminderEmail =
+    await appointmentReminderEmailRepository.selectOne({
+      appointmentId: event.id,
+    });
+
+  if (!appointmentReminderEmail) {
+    console.error(
+      "Appointment reminder email not found for appointment:",
+      event.id,
+    );
+    return;
+  }
+
+  // 新的提醒时间：预约开始时间前一天。
+  const rescheduledAt = dayjs(event.startAt).subtract(1, "day").toISOString();
+
+  // 如果提醒时间已经过去，就不需要重排邮件了。
+  if (dayjs().isAfter(rescheduledAt)) {
+    return;
+  }
+
+  // 重排提醒邮件。
+  await requestNotification.patch<null>(
+    `/scheduled-emails/${appointmentReminderEmail.emailId}`,
+    { scheduledAt: rescheduledAt },
+  );
+
+  // 更新提醒邮件。
+  await appointmentReminderEmailRepository.updateOneByAppointmentId(
+    appointmentReminderEmail.appointmentId,
+    { scheduledAt: rescheduledAt },
+  );
+}
+
 export async function consumeAppointmentCancelledEvent(
   event: EventRegistry["AppointmentCancelled"],
 ) {

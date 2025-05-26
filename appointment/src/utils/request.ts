@@ -2,6 +2,7 @@ import { HTTPException } from "hono/http-exception";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
 
 const serviceDiscovery = {
+  user: "http://user:3000",
   notification: "http://notification:3000",
 } as const;
 
@@ -91,4 +92,5 @@ function createRequestToService(service: DiscoveredService) {
   };
 }
 
+export const requestUser = createRequestToService("user");
 export const requestNotification = createRequestToService("notification");
