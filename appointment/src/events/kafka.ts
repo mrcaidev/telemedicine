@@ -2,6 +2,7 @@ import { Kafka, type KafkaConfig, logLevel } from "kafkajs";
 import {
   consumeAppointmentBookedEvent,
   consumeAppointmentCancelledEvent,
+  consumeAppointmentRescheduledEvent,
   consumeDoctorCreatedEvent,
   consumeDoctorUpdatedEvent,
   consumePatientCreatedEvent,
@@ -129,6 +130,8 @@ await consumer.run({
       await consumeDoctorUpdatedEvent(json);
     } else if (topic === "AppointmentBooked") {
       await consumeAppointmentBookedEvent(json);
+    } else if (topic === "AppointmentRescheduled") {
+      await consumeAppointmentRescheduledEvent(json);
     } else if (topic === "AppointmentCancelled") {
       await consumeAppointmentCancelledEvent(json);
     }
