@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "bun run --hot src/index.ts",
     "build": "bun build --outdir dist --target bun src/index.ts",
+    "unit-test": "UNIT_TEST=true bun test ./unit-tests",
+    "integration-test": "INTEGRATION_TEST=true bun test ./integration-tests",
     "check": "tsc && biome check"
   },
   "dependencies": {
