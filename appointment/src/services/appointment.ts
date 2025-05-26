@@ -1,16 +1,14 @@
-import {
-  publishAppointmentBookedEvent,
-  publishAppointmentCancelledEvent,
-} from "@/events/producer";
+import { produceEvent } from "@/events/producer";
 import * as appointmentRepository from "@/repositories/appointment";
 import * as doctorAvailabilityRepository from "@/repositories/doctor-availability";
 import type { Actor, AppointmentStatus } from "@/utils/types";
 import dayjs, { type Dayjs } from "dayjs";
 import { HTTPException } from "hono/http-exception";
 
-export async function findAll(
+export async function paginate(
   query: {
-    status?: AppointmentStatus[];
+    clinicId?: string;
+    status: AppointmentStatus[];
     sortBy: "startAt" | "endAt";
     sortOrder: "asc" | "desc";
     limit: number;
@@ -18,61 +16,63 @@ export async function findAll(
   },
   actor: Actor,
 ) {
-  const appointments = await appointmentRepository.findAll({
-    ...query,
+  const { clinicId, ...safeQuery } = query;
+
+  const appointments = await appointmentRepository.selectManyFull({
+    // 这些查询选项是安全的，不会导致越权问题。
+    ...safeQuery,
+    // 病人只能查询自己的预约。
     ...(actor.role === "patient" && { patientId: actor.id }),
+    // 医生只能查询自己的预约。
     ...(actor.role === "doctor" && { doctorId: actor.id }),
+    // 诊所管理员可以查询自己诊所内的预约。
+    ...(actor.role === "clinic_admin" && { clinicId }),
   });
 
   const nextCursor =
     appointments.length < query.limit
       ? null
-      : appointments[appointments.length - 1]?.[query.sortBy];
+      : appointments.at(-1)?.[query.sortBy];
 
   return { appointments, nextCursor } as const;
 }
 
 export async function findOneById(id: string, actor: Actor) {
-  // 找出预约。
-  const appointment = await appointmentRepository.findOneFullById(id);
+  const appointment = await appointmentRepository.selectOneFull({ id });
+
   if (!appointment) {
     throw new HTTPException(404, { message: "Appointment not found" });
   }
 
-  // 只有相关的病人和医生才能访问。
+  // 只有预约涉及到的病人或医生才有权查看。
   if (
     appointment.patient.id !== actor.id &&
     appointment.doctor.id !== actor.id
   ) {
-    throw new HTTPException(403, {
-      message: "You are not allowed to view this appointment",
-    });
+    throw new HTTPException(403, { message: "Permission denied" });
   }
 
   return appointment;
 }
 
-export async function bookOne(
+export async function book(
   data: { availabilityId: string; remark: string },
   actor: Actor,
 ) {
-  // 找出空闲时间段详情。
-  const doctorAvailability = await doctorAvailabilityRepository.findOneById(
-    data.availabilityId,
-  );
+  const doctorAvailability = await doctorAvailabilityRepository.selectOne({
+    id: data.availabilityId,
+  });
+
   if (!doctorAvailability) {
-    throw new HTTPException(404, {
-      message: "Doctor is not available at this time",
-    });
+    throw new HTTPException(404, { message: "Doctor availability not found" });
   }
 
-  // 计算出该空闲时间段对应的绝对时间。
+  // 计算出空闲时间段在下一周内对应的绝对时间。
   const date = computeNextDateOfWeekday(doctorAvailability.weekday);
-  const startAt = dateToIso(date, doctorAvailability.startTime);
-  const endAt = dateToIso(date, doctorAvailability.endTime);
+  const startAt = dateTimeToTimestamp(date, doctorAvailability.startTime);
+  const endAt = dateTimeToTimestamp(date, doctorAvailability.endTime);
 
-  // 创建预约。
-  const appointment = await appointmentRepository.createOne({
+  const appointment = await appointmentRepository.insertOne({
     patientId: actor.id,
     doctorId: doctorAvailability.doctorId,
     startAt,
@@ -80,10 +80,77 @@ export async function bookOne(
     remark: data.remark,
   });
 
-  // 发送事件。
-  await publishAppointmentBookedEvent(appointment);
+  await produceEvent("AppointmentBooked", appointment);
 
   return appointment;
+}
+
+export async function requestReschedule(id: string, actor: Actor) {
+  const oldAppointment = await appointmentRepository.selectOneFull({ id });
+
+  if (!oldAppointment) {
+    throw new HTTPException(404, { message: "Appointment not found" });
+  }
+
+  // 当前用户必须是预约的医生本人。
+  if (oldAppointment.doctor.id !== actor.id) {
+    throw new HTTPException(403, { message: "Permission denied" });
+  }
+
+  // 预约必须处于正常状态。
+  if (oldAppointment.status !== "normal") {
+    throw new HTTPException(409, {
+      message: "This appointment cannot be rescheduled",
+    });
+  }
+
+  // 预约必须未开始。
+  if (dayjs().isAfter(oldAppointment.startAt)) {
+    throw new HTTPException(422, {
+      message: "This appointment has already started",
+    });
+  }
+
+  const newAppointment = await appointmentRepository.updateOneById(id, {
+    status: "to_be_rescheduled",
+  });
+
+  return newAppointment;
+}
+
+export async function cancel(id: string, actor: Actor) {
+  const oldAppointment = await appointmentRepository.selectOneFull({ id });
+
+  if (!oldAppointment) {
+    throw new HTTPException(404, { message: "Appointment not found" });
+  }
+
+  // 当前用户必须是预约的病人本人。
+  if (oldAppointment.patient.id !== actor.id) {
+    throw new HTTPException(403, { message: "Permission denied" });
+  }
+
+  // 预约必须不处于取消状态。
+  if (oldAppointment.status === "cancelled") {
+    throw new HTTPException(409, {
+      message: "This appointment is already cancelled",
+    });
+  }
+
+  // 预约必须未开始。
+  if (dayjs().isAfter(oldAppointment.startAt)) {
+    throw new HTTPException(422, {
+      message: "This appointment has already started",
+    });
+  }
+
+  const newAppointment = await appointmentRepository.updateOneById(id, {
+    status: "cancelled",
+  });
+
+  await produceEvent("AppointmentCancelled", newAppointment);
+
+  return newAppointment;
 }
 
 function computeNextDateOfWeekday(weekday: number) {
@@ -95,73 +162,6 @@ function computeNextDateOfWeekday(weekday: number) {
   return targetDate.add(1, "week");
 }
 
-function dateToIso(date: Dayjs, time: string) {
-  return dayjs(`${date.format("YYYY-MM-DD")} ${time}`).toISOString();
-}
-
-export async function requestRescheduleOneById(id: string, actor: Actor) {
-  // 找出该预约。
-  const appointment = await appointmentRepository.findOneById(id);
-  if (!appointment) {
-    throw new HTTPException(404, { message: "Appointment not found" });
-  }
-
-  // 只有预约的医生本人才能请求重排。
-  if (appointment.doctorId !== actor.id) {
-    throw new HTTPException(403, { message: "Permission denied" });
-  }
-
-  // 只有正常状态的预约才能请求重排。
-  if (appointment.status !== "normal") {
-    throw new HTTPException(409, {
-      message: "This appointment cannot be rescheduled",
-    });
-  }
-
-  // 如果已经开始了，就不允许重排。
-  if (dayjs().isAfter(appointment.startAt)) {
-    throw new HTTPException(422, {
-      message: "This appointment has already started",
-    });
-  }
-
-  // 更新预约状态。
-  return await appointmentRepository.updateOneById(id, {
-    status: "to_be_rescheduled",
-  });
-}
-
-export async function cancelOneById(id: string, actor: Actor) {
-  // 找出该预约。
-  const appointment = await appointmentRepository.findOneFullById(id);
-  if (!appointment) {
-    throw new HTTPException(404, { message: "Appointment not found" });
-  }
-
-  // 只有预约的病人本人才能取消预约。
-  if (appointment.patient.id !== actor.id) {
-    throw new HTTPException(403, {
-      message: "You are not allowed to cancel this appointment",
-    });
-  }
-
-  // 如果已经取消了，就不需要再取消了。
-  if (appointment.status === "cancelled") {
-    throw new HTTPException(409, {
-      message: "This appointment is already cancelled",
-    });
-  }
-
-  // 如果已经开始了，就不允许取消。
-  if (dayjs().isAfter(appointment.startAt)) {
-    throw new HTTPException(422, {
-      message: "This appointment has already started",
-    });
-  }
-
-  // 发送事件。
-  await publishAppointmentCancelledEvent(appointment);
-
-  // 更新预约状态。
-  return await appointmentRepository.updateOneById(id, { status: "cancelled" });
+function dateTimeToTimestamp(date: Dayjs, time: string) {
+  return dayjs.tz(`${date.format("YYYY-MM-DD")} ${time}`).toISOString();
 }

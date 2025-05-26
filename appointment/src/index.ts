@@ -1,4 +1,4 @@
-import "@/events/consumer";
+import "@/events/kafka";
 import "@/utils/dayjs";
 import { sql } from "bun";
 import { Hono } from "hono";
@@ -9,24 +9,23 @@ import { doctorAvailabilityController } from "./controller/doctor-availability";
 
 const app = new Hono();
 
-// Liveness 探针。
 app.get("/livez", (c) => {
   return c.text("live");
 });
 
-// Readiness 探针。
 app.get("/readyz", async (c) => {
   await sql`select 1`;
   return c.text("ready");
 });
 
-// 注册所有 API。
 app.route("/appointments", appointmentController);
 app.route("/doctor-availabilities", doctorAvailabilityController);
 
-// 集中处理错误。
 app.onError((error, c) => {
   if (isValiError(error)) {
+    if (Bun.env.NODE_ENV === "development") {
+      console.error(error);
+    }
     return c.json({ code: 400, message: error.message, data: null }, 400);
   }
 

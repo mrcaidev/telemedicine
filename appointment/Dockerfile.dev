@@ -3,5 +3,4 @@ WORKDIR /code
 COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile
 ENV NODE_ENV=development
-ENV TZ=Asia/Singapore
 CMD ["bun", "run", "dev"]
