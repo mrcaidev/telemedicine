@@ -44,14 +44,16 @@ appointmentController.get(
           v.string(),
           v.isoTimestamp("cursor should be an ISO 8601 timestamp"),
         ),
-        new Date().toISOString(),
       ),
     }),
   ),
   async (c) => {
     const query = c.req.valid("query");
     const actor = c.get("actor");
-    const page = await appointmentService.findAll(query, actor);
+    const page = await appointmentService.findAll(
+      { cursor: new Date().toISOString(), ...query },
+      actor,
+    );
     return c.json({ code: 0, message: "", data: page });
   },
 );
