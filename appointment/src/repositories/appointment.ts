@@ -1,4 +1,3 @@
-import { camelToSnakeJson, camelToSnakeString } from "@/utils/case";
 import type {
   Appointment,
   AppointmentStatus,
@@ -6,6 +5,8 @@ import type {
   PartiallyRequired,
 } from "@/utils/types";
 import { sql } from "bun";
+import decamelize from "decamelize";
+import decamelizeKeys from "decamelize-keys";
 
 type FullRow = {
   id: string;
@@ -65,8 +66,8 @@ export async function selectManyFull(query: {
     ${query.doctorId ? sql`and doctor_id = ${query.doctorId}` : sql``}
     ${query.clinicId ? sql`and clinic_id = ${query.clinicId}` : sql``}
     ${query.status ? sql`and status in (${sql.unsafe(query.status.map((s) => `'${s}'`).join(","))})` : sql``}
-    ${!query.cursor ? sql`` : query.sortOrder === "asc" ? sql`and ${sql.unsafe(camelToSnakeString(query.sortBy))} > ${query.cursor}` : sql`and ${sql.unsafe(camelToSnakeString(query.sortBy))} < ${query.cursor}`}
-    order by ${sql.unsafe(camelToSnakeString(query.sortBy))} ${sql.unsafe(query.sortOrder)}
+    ${!query.cursor ? sql`` : query.sortOrder === "asc" ? sql`and ${sql.unsafe(decamelize(query.sortBy))} > ${query.cursor}` : sql`and ${sql.unsafe(decamelize(query.sortBy))} < ${query.cursor}`}
+    order by ${sql.unsafe(decamelize(query.sortBy))} ${sql.unsafe(query.sortOrder)}
     limit ${query.limit}
   `) as FullRow[];
 
@@ -95,7 +96,7 @@ export async function insertOne(
   >,
 ) {
   const [insertedRow] = (await sql`
-    insert into appointments ${sql(camelToSnakeJson(data))}
+    insert into appointments ${sql(decamelizeKeys(data))}
     returning id
   `) as { id: string }[];
 
@@ -124,7 +125,7 @@ export async function updateOneById(
 ) {
   const [updatedRow] = (await sql`
     update appointments
-    set ${sql(camelToSnakeJson(data))}
+    set ${sql(decamelizeKeys(data))}
     where id = ${id}
     returning id
   `) as { id: string }[];

@@ -1,6 +1,6 @@
-import { camelToSnakeJson } from "@/utils/case";
 import type { Doctor } from "@/utils/types";
 import { sql } from "bun";
+import decamelizeKeys from "decamelize-keys";
 
 type Row = {
   id: string;
@@ -34,7 +34,7 @@ export async function selectOne(query: { id?: string }) {
 }
 
 export async function insertOne(data: Doctor & { clinicId: string }) {
-  await sql`insert into doctors ${sql(camelToSnakeJson(data))}`;
+  await sql`insert into doctors ${sql(decamelizeKeys(data))}`;
 }
 
 export async function updateOneById(
@@ -45,7 +45,7 @@ export async function updateOneById(
 ) {
   await sql`
     update doctors
-    set ${sql(camelToSnakeJson(data))}
+    set ${sql(decamelizeKeys(data))}
     where id = ${id}
   `;
 }

@@ -1,6 +1,6 @@
-import { camelToSnakeJson } from "@/utils/case";
 import type { DoctorAvailability, PartiallyRequired } from "@/utils/types";
 import { sql } from "bun";
+import decamelizeKeys from "decamelize-keys";
 
 type Row = {
   id: string;
@@ -74,7 +74,7 @@ export async function insertOne(
   >,
 ) {
   const [row] = (await sql`
-    insert into doctor_availabilities ${sql(camelToSnakeJson(data))}
+    insert into doctor_availabilities ${sql(decamelizeKeys(data))}
     returning id, doctor_id, weekday, start_time, end_time, created_at
   `) as Row[];
 
