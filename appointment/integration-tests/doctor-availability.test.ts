@@ -1,4 +1,5 @@
 import { describe, expect, it } from "bun:test";
+import type { DoctorAvailability } from "@/utils/types";
 import {
   errorResponseTemplate,
   mockData,
@@ -29,9 +30,7 @@ describe("lifecycle", () => {
       },
       { headers: mockData.clinicAdmins[0].authHeaders },
     );
-    const json2 = (await res2.json()) as {
-      data: { id: string; createdAt: string };
-    };
+    const json2 = (await res2.json()) as { data: DoctorAvailability };
     expect(res2.status).toEqual(201);
     expect(json2).toEqual({
       ...successResponseTemplate,
@@ -53,14 +52,7 @@ describe("lifecycle", () => {
       data: [
         mockData.doctorAvailabilities[0],
         mockData.doctorAvailabilities[1],
-        {
-          id: json2.data.id,
-          doctorId: mockData.doctors[0].id,
-          weekday: 5,
-          startTime: "14:00",
-          endTime: "15:00",
-          createdAt: json2.data.createdAt,
-        },
+        json2.data,
       ],
     });
 

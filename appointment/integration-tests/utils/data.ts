@@ -187,7 +187,7 @@ export const mockData = {
       startAt: "2030-12-04T03:00:00.000Z",
       endAt: "2030-12-04T04:00:00.000Z",
       remark: "appointment2",
-      status: "to_be_rescheduled",
+      status: "cancelled",
       createdAt: "2030-12-02T03:00:00.000Z",
     },
     {
@@ -207,7 +207,7 @@ export const mockData = {
       startAt: "2030-12-05T04:00:00.000Z",
       endAt: "2030-12-05T05:00:00.000Z",
       remark: "appointment3",
-      status: "cancelled",
+      status: "to_be_rescheduled",
       createdAt: "2030-12-03T04:00:00.000Z",
     },
     {

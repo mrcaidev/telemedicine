@@ -48,7 +48,7 @@ create table appointments (
 -- 预约的完整视图，联合了病人资料、医生资料（以及其中的诊所 ID）。
 create view full_appointments as (
   select
-    a.id
+    a.id,
     a.start_at,
     a.end_at,
     a.remark,
@@ -60,7 +60,7 @@ create view full_appointments as (
     d.id as doctor_id,
     d.first_name as doctor_first_name,
     d.last_name as doctor_last_name,
-    d.avatar_url as doctor_avatar_url
+    d.avatar_url as doctor_avatar_url,
     d.clinic_id
   from appointments a
   left outer join patients p on a.patient_id = p.id

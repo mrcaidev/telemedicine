@@ -52,8 +52,8 @@ if (Bun.env.INTEGRATION_TEST) {
 
       insert into appointments (id, patient_id, doctor_id, start_at, end_at, remark, status, created_at) values
       ('ef9e8b01-9385-4338-8ad4-3d19f473b07f', '0d342d37-fe96-45ff-97f8-629e40b823a6', '757eb510-e8ed-4304-958d-b881232e2632', '2025-01-06T01:00:00.000Z', '2025-01-06T02:00:00.000Z', 'appointment1', 'normal', '2025-01-04T01:00:00.000Z'),
-      ('3785021e-d4c6-40ce-841b-4230bb417c93', '0d342d37-fe96-45ff-97f8-629e40b823a6', '38dddfc7-c956-4e2a-ba3a-6c4ef032914f', '2030-12-04T03:00:00.000Z', '2030-12-04T04:00:00.000Z', 'appointment2', 'to_be_rescheduled', '2030-12-02T03:00:00.000Z'),
-      ('4ca2283e-a33f-466c-9c8b-63096fa8c53a', 'aacdc7fb-bdb6-449e-a6ce-03f335927d45', 'c1f28821-523b-439a-970f-ed613e10255e', '2030-12-05T04:00:00.000Z', '2030-12-05T05:00:00.000Z', 'appointment3', 'cancelled', '2030-12-03T04:00:00.000Z'),
+      ('3785021e-d4c6-40ce-841b-4230bb417c93', '0d342d37-fe96-45ff-97f8-629e40b823a6', '38dddfc7-c956-4e2a-ba3a-6c4ef032914f', '2030-12-04T03:00:00.000Z', '2030-12-04T04:00:00.000Z', 'appointment2', 'cancelled', '2030-12-02T03:00:00.000Z'),
+      ('4ca2283e-a33f-466c-9c8b-63096fa8c53a', 'aacdc7fb-bdb6-449e-a6ce-03f335927d45', 'c1f28821-523b-439a-970f-ed613e10255e', '2030-12-05T04:00:00.000Z', '2030-12-05T05:00:00.000Z', 'appointment3', 'to_be_rescheduled', '2030-12-03T04:00:00.000Z'),
       ('7195ca4e-b20f-4017-b1a0-7b1752ef225f', 'd568ab85-f95d-47ea-a9d2-cfd1314af840', '757eb510-e8ed-4304-958d-b881232e2632', '2030-12-03T02:00:00.000Z', '2030-12-03T03:00:00.000Z', 'appointment4', 'cancelled', '2030-12-01T02:00:00.000Z');
 
       insert into appointment_reminder_emails (appointment_id, email_id, scheduled_at) values

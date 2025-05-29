@@ -77,7 +77,7 @@ export async function selectManyFull(query: {
 export async function selectOneFull(query: { id?: string }) {
   const [row] = await sql`
     select id, start_at, end_at, remark, status, created_at, patient_id, patient_nickname, patient_avatar_url, doctor_id, doctor_first_name, doctor_last_name, doctor_avatar_url, clinic_id
-    from appointments
+    from full_appointments
     where true
     ${query.id ? sql`and id = ${query.id}` : sql``}
   `;
