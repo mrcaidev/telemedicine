@@ -1,3 +1,9 @@
+export type Prettify<T> = { [K in keyof T]: T[K] } & {};
+
+export type PartiallyRequired<T, K extends keyof T> = Prettify<
+  Required<Pick<T, K>> & Partial<T>
+>;
+
 export type Role = "platform_admin" | "clinic_admin" | "doctor" | "patient";
 
 export type Actor = {
@@ -21,9 +27,11 @@ export type Doctor = {
 
 export type DoctorAvailability = {
   id: string;
+  doctorId: string;
   weekday: number;
   startTime: string;
   endTime: string;
+  createdAt: string;
 };
 
 export type AppointmentStatus = "normal" | "to_be_rescheduled" | "cancelled";
@@ -39,15 +47,15 @@ export type Appointment = {
   createdAt: string;
 };
 
-export type FullAppointment = Omit<Appointment, "patientId" | "doctorId"> & {
-  patient: Patient;
-  doctor: Doctor;
-};
+export type FullAppointment = Prettify<
+  Omit<Appointment, "patientId" | "doctorId"> & {
+    patient: Patient;
+    doctor: Doctor;
+  } & { clinicId: string }
+>;
 
-export type EmailSchedule = {
+export type AppointmentReminderEmail = {
   appointmentId: string;
   emailId: string;
   scheduledAt: string;
 };
-
-export type PartiallyRequired<T, K extends keyof T> = Pick<T, K> & Partial<T>;

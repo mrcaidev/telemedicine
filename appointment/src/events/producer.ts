@@ -1,34 +1,15 @@
 import { producer } from "./kafka";
-import type {
-  AppointmentBookedEvent,
-  AppointmentCancelledEvent,
-  EmailRequestedEvent,
-} from "./types";
+import type { EventRegistry } from "./registry";
 
-export async function publishEmailRequestedEvent(event: EmailRequestedEvent) {
-  const [record] = await producer.send({
-    topic: "EmailRequested",
-    messages: [{ value: JSON.stringify(event) }],
-  });
-  console.log("sent event:", JSON.stringify(record));
-}
-
-export async function publishAppointmentBookedEvent(
-  event: AppointmentBookedEvent,
+export async function produceEvent<Topic extends keyof EventRegistry>(
+  topic: Topic,
+  event: EventRegistry[Topic] | EventRegistry[Topic][],
 ) {
-  const [record] = await producer.send({
-    topic: "AppointmentBooked",
-    messages: [{ value: JSON.stringify(event) }],
-  });
-  console.log("sent event:", JSON.stringify(record));
-}
+  const events = Array.isArray(event) ? event : [event];
 
-export async function publishAppointmentCancelledEvent(
-  event: AppointmentCancelledEvent,
-) {
   const [record] = await producer.send({
-    topic: "AppointmentCancelled",
-    messages: [{ value: JSON.stringify(event) }],
+    topic: topic,
+    messages: events.map((e) => ({ value: JSON.stringify(e) })),
   });
   console.log("sent event:", JSON.stringify(record));
 }
