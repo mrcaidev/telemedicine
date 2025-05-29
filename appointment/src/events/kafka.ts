@@ -12,7 +12,7 @@ import {
 // 读取 Kafka 配置。
 async function readConfig() {
   const baseConfig: KafkaConfig = {
-    clientId: "notification",
+    clientId: "appointment",
     brokers: Bun.env.KAFKA_BROKERS?.split(","),
     logLevel: logLevel.ERROR,
   };
