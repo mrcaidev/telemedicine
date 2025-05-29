@@ -1,23 +1,6 @@
 import { afterAll, beforeAll, mock } from "bun:test";
 import { sql } from "bun";
 
-mock.module("@/utils/request", () => ({
-  requestUser: {
-    get: async () => {},
-    post: async () => {},
-    put: async () => {},
-    patch: async () => {},
-    delete: async () => {},
-  },
-  requestNotification: {
-    get: async () => {},
-    post: async () => {},
-    put: async () => {},
-    patch: async () => {},
-    delete: async () => {},
-  },
-}));
-
 if (Bun.env.UNIT_TEST) {
   mock.module("bun", () => ({
     sql: async () => {},
