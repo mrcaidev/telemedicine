@@ -119,30 +119,19 @@ export async function selectMany(query: {
   return rows.map(normalizeRow);
 }
 
-export async function selectManyMatching(query: {
-  q: string;
+export async function searchMany(query: {
+  text: string;
+  embedding: string;
   limit: number;
   cursor: number;
 }) {
   const rows = (await sql`
-    with matched as (
-      select id, ts_rank_cd(fts, plainto_tsquery('english', ${query.q})) as similarity
-      from doctor_profiles
-      where fts @@ plainto_tsquery('english', ${query.q})
-      and ts_rank_cd(fts, plainto_tsquery('english', ${query.q})) < ${query.cursor}
-      order by similarity desc
-      limit ${query.limit}
-    )
-    select m.id, m.similarity, role, email, created_at, first_name, last_name, avatar_url, gender, description, specialties, clinic_id, clinic_name, clinic_created_at
-    from matched m
-    left outer join doctors d on m.id = d.id
-    order by similarity desc
-  `) as (Row & { similarity: number })[];
-  console.log("rows", rows);
+    select * from search_doctors(${query.text}, ${query.embedding}, ${query.limit}, ${query.cursor})
+  `) as (Row & { score: number })[];
 
   return rows.map((row) => {
-    const { similarity, ...rest } = row;
-    return { ...normalizeRow(rest), similarity };
+    const { score, ...rest } = row;
+    return { ...normalizeRow(rest), score };
   });
 }
 
