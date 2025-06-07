@@ -233,7 +233,7 @@ export async function updateOneById(
     Pick<
       DoctorProfile,
       "firstName" | "lastName" | "description" | "gender" | "specialties"
-    >
+    > & { embedding: string }
   >,
 ) {
   const [updated] = (await sql`

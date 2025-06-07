@@ -1,21 +1,5 @@
-import type { Doctor, Patient } from "@/utils/types";
 import { producer } from "./kafka";
-
-type EventRegistry = {
-  PatientCreated: Patient;
-  PatientUpdated: Patient;
-  PatientDeleted: { id: string };
-  DoctorCreated: Doctor;
-  DoctorUpdated: Doctor;
-  DoctorDeleted: { id: string };
-  EmailRequested: {
-    subject: string;
-    to: string[];
-    cc: string[];
-    bcc: string[];
-    content: string;
-  };
-};
+import type { EventRegistry } from "./registry";
 
 export async function produceEvent<Topic extends keyof EventRegistry>(
   topic: Topic,
