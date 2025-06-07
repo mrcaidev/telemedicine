@@ -1,3 +1,4 @@
+import { SENDER_ADDRESS } from "@/common/constants";
 import { resend } from "@/utils/resend";
 import type { Email } from "@/utils/types";
 
@@ -5,7 +6,7 @@ type EmailRequestedEvent = Email;
 
 export async function consumeEmailRequestedEvent(event: EmailRequestedEvent) {
   const { data, error } = await resend.emails.send({
-    from: "Telemedicine <notification@telemedicine.ink>",
+    from: SENDER_ADDRESS,
     subject: event.subject,
     to: event.to,
     cc: event.cc,
