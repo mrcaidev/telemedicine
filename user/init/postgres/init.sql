@@ -216,17 +216,21 @@ embedding_results as (
   where embedding is not null
   order by rank
   limit match_count * 2
+),
+rrf_results as (
+  select
+    doctors.*,
+    coalesce(1.0 / (rrf_k + fts_results.rank), 0.0) * fts_weight
+    + coalesce(1.0 / (rrf_k + embedding_results.rank), 0.0) * embedding_weight
+    as score
+  from fts_results
+  full outer join embedding_results on fts_results.id = embedding_results.id
+  left outer join doctors on coalesce(fts_results.id, embedding_results.id) = doctors.id
+  order by score desc
 )
-select
-  doctors.*,
-  coalesce(1.0 / (rrf_k + fts_results.rank), 0.0) * fts_weight
-  + coalesce(1.0 / (rrf_k + embedding_results.rank), 0.0) * embedding_weight
-  as score
-from fts_results
-full outer join embedding_results on fts_results.id = embedding_results.id
-left outer join doctors on coalesce(fts_results.id, embedding_results.id) = doctors.id
+select *
+from rrf_results
 where score between min_score and max_score
-order by score desc
 limit match_count
 $$;
 
