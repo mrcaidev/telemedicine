@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, mock } from "bun:test";
 import { sql } from "bun";
+import pgvector from "pgvector";
 
 mock.module("openai", () => ({
   default: class {
@@ -29,10 +30,10 @@ beforeAll(async () => {
     insert into clinic_admin_profiles (id, clinic_id, first_name, last_name, created_by) values
     ('b7aa316d-d7ef-4b35-8075-a5440922b030', 'f5dc8bbb-079b-41a0-8f52-8e25b5c71401', 'Charlie', 'Avery', 'e4c315ef-0f8d-4456-a69e-c971b5e25ebc');
 
-    insert into doctor_profiles (id, clinic_id, first_name, last_name, description, specialties, created_by) values
-    ('4504abab-58c2-4fa7-ab05-ec5ac687625f', 'f5dc8bbb-079b-41a0-8f52-8e25b5c71401', 'David', 'Tan', '', '{}', 'b7aa316d-d7ef-4b35-8075-a5440922b030'),
-    ('df9ffcca-1415-4837-95fa-83288e199d99', 'f5dc8bbb-079b-41a0-8f52-8e25b5c71401', 'Christa', 'Conn', 'Very good at Surgery', '{"surgery"}', 'b7aa316d-d7ef-4b35-8075-a5440922b030'),
-    ('04cd46f0-c785-48cc-bde1-898aac54c425', 'f5dc8bbb-079b-41a0-8f52-8e25b5c71401', 'Rory', 'Greenfelder', 'Good at both Cardiology and Surgery', '{"cardiology"}', 'b7aa316d-d7ef-4b35-8075-a5440922b030');
+    insert into doctor_profiles (id, clinic_id, first_name, last_name, description, specialties, embedding, created_by) values
+    ('4504abab-58c2-4fa7-ab05-ec5ac687625f', 'f5dc8bbb-079b-41a0-8f52-8e25b5c71401', 'David', 'Tan', '', '{}', ${pgvector.toSql(Array(512).fill(0.1))},'b7aa316d-d7ef-4b35-8075-a5440922b030'),
+    ('df9ffcca-1415-4837-95fa-83288e199d99', 'f5dc8bbb-079b-41a0-8f52-8e25b5c71401', 'Christa', 'Conn', 'Very good at Surgery', '{"surgery"}', ${pgvector.toSql(Array(512).fill(0.1))},'b7aa316d-d7ef-4b35-8075-a5440922b030'),
+    ('04cd46f0-c785-48cc-bde1-898aac54c425', 'f5dc8bbb-079b-41a0-8f52-8e25b5c71401', 'Rory', 'Greenfelder', 'Good at both Cardiology and Surgery', '{"cardiology"}', ${pgvector.toSql(Array(512).fill(0.1))},'b7aa316d-d7ef-4b35-8075-a5440922b030');
 
     insert into patient_profiles (id) values
     ('8b41503d-92fd-4325-8032-df5dca24ab10'),
