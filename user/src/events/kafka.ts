@@ -1,5 +1,8 @@
 import { Kafka, type KafkaConfig, logLevel } from "kafkajs";
-import { consumeDoctorCreatedEvent } from "./consumer";
+import {
+  consumeDoctorCreatedEvent,
+  consumeDoctorUpdatedEvent,
+} from "./consumer";
 
 // 读取 Kafka 配置。
 async function readConfig() {
@@ -106,6 +109,8 @@ await consumer.run({
     }
     if (topic === "DoctorCreated") {
       await consumeDoctorCreatedEvent(json);
+    } else if (topic === "DoctorUpdated") {
+      await consumeDoctorUpdatedEvent(json);
     }
   },
 });

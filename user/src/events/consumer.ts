@@ -13,3 +13,14 @@ export async function consumeDoctorCreatedEvent(
     embedding: pgvector.toSql(embedding),
   });
 }
+
+export async function consumeDoctorUpdatedEvent(
+  event: EventRegistry["DoctorUpdated"],
+) {
+  const embedding = await createEmbedding(
+    `${event.firstName} ${event.lastName} ${event.description} ${event.specialties.join(" ")}`,
+  );
+  await doctorProfileRepository.updateOneById(event.id, {
+    embedding: pgvector.toSql(embedding),
+  });
+}
