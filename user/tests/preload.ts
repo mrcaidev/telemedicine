@@ -1,6 +1,13 @@
-import { afterAll, beforeAll } from "bun:test";
-import { producer } from "@/events/kafka";
+import { afterAll, beforeAll, mock } from "bun:test";
 import { sql } from "bun";
+
+mock.module("openai", () => ({
+  default: class {
+    embeddings = {
+      create: async () => ({ data: [{ embedding: Array(512).fill(0.1) }] }),
+    };
+  },
+}));
 
 beforeAll(async () => {
   await sql`
@@ -34,8 +41,12 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
+  const { producer, consumer } = await import("@/events/kafka");
+
   await producer.disconnect();
   console.log("kafka producer disconnected");
+  await consumer.disconnect();
+  console.log("kafka consumer disconnected");
 
   await sql`
     delete from audit_logs;

@@ -3,8 +3,10 @@ import * as accountRepository from "@/repositories/account";
 import * as auditLogRepository from "@/repositories/audit-log";
 import * as clinicAdminProfileRepository from "@/repositories/clinic-admin-profile";
 import * as doctorProfileRepository from "@/repositories/doctor-profile";
+import { createEmbedding } from "@/utils/embedding";
 import type { Actor, Gender } from "@/utils/types";
 import { HTTPException } from "hono/http-exception";
+import pgvector from "pgvector";
 
 export async function paginate(query: {
   clinicId?: string;
@@ -26,13 +28,20 @@ export async function search(query: {
   limit: number;
   cursor: number;
 }) {
-  const matches = await doctorProfileRepository.selectManyMatching(query);
+  const embedding = await createEmbedding(query.q);
+
+  const matches = await doctorProfileRepository.searchMany({
+    text: query.q,
+    embedding: pgvector.toSql(embedding),
+    limit: query.limit,
+    cursor: query.cursor,
+  });
 
   const nextCursor =
-    matches.length < query.limit ? null : (matches.at(-1)?.similarity ?? 0);
+    matches.length < query.limit ? null : (matches.at(-1)?.score ?? 0);
 
   return {
-    doctors: matches.map(({ similarity, ...doctor }) => doctor),
+    doctors: matches.map(({ score, ...doctor }) => doctor),
     nextCursor,
   };
 }

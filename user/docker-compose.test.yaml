@@ -6,15 +6,16 @@ services:
     environment:
       - JWT_SECRET=a-string-secret-at-least-256-bits-long
       - SUPER_ADMIN_TOKEN=i-am-a-super-admin
+      - GOOGLE_OAUTH_CLIENT_IDS=test
+      - OPENAI_API_KEY=sk-test
       - POSTGRES_URL=postgres://test:test@postgres:5432/test
       - KAFKA_BROKERS=kafka:9092
-      - GOOGLE_OAUTH_CLIENT_IDS=test
     volumes:
       - .:/code
       - /code/node_modules
     depends_on:
-      postgres:
-        condition: service_healthy
+      init-postgres-2:
+        condition: service_completed_successfully
       init-kafka:
         condition: service_completed_successfully
 
@@ -24,14 +25,31 @@ services:
       - POSTGRESQL_USERNAME=test
       - POSTGRESQL_PASSWORD=test
       - POSTGRESQL_DATABASE=test
-    volumes:
-      - ./init/postgres:/docker-entrypoint-initdb.d
+      - POSTGRESQL_POSTGRES_PASSWORD=postgres
     healthcheck:
       test: pg_isready -U test -d test
       interval: 30s
       timeout: 10s
       start_period: 30s
       start_interval: 5s
+
+  init-postgres-1:
+    image: bitnami/postgresql
+    init: true
+    command: sh -c "PGPASSWORD=postgres psql -h postgres -U postgres -d test -c 'create extension vector'"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  init-postgres-2:
+    image: bitnami/postgresql
+    init: true
+    command: sh -c "PGPASSWORD=test psql -h postgres -U test -d test -f /init/init.sql"
+    volumes:
+      - ./init/postgres:/init
+    depends_on:
+      init-postgres-1:
+        condition: service_completed_successfully
 
   init-kafka:
     image: bitnami/kafka

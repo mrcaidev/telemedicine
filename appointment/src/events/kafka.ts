@@ -91,7 +91,7 @@ await producer.connect();
 console.log("kafka producer connected");
 
 // 连接消费者。
-export const consumer = kafka.consumer({ groupId: "notification" });
+export const consumer = kafka.consumer({ groupId: "appointment" });
 await consumer.connect();
 console.log("kafka consumer connected");
 
