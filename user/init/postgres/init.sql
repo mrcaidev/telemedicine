@@ -126,7 +126,7 @@ create table doctor_profiles (
   description text default '' not null,
   specialties text[] default '{}' not null,
   fts tsvector generated always as (generate_doctor_fts(first_name, last_name, description, specialties)) stored,
-  embedding vector(384) default null,
+  embedding vector(512) default null,
   created_by uuid not null references clinic_admin_profiles(id),
   deleted_by uuid default null references clinic_admin_profiles(id)
 );
@@ -192,7 +192,7 @@ create type search_doctors_result as (
 );
 create function search_doctors(
   query_text text,
-  query_embedding vector(384),
+  query_embedding vector(512),
   match_count int,
   max_score float default 10000,
   min_score float default 0,

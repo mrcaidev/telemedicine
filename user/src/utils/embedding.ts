@@ -1,8 +1,14 @@
-import { pipeline } from "@huggingface/transformers";
+import OpenAI from "openai";
 
-const embedder = await pipeline("feature-extraction", "Supabase/gte-small");
+const openai = new OpenAI({
+  apiKey: Bun.env.OPENAI_API_KEY,
+});
 
-export async function createEmbedding(text: string) {
-  const { data } = await embedder(text, { normalize: true, pooling: "mean" });
-  return Array.from(data);
+export async function createEmbedding(input: string) {
+  const { data } = await openai.embeddings.create({
+    model: "text-embedding-3-small",
+    input: input,
+    dimensions: 512,
+  });
+  return data[0]!.embedding;
 }

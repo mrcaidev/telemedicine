@@ -6,9 +6,10 @@ services:
     environment:
       - JWT_SECRET=a-string-secret-at-least-256-bits-long
       - SUPER_ADMIN_TOKEN=i-am-a-super-admin
+      - GOOGLE_OAUTH_CLIENT_IDS=test
+      - OPENAI_API_KEY=sk-test
       - POSTGRES_URL=postgres://test:test@postgres:5432/test
       - KAFKA_BROKERS=kafka:9092
-      - GOOGLE_OAUTH_CLIENT_IDS=test
     volumes:
       - .:/code
       - /code/node_modules

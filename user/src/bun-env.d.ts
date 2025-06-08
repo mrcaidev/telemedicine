@@ -3,6 +3,7 @@ declare module "bun" {
     JWT_SECRET: string;
     SUPER_ADMIN_TOKEN: string;
     GOOGLE_OAUTH_CLIENT_IDS: string;
+    OPENAI_API_KEY: string;
     POSTGRES_URL: string;
     KAFKA_BROKERS: string;
     KAFKA_SECURITY_PROTOCOL?: string;

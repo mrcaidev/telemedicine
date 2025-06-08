@@ -8,10 +8,10 @@
     "check": "tsc && biome check"
   },
   "dependencies": {
-    "@huggingface/transformers": "^3.5.2",
     "hono": "^4.7.10",
     "jose": "^6.0.11",
     "kafkajs": "^2.2.4",
+    "openai": "^5.1.1",
     "pgvector": "^0.2.1",
     "valibot": "^1.1.0"
   },
