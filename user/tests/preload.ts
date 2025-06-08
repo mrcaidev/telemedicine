@@ -1,6 +1,16 @@
-import { afterAll, beforeAll } from "bun:test";
+import { afterAll, beforeAll, mock } from "bun:test";
 import { producer } from "@/events/kafka";
 import { sql } from "bun";
+
+mock.module("openai", () => ({
+  default: {
+    OpenAI: class {
+      embeddings = {
+        create: async () => [{ embeddings: Array(512).fill(0.1) }],
+      };
+    },
+  },
+}));
 
 beforeAll(async () => {
   await sql`
