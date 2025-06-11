@@ -57,11 +57,11 @@ async def update_session_history(id:UUID, history:List[dict]):
         {"$set": {"history": history}}
     )
 
-async def update_session_evaluation(id:UUID, symptom:str, urgency:int, suggestion:str):
+async def update_session_evaluation(id:UUID, symptom:str, urgency:int, suggestion:str, keyword:str):
     collection.update_one(
         {"id": id},
         {"$set": {
-            "evaluation": Evaluation(symptom=symptom, urgency=urgency, suggestion=suggestion).model_dump(),
+            "evaluation": Evaluation(symptom=symptom, urgency=urgency, suggestion=suggestion, keyword=keyword).model_dump(),
             "updated_at": datetime.now()}}
     )
 async def delete_session(id:UUID, user_id:UUID):
