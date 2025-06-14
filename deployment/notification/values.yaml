@@ -1,5 +1,4 @@
 image: mrcaidev/telemedicine-notification
-host: localhost
 port: 3000
 livenessProbe: /livez
 readinessProbe: /readyz
@@ -10,9 +9,3 @@ resources:
   limits:
     cpu: 200m
     memory: 256Mi
-minReplicas: 1
-maxReplicas: 1
-kafkaCertsNeeded: false
-secrets:
-  RESEND_API_KEY: mock-api-key
-  KAFKA_BROKERS: kafka:9092

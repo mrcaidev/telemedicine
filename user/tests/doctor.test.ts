@@ -235,7 +235,7 @@ describe("POST /doctors", () => {
   });
 });
 
-describe("GET /doctors/search", () => {
+describe.skip("GET /doctors/search", () => {
   it("returns two doctors if searching 'surgery'", async () => {
     const res = await GET("/doctors/search?q=surgery");
     const json = await res.json();

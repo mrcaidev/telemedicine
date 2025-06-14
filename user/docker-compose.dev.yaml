@@ -8,15 +8,16 @@ services:
     environment:
       - JWT_SECRET=a-string-secret-at-least-256-bits-long
       - SUPER_ADMIN_TOKEN=i-am-a-super-admin
+      - GOOGLE_OAUTH_CLIENT_IDS=234782665622-nchrj8b3tl88ngd15i371huiei5tne6k.apps.googleusercontent.com,234782665622-4n06echhmlaaniba6up6mp7t0nbup9iv.apps.googleusercontent.com,234782665622-ml21883i8km05ls3t6eschrapvqb6rge.apps.googleusercontent.com
+      - OPENAI_API_KEY=sk-dev
       - POSTGRES_URL=postgres://dev:dev@postgres:5432/dev
       - KAFKA_BROKERS=kafka:9092
-      - GOOGLE_OAUTH_CLIENT_IDS=234782665622-nchrj8b3tl88ngd15i371huiei5tne6k.apps.googleusercontent.com,234782665622-4n06echhmlaaniba6up6mp7t0nbup9iv.apps.googleusercontent.com,234782665622-ml21883i8km05ls3t6eschrapvqb6rge.apps.googleusercontent.com
     volumes:
       - .:/code
       - /code/node_modules
     depends_on:
-      postgres:
-        condition: service_healthy
+      init-postgres-2:
+        condition: service_completed_successfully
       init-kafka:
         condition: service_completed_successfully
     restart: always
@@ -27,8 +28,8 @@ services:
       - POSTGRESQL_USERNAME=dev
       - POSTGRESQL_PASSWORD=dev
       - POSTGRESQL_DATABASE=dev
+      - POSTGRESQL_POSTGRES_PASSWORD=postgres
     volumes:
-      - ./init/postgres:/docker-entrypoint-initdb.d
       - postgres-data:/bitnami/postgresql
     healthcheck:
       test: pg_isready -U dev -d dev
@@ -37,6 +38,24 @@ services:
       start_period: 30s
       start_interval: 5s
     restart: always
+
+  init-postgres-1:
+    image: bitnami/postgresql
+    init: true
+    command: sh -c "PGPASSWORD=postgres psql -h postgres -U postgres -d dev -c 'create extension vector'"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  init-postgres-2:
+    image: bitnami/postgresql
+    init: true
+    command: sh -c "PGPASSWORD=dev psql -h postgres -U dev -d dev -f /init/init.sql"
+    volumes:
+      - ./init/postgres:/init
+    depends_on:
+      init-postgres-1:
+        condition: service_completed_successfully
 
   init-kafka:
     image: bitnami/kafka

@@ -6,7 +6,7 @@ services:
     ports:
       - 3000:3000
     environment:
-      - RESEND_API_KEY=dev
+      - RESEND_API_KEY=re_dev
       - KAFKA_BROKERS=kafka:9092
     volumes:
       - .:/code
@@ -19,7 +19,7 @@ services:
   init-kafka:
     image: bitnami/kafka
     init: true
-    command: sh -c /init/init.sh
+    command: sh /init/init.sh
     volumes:
       - ./init/kafka:/init
     depends_on:

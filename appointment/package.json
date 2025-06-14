@@ -4,18 +4,22 @@
   "type": "module",
   "scripts": {
     "dev": "bun run --hot src/index.ts",
-    "build": "bun build --outdir dist --target bun --minify src/index.ts",
+    "build": "bun build --outdir dist --target bun src/index.ts",
+    "unit-test": "UNIT_TEST=true bun test ./unit-tests",
+    "integration-test": "INTEGRATION_TEST=true bun test ./integration-tests",
     "check": "tsc && biome check"
   },
   "dependencies": {
     "dayjs": "^1.11.13",
-    "hono": "^4.7.7",
+    "decamelize": "^6.0.0",
+    "decamelize-keys": "^2.0.1",
+    "hono": "^4.7.10",
     "kafkajs": "^2.2.4",
-    "valibot": "^1.0.0"
+    "valibot": "^1.1.0"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
-    "@types/bun": "^1.2.10",
+    "@types/bun": "^1.2.14",
     "typescript": "^5.8.3"
   }
 }

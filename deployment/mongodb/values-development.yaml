@@ -1,0 +1,7 @@
+auth:
+  usernames:
+    - smart_assistant_username
+  passwords:
+    - smart_assistant_password
+  databases:
+    - smart_assistant

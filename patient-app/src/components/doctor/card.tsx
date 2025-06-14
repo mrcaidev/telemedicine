@@ -26,7 +26,9 @@ export function DoctorCard({
           <Text className="font-semibold">
             {doctor.firstName} {doctor.lastName}
           </Text>
-          <Muted className="text-sm">{doctor.specialties.join(", ")}</Muted>
+          <Muted className="text-sm">
+            {doctor.specialties.join(", ") || doctor.clinic.name}
+          </Muted>
         </View>
       </View>
     </Link>

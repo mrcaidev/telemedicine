@@ -1,55 +1,15 @@
+import * as appointmentReminderEmailRepository from "@/repositories/appointment-reminder-email";
 import * as doctorRepository from "@/repositories/doctor";
-import * as emailScheduleRepository from "@/repositories/email-schedule";
 import * as patientRepository from "@/repositories/patient";
 import { requestNotification } from "@/utils/request";
 import dayjs from "dayjs";
-import { consumer } from "./kafka";
-import type {
-  AppointmentBookedEvent,
-  AppointmentCancelledEvent,
-  DoctorCreatedEvent,
-  PatientCreatedEvent,
-} from "./types";
+import { produceEvent } from "./producer";
+import type { EventRegistry } from "./registry";
 
-// 订阅主题。
-await consumer.subscribe({
-  topics: [
-    "PatientCreated",
-    "DoctorCreated",
-    "AppointmentBooked",
-    "AppointmentCancelled",
-  ],
-});
-console.log("kafka consumer subscribed to topics");
-
-// 不断消费消息。
-await consumer.run({
-  eachMessage: async ({ topic, message }) => {
-    const text = message.value?.toString();
-    if (!text) {
-      return;
-    }
-
-    const json = JSON.parse(text);
-    if (!json) {
-      return;
-    }
-
-    if (topic === "PatientCreated") {
-      await consumePatientCreatedEvent(json);
-    } else if (topic === "DoctorCreated") {
-      await consumeDoctorCreatedEvent(json);
-    } else if (topic === "AppointmentBooked") {
-      await consumeAppointmentBookedEvent(json);
-    } else if (topic === "AppointmentCancelled") {
-      await consumeAppointmentCancelledEvent(json);
-    }
-  },
-});
-console.log("kafka consumer is running");
-
-export async function consumePatientCreatedEvent(event: PatientCreatedEvent) {
-  await patientRepository.createOne({
+export async function consumePatientCreatedEvent(
+  event: EventRegistry["PatientCreated"],
+) {
+  await patientRepository.insertOne({
     id: event.id,
     email: event.email,
     nickname: event.nickname,
@@ -57,68 +17,159 @@ export async function consumePatientCreatedEvent(event: PatientCreatedEvent) {
   });
 }
 
-export async function consumeDoctorCreatedEvent(event: DoctorCreatedEvent) {
-  await doctorRepository.createOne({
-    id: event.id,
-    firstName: event.firstName,
-    lastName: event.lastName,
+export async function consumePatientUpdatedEvent(
+  event: EventRegistry["PatientUpdated"],
+) {
+  await patientRepository.updateOneById(event.id, {
+    email: event.email,
+    nickname: event.nickname,
     avatarUrl: event.avatarUrl,
   });
 }
 
-export async function consumeAppointmentBookedEvent(
-  event: AppointmentBookedEvent,
+export async function consumeDoctorCreatedEvent(
+  event: EventRegistry["DoctorCreated"],
 ) {
-  // 找出病人的邮箱。
-  const patientWithEmail = await patientRepository.findOneWithEmailById(
-    event.patient.id,
-  );
+  await doctorRepository.insertOne({
+    id: event.id,
+    firstName: event.firstName,
+    lastName: event.lastName,
+    avatarUrl: event.avatarUrl,
+    clinicId: event.clinic.id,
+  });
+}
+
+export async function consumeDoctorUpdatedEvent(
+  event: EventRegistry["DoctorUpdated"],
+) {
+  await doctorRepository.updateOneById(event.id, {
+    firstName: event.firstName,
+    lastName: event.lastName,
+    avatarUrl: event.avatarUrl,
+    clinicId: event.clinic.id,
+  });
+}
+
+export async function consumeAppointmentBookedEvent(
+  event: EventRegistry["AppointmentBooked"],
+) {
+  // 找到病人的邮箱。
+  const patientWithEmail = await patientRepository.selectOneWithEmail({
+    id: event.patient.id,
+  });
+
   if (!patientWithEmail) {
     console.error("Patient not found:", event.patient.id);
     return;
   }
 
-  // 给病人发定时邮件，设定在预约开始时间前一天。
-  const startAtObject = dayjs(event.startAt);
-  const endAtObject = dayjs(event.endAt);
-  const scheduledAt = startAtObject.subtract(1, "day").toISOString();
+  // 提醒时间：预约开始时间前一天。
+  const scheduledAt = dayjs(event.startAt).subtract(1, "day").toISOString();
+
+  // 如果提醒时间已过，就不用安排提醒邮件了。
+  if (dayjs().isAfter(scheduledAt)) {
+    return;
+  }
+
+  // 安排提醒邮件。
   const emailId = await requestNotification.post<string>("/scheduled-emails", {
-    subject: "Appointment Reminder",
+    subject: "Appointment Reminder for Tomorrow",
     to: [patientWithEmail.email],
     cc: [],
     bcc: [],
-    content: `Hi, ${patientWithEmail.nickname ?? patientWithEmail.email}!\nPlease kindly be reminded that you have an appointment tomorrow:\n\nDate: ${startAtObject.format("dddd, LL")}\nTime: ${startAtObject.format("LT")} - ${endAtObject.format("LT")}\nDoctor: ${event.doctor.firstName} ${event.doctor.lastName}\n\nBest regards,\nYour Health App`,
+    content: `Dear ${patientWithEmail.nickname ?? patientWithEmail.email},\nThis is a friendly reminder that you have a scheduled appointment tomorrow.\nHere are the details of your appointment:\n- Date: ${dayjs(event.startAt).format("dddd, LL")}\n- Time: ${dayjs(event.startAt).format("LT")} - ${dayjs(event.endAt).format("LT")}\n- Doctor: ${event.doctor.firstName} ${event.doctor.lastName}\nIf you are no longer able to attend, please kindly cancel or reschedule your appointment on our platform as soon as possible.\nThank you for choosing Telemedicine. We look forward to seeing you soon.\nWarm regards,\nTelemedicine`,
     scheduledAt,
   });
 
-  // 保存回执中的邮件 ID，以便后续撤销定时邮件。
-  await emailScheduleRepository.createOne({
+  // 保存回执中的提醒邮件 ID，以便后续撤销。
+  await appointmentReminderEmailRepository.insertOne({
     appointmentId: event.id,
     emailId,
     scheduledAt,
   });
 }
 
-export async function consumeAppointmentCancelledEvent(
-  event: AppointmentCancelledEvent,
+export async function consumeAppointmentRescheduledEvent(
+  event: EventRegistry["AppointmentRescheduled"],
 ) {
-  // 找出定时邮件记录。
-  const emailSchedule = await emailScheduleRepository.findOneByAppointmentId(
-    event.id,
+  // 找到病人的邮箱。
+  const patientWithEmail = await patientRepository.selectOneWithEmail({
+    id: event.patient.id,
+  });
+
+  if (!patientWithEmail) {
+    console.error("Patient not found:", event.patient.id);
+    return;
+  }
+
+  // 马上给病人发送一封邮件，告知预约已被重排。
+  await produceEvent("EmailRequested", {
+    subject: "Your Appointment Has Been Rescheduled",
+    to: [patientWithEmail.email],
+    cc: [],
+    bcc: [],
+    content: `Dear ${patientWithEmail.nickname ?? patientWithEmail.email},\nWe hope this message finds you well.\nWe are writing to inform you that your upcoming appointment has been rescheduled due to unforeseen circumstances. We sincerely apologize for any inconvenience this may cause and appreciate your understanding.\nYour new appointment details are as follows:\n- Date: ${dayjs(event.startAt).format("dddd, LL")}\n- Time: ${dayjs(event.startAt).format("LT")} - ${dayjs(event.endAt).format("LT")}\n- Doctor: ${event.doctor.firstName} ${event.doctor.lastName}\nIf the new time does not work for you, you are welcome to cancel the appointment on our platform.\nThank you for your patience and flexibility. If you have any questions or need assistance, please don't hesitate to contact our support team.\nWarm regards,\nTelemedicine`,
+  });
+
+  // 找出预约的提醒邮件。
+  const appointmentReminderEmail =
+    await appointmentReminderEmailRepository.selectOne({
+      appointmentId: event.id,
+    });
+
+  if (!appointmentReminderEmail) {
+    console.error(
+      "Appointment reminder email not found for appointment:",
+      event.id,
+    );
+    return;
+  }
+
+  // 新的提醒时间：预约开始时间前一天。
+  const rescheduledAt = dayjs(event.startAt).subtract(1, "day").toISOString();
+
+  // 如果提醒时间已过，就不需要重排提醒邮件了。
+  if (dayjs().isAfter(rescheduledAt)) {
+    return;
+  }
+
+  // 重排提醒邮件。
+  await requestNotification.patch<null>(
+    `/scheduled-emails/${appointmentReminderEmail.emailId}`,
+    { scheduledAt: rescheduledAt },
   );
 
-  // 如果没有记录，就没什么好撤销。
-  if (!emailSchedule) {
+  // 更新提醒邮件。
+  await appointmentReminderEmailRepository.updateOneByAppointmentId(
+    appointmentReminderEmail.appointmentId,
+    { scheduledAt: rescheduledAt },
+  );
+}
+
+export async function consumeAppointmentCancelledEvent(
+  event: EventRegistry["AppointmentCancelled"],
+) {
+  // 找出预约的提醒邮件。
+  const appointmentReminderEmail =
+    await appointmentReminderEmailRepository.selectOne({
+      appointmentId: event.id,
+    });
+
+  if (!appointmentReminderEmail) {
+    console.error(
+      "Appointment reminder email not found for appointment:",
+      event.id,
+    );
     return;
   }
 
-  // 如果超过了定时发送的时间，说明邮件大概已经发送了，就也不撤销了。
-  if (dayjs().isAfter(emailSchedule.scheduledAt)) {
+  // 如果提醒时间已过，就不需要撤销提醒邮件了。
+  if (dayjs().isAfter(appointmentReminderEmail.scheduledAt)) {
     return;
   }
 
-  // 让 notification 服务撤销定时邮件。
-  await requestNotification.post(
-    `/scheduled-emails/${emailSchedule.emailId}/cancel`,
+  // 撤销提醒邮件。
+  await requestNotification.delete<null>(
+    `/scheduled-emails/${appointmentReminderEmail.emailId}`,
   );
 }

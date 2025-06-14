@@ -7,6 +7,7 @@ import { RawAppointment } from "@/types/appointment";
 import { FileText, StickyNote } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/dashboard/status-badge";
+import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
 import Image from "next/image";
 
@@ -30,8 +31,36 @@ export default function AppointmentDetailPage() {
       .then((data) => setAppointment(data.data.data));
   }, [id]);
 
+  const handleReschedule = async (id: string) => {
+    try {
+      const res = await fetch(`/api/doctor/appointments/${id}`, {
+        method: "POST",
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to reschedule");
+      }
+
+      toast.success("Request sent successfully!");
+      router.refresh();
+      setAppointment((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          status: "to_be_rescheduled",
+        };
+      });
+    } catch (error) {
+      console.error("Reschedule failed", error);
+    }
+  };
+
   if (!appointment)
     return <p className="text-center p-6 text-gray-500">Loading...</p>;
+
+  const now = new Date();
+  const isFinished = new Date(appointment.endAt) <= now;
+  const isReschedulable = appointment.status === "normal" && !isFinished;
 
   return (
     <div className="w-full px-8 py-6 space-y-6 ">
@@ -50,7 +79,24 @@ export default function AppointmentDetailPage() {
         <h1 className="text-2xl flex items-center gap-2 font-bold">
           <FileText className="w-6 h-6 text-gray-700" /> Appointment Detail
         </h1>
-        <StatusBadge appt={appointment} />
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            className={`cursor-pointer  ${
+              !isReschedulable
+                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                : "bg-blue-500 text-white hover:bg-blue-600"
+            }`}
+            disabled={!isReschedulable}
+            onClick={() => {
+              handleReschedule(appointment.id);
+            }}
+          >
+            Reschedule
+          </Button>
+          <StatusBadge appt={appointment} />
+        </div>
       </div>
 
       {/* Created At */}

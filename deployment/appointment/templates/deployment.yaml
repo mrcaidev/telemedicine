@@ -16,15 +16,6 @@ spec:
           image: {{ .Values.image }}
           ports:
             - containerPort: {{ .Values.port }}
-          envFrom:
-            - secretRef:
-                name: {{ .Release.Name }}
-          {{- if .Values.kafkaCertsNeeded }}
-          volumeMounts:
-            - name: kafka-certs
-              mountPath: /etc/kafka/certs
-              readOnly: true
-          {{- end }}
           {{- with .Values.livenessProbe }}
           livenessProbe:
             httpGet:
@@ -36,6 +27,15 @@ spec:
             httpGet:
               path: {{ . }}
               port: {{ $.Values.port }}
+          {{- end }}
+          envFrom:
+            - secretRef:
+                name: {{ .Release.Name }}
+          {{- if .Values.kafkaCertsNeeded }}
+          volumeMounts:
+            - name: kafka-certs
+              mountPath: /etc/kafka/certs
+              readOnly: true
           {{- end }}
       {{- if .Values.kafkaCertsNeeded }}
       volumes:
@@ -52,11 +52,6 @@ spec:
       {{- end }}
       {{- with .Values.resources }}
       resources:
-        requests:
-          cpu: {{ .requests.cpu }}
-          memory: {{ .requests.memory }}
-        limits:
-          cpu: {{ .limits.cpu }}
-          memory: {{ .limits.memory }}
+        {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ .Release.Name }}

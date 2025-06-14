@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { signIn } from "next-auth/react";
 import RoleBasedRedirect from "@/components/auth/role-based-redirect";
+import PolicyDialog from "@/components/dialog/privacy-dialog";
 
 type LoginForm = z.infer<typeof loginSchema>;
 
@@ -34,7 +35,7 @@ export default function LoginPage() {
     });
 
     if (!res?.ok) {
-      console.log("Login failed",res)
+      console.log("Login failed", res);
       console.error("Login failed", res?.error);
       alert("Login failed");
     }
@@ -68,21 +69,15 @@ export default function LoginPage() {
             <input type="checkbox" {...register("acceptPolicy")} />
             <label className="text-sm text-gray-600">
               I accept the{" "}
-              <a
-                href="/terms"
-                className="text-blue-500 underline"
-                target="_blank"
-              >
-                Terms
-              </a>{" "}
+              <PolicyDialog label="Terms" title="Terms and Conditions">
+                <p>These are the terms of use for the platform...</p>
+              </PolicyDialog>{" "}
               and{" "}
-              <a
-                href="/privacy"
-                className="text-blue-500 underline"
-                target="_blank"
-              >
-                Privacy Policy
-              </a>
+              <PolicyDialog label="Privacy Policy" title="Privacy Policy">
+                <p>
+                  We respect your privacy and describe how we handle data...
+                </p>
+              </PolicyDialog>
               .
             </label>
           </div>
