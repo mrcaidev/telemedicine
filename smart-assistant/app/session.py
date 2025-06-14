@@ -1,6 +1,6 @@
 import asyncio
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List
 from uuid import UUID
 from app.model import Evaluation
@@ -13,12 +13,14 @@ db = client['smart_assistant']
 collection = db['session']
 
 async def insert_session(user_id:UUID, id:UUID):
+    now_utc = datetime.now(timezone.utc).replace(microsecond=0)
+    iso_z = now_utc.isoformat().replace("+00:00", "Z")
     collection.insert_one({
         "user_id": user_id,
         "id": id,
         "history": [],
         "evaluation": None,
-        "createdAt": datetime.now(),
+        "createdAt": iso_z,
     })
 
 async def get_session(id:UUID, user_id:UUID):
@@ -55,11 +57,11 @@ async def update_session_history(id:UUID, history:List[dict]):
         {"$set": {"history": history}}
     )
 
-async def update_session_evaluation(id:UUID, symptom:str, urgency:int, suggestion:str):
+async def update_session_evaluation(id:UUID, symptom:str, urgency:int, suggestion:str, keyword:str):
     collection.update_one(
         {"id": id},
         {"$set": {
-            "evaluation": Evaluation(symptom=symptom, urgency=urgency, suggestion=suggestion).model_dump(),
+            "evaluation": Evaluation(symptom=symptom, urgency=urgency, suggestion=suggestion, keyword=keyword).model_dump(),
             "updated_at": datetime.now()}}
     )
 async def delete_session(id:UUID, user_id:UUID):

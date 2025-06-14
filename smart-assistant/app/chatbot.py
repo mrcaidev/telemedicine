@@ -1,41 +1,65 @@
 import asyncio
+import logging
 import os
 import json
 from uuid import UUID
 import re
 
 import app.session as session
-from openai import OpenAI
+from openai import OpenAI, api_key
 import app.config as config
+from langchain.output_parsers import PydanticOutputParser
+from app.model import ChatbotOutput
+from langchain.prompts import ChatPromptTemplate
+from langchain.chat_models import ChatOpenAI
+from pydantic import ValidationError
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Set your agent endpoint and access key as environment variables in your OS.
 agent_access_key = config.AGENT_ACCESS_KEY
+parser = PydanticOutputParser(pydantic_object=ChatbotOutput)
 
-default_message = {"role":"system","content": "You are a professional and polite medical assistant. Your job is to talk with the patient, understand their symptoms step by step, and finally provide a summary in structured form."
-                                               "Please follow these rules strictly:"
-                                               "1. Ask only one question at a time."
-                                               "2. Each question must be no longer than 50 words."
-                                               "3. Be extremely polite and considerate in tone."
-                                               "4. Ask follow-up questions to clarify the symptom until you can make a basic assessment."
-                                               "5. At the end of the conversation, output the evaluation results in the following format **only**:"
-                                               "[Evaluation Results]"
-                                               "Symptom: <a short summary of the main symptom>"
-                                               "Urgency: from 1 to 3, 1 for Low, 2 for Medium, 3 for High"
-                                               "Suggestion: <Which department to visit, or whether to seek emergency care>"
-                                               "Example:"
-                                               "[Evaluation Results]"
-                                               "Symptom: chest tightness and shortness of breath"
-                                               "Urgency: 3"
-                                               "Suggestion: Visit the emergency room immediately"
-                                               "Your answers should be informative and caring. "
-                                               "Start the conversation by gently asking the patient about their main discomfort."
-                                               "6. Do not output anything else after the evaluation result. Do not include any polite closing or explanation."
-                                               "Your answers should be informative and caring during the conversation. But once you output the `[Evaluation Results]`, end the conversation immediately."}
+format_instructions = parser.get_format_instructions()
+
+template_str = """
+You are a professional and polite medical assistant. 
+You will talk to the patient step by step to understand their symptoms.
+
+Please follow these rules:
+1. Ask only one question at a time, max 50 words.
+2. Be extremely polite and respectful.
+3. Once you understand enough, output a JSON structure as follows:
+{format_instructions}
+
+4. If still asking questions, reply as:
+{{
+  "type": "message",
+  "message": "..."
+}}
+
+5. Never say anything outside this JSON structure.
+6. Always reply in the same language as the user.
+
+Conversation history (exclude system prompt):
+{history}
+
+Patient input: {input}
+"""
+
+prompt = ChatPromptTemplate.from_template(template_str).partial(
+    format_instructions=format_instructions
+)
 
 
 client = OpenAI(
         api_key = agent_access_key
     )
+
+llm = ChatOpenAI(model="gpt-4", temperature=0.0, api_key = agent_access_key)
+
+chain = prompt | llm | parser
 
 
 async def speak_to_bot(id: UUID, user_message):
@@ -44,43 +68,48 @@ async def speak_to_bot(id: UUID, user_message):
         history = []
     user = {"role":"user", "content":user_message}
     history.append(user)
-    temp_history = history.copy()
-    temp_history.insert(0, default_message)
-    response = client.chat.completions.create(
-        model="gpt-4",
-        messages=temp_history,
+    history_str = "\n".join(
+        f"{m['role'].capitalize()}: {m['content']}" for m in history
     )
-    assistant_reply = response.choices[0].message.content
-    symptom, urgency, suggestion = parse_evaluation_results(assistant_reply)
 
-    if symptom and urgency and suggestion:
-        # 说明产出了诊断结果，保存诊断结果，本轮对话不记录
-        await save_evaluation_results(id, symptom, urgency, suggestion)
+    # 4. 运行 LangChain 流水线
+    result: ChatbotOutput = chain.invoke({
+        "history": history_str,
+        "input": user_message
+    })
+    if result.type == "message":
+        # 继续对话：保存 assistant 的这次问句到历史
+        history.append({"role": "assistant", "content": result.message})
         await session.update_session_history(id, history)
-        return {"role": "assistant", "symptom": symptom,"urgency":urgency, "suggestion":suggestion, "type": "evaluation"}
-    else:
-        # 没有产出诊断，保留记录，继续对话
-        history.append({"role": "assistant", "content": assistant_reply})
-        await session.update_session_history(id, history)
-    return {"role": "assistant", "content": assistant_reply, "type": "message"}
+        return {
+            "role": "assistant",
+            "content": result.message,
+            "type": "message"
+        }
+    # Evaluation result
+    await save_evaluation_results(
+        id,
+        result.Symptom,
+        result.Urgency,
+        result.Suggestion,
+        result.Keywords
+    )
+    return {
+        "role": "assistant",
+        "symptom": result.Symptom,
+        "urgency": result.Urgency,
+        "suggestion": result.Suggestion,
+        "keyword": result.Keywords,
+        "type": "evaluation"
+    }
 
 
-def parse_evaluation_results(message: str):
-    pattern = r"\[Evaluation Results\]\s*Symptom:\s*(.*?)\s*Urgency:\s*(.*?)\s*Suggestion:\s*(.*)"
-    match = re.search(pattern, message, re.DOTALL)
-    if match:
-        symptom = match.group(1).strip()
-        urgency = match.group(2).strip()
-        suggestion = match.group(3).strip()
-        return symptom, urgency, suggestion
-    return None, None, None
-
-
-async def save_evaluation_results(id, symptom, urgency, suggestion):
+async def save_evaluation_results(id, symptom, urgency, suggestion,keyword):
     # 添加保存逻辑
     await session.update_session_evaluation(
         id=id,
         symptom=symptom,
         urgency=urgency,
         suggestion=suggestion,
+        keyword=keyword
     )
