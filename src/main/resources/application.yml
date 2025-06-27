@@ -1,0 +1,62 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: medical-records
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+#    url: jdbc:mysql://host.docker.internal:3307/records_db?useUnicode=true&characterEncoding=utf-8&allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://localhost:3306/records_db?useUnicode=true&characterEncoding=utf-8&allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password:
+#    password: root
+
+eureka:
+  client:
+    # 不向 eureka server 注册自己
+    register-with-eureka: false
+    # 不从 eureka server 获取信息
+    fetch-registry: false
+
+
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: true
+  global-config:
+    db-config:
+      id-type: ASSIGN_ID
+
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
+    swagger-model-name: 实体类列表
+    enable-group: true
+    enable-request-cache: true
+  production: false
+  basic:
+    enable: false
+
+# SpringDoc配置
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    disable-swagger-default-url: false
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+  group-configs:
+    - group: 默认分组
+      paths-to-match: /**
+      packages-to-scan: com.medical.records.controller
+
+
+
+
+qwen:
+  baseURL: https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions
+  apiKey:
+  model: qwen-turbo
+  timeout: -1
