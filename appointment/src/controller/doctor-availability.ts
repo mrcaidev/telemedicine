@@ -1,5 +1,4 @@
-import { idSchema, isoTimeSchema, weekdaySchema } from "@/common/schema";
-import { authGuard } from "@/middleware/auth-guard";
+import { rbac } from "@/middleware/rbac";
 import { validator } from "@/middleware/validator";
 import * as doctorAvailabilityService from "@/services/doctor-availability";
 import { Hono } from "hono";
@@ -9,7 +8,7 @@ export const doctorAvailabilityController = new Hono();
 
 doctorAvailabilityController.get(
   "/:doctorId",
-  validator("param", v.object({ doctorId: idSchema })),
+  validator("param", v.object({ doctorId: v.pipe(v.string(), v.uuid()) })),
   async (c) => {
     const { doctorId } = c.req.valid("param");
     const doctorAvailabilities =
@@ -20,24 +19,40 @@ doctorAvailabilityController.get(
 
 doctorAvailabilityController.post(
   "/:doctorId",
-  authGuard(["clinic_admin"]),
-  validator("param", v.object({ doctorId: idSchema })),
+  rbac(["clinic_admin"]),
+  validator("param", v.object({ doctorId: v.pipe(v.string(), v.uuid()) })),
   validator(
     "json",
     v.object({
-      weekday: weekdaySchema,
-      startTime: isoTimeSchema,
-      endTime: isoTimeSchema,
+      weekday: v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(6)),
+      startTime: v.pipe(v.string(), v.isoTime()),
+      endTime: v.pipe(v.string(), v.isoTime()),
     }),
   ),
   async (c) => {
     const { doctorId } = c.req.valid("param");
     const data = c.req.valid("json");
-    const actor = c.get("actor");
-    const doctorAvailability = await doctorAvailabilityService.createOne(
-      { doctorId, ...data },
-      actor,
-    );
+    const doctorAvailability = await doctorAvailabilityService.createOne({
+      doctorId,
+      ...data,
+    });
     return c.json({ code: 0, message: "", data: doctorAvailability }, 201);
+  },
+);
+
+doctorAvailabilityController.delete(
+  "/:doctorId/:id",
+  rbac(["clinic_admin"]),
+  validator(
+    "param",
+    v.object({
+      doctorId: v.pipe(v.string(), v.uuid()),
+      id: v.pipe(v.string(), v.uuid()),
+    }),
+  ),
+  async (c) => {
+    const { id } = c.req.valid("param");
+    await doctorAvailabilityService.deleteOneById(id);
+    return c.json({ code: 0, message: "", data: null });
   },
 );

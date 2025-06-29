@@ -12,7 +12,7 @@ export default function AppointmentListPage() {
     <View className="px-6">
       <View className="flex-row items-center justify-between mt-2 mb-6">
         <Text className="text-2xl font-bold">Appointment</Text>
-        <Link href="/appointment" className="text-primary text-sm">
+        <Link href="/appointment-history" className="text-primary text-sm">
           View history
         </Link>
       </View>
@@ -55,7 +55,9 @@ function Appointments() {
         }
       }}
       ItemSeparatorComponent={Separator}
-      ListEmptyComponent={() => <Text>No appointments available</Text>}
+      ListEmptyComponent={() => (
+        <Text className="text-center">No future appointments</Text>
+      )}
       ListFooterComponent={
         <Muted className="mt-2 text-center text-sm">
           {hasNextPage ? "Loading more for you..." : "- That's all, for now -"}

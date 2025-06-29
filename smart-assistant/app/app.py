@@ -106,10 +106,11 @@ async def speak_to_agent(id:str, request:Request, response: Response, res: Respo
         return ResponseData(code=RespCode.SUCCESS_CREATE, message="success",data=chatbotReply(type=message_reply["type"], content=message_reply["content"],role=message_reply["role"]))
     else:
         await RedisUtils.delete_key(user_id)
+        logger.info(message_reply)
         return ResponseData(code=RespCode.SUCCESS_CREATE, message="success",
                             data=chatbotEvaluation(type=message_reply["type"], symptom=message_reply["symptom"],
                                                    urgency=message_reply["urgency"],
-                                                   suggestion=message_reply["suggestion"]))
+                                                   suggestion=message_reply["suggestion"],keyword=message_reply["keyword"]),)
 
 
 @app.get("/livez")

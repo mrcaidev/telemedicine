@@ -1,3 +1,4 @@
+import "@/events/kafka";
 import { sql } from "bun";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";

@@ -66,7 +66,7 @@ export default function AppointmentPage() {
           </Row>
         </ScrollView>
         <View className="my-6">
-          <CancelAppointmentButton />
+          <CancelAppointmentButton cancelled={false} />
         </View>
       </View>
     );
@@ -125,7 +125,9 @@ export default function AppointmentPage() {
         </Row>
       </ScrollView>
       <View className="my-6">
-        <CancelAppointmentButton />
+        <CancelAppointmentButton
+          cancelled={appointment.status === "cancelled"}
+        />
       </View>
     </View>
   );
@@ -149,7 +151,7 @@ function Row({
   );
 }
 
-function CancelAppointmentButton() {
+function CancelAppointmentButton({ cancelled }: { cancelled: boolean }) {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { mutate, isPending } = useCancelAppointmentMutation(id);
 
@@ -160,9 +162,9 @@ function CancelAppointmentButton() {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="outline">
+        <Button variant="outline" disabled={cancelled}>
           <Icon as={XIcon} />
-          <Text>Cancel appointment</Text>
+          <Text>{cancelled ? "Cancelled" : "Cancel appointment"}</Text>
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>

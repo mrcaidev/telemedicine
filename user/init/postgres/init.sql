@@ -126,9 +126,14 @@ create table doctor_profiles (
   description text default '' not null,
   specialties text[] default '{}' not null,
   fts tsvector generated always as (generate_doctor_fts(first_name, last_name, description, specialties)) stored,
+  embedding vector(512) default null,
   created_by uuid not null references clinic_admin_profiles(id),
   deleted_by uuid default null references clinic_admin_profiles(id)
 );
+
+-- 检索字段索引。
+create index on doctor_profiles using gin(fts);
+create index on doctor_profiles using hnsw(embedding vector_cosine_ops);
 
 -- 医生的完整资料视图。
 create view doctor_full_profiles as (
@@ -167,6 +172,67 @@ create view doctors as (
   left outer join clinics c on dp.clinic_id = c.id
   left outer join accounts a on dp.id = a.id
 );
+
+-- 文本 + 向量混合搜索医生。
+create type search_doctors_result as (
+  id uuid,
+  role text,
+  email text,
+  created_at timestamptz,
+  first_name text,
+  last_name text,
+  avatar_url text,
+  gender gender,
+  description text,
+  specialties text[],
+  clinic_id uuid,
+  clinic_name text,
+  clinic_created_at timestamptz,
+  score float
+);
+create function search_doctors(
+  query_text text,
+  query_embedding vector(512),
+  match_count int,
+  max_score float default 10000,
+  min_score float default 0,
+  fts_weight float = 1,
+  embedding_weight float = 1,
+  rrf_k int = 3
+)
+returns setof search_doctors_result
+language sql
+as $$
+with fts_results as (
+  select id, row_number() over (order by ts_rank_cd(fts, to_tsquery('english', query_text)) desc) as rank
+  from doctor_profiles
+  where fts @@ to_tsquery('english', query_text)
+  order by rank
+  limit match_count * 2
+),
+embedding_results as (
+  select id, row_number() over (order by embedding <=> query_embedding) as rank
+  from doctor_profiles
+  where embedding is not null
+  order by rank
+  limit match_count * 2
+),
+rrf_results as (
+  select
+    doctors.*,
+    coalesce(1.0 / (rrf_k + fts_results.rank), 0.0) * fts_weight
+    + coalesce(1.0 / (rrf_k + embedding_results.rank), 0.0) * embedding_weight
+    as score
+  from fts_results
+  full outer join embedding_results on fts_results.id = embedding_results.id
+  left outer join doctors on coalesce(fts_results.id, embedding_results.id) = doctors.id
+  order by score desc
+)
+select *
+from rrf_results
+where score between min_score and max_score
+limit match_count
+$$;
 
 -- 病人的资料。
 -- 由自己管理。

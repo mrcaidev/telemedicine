@@ -2,7 +2,7 @@ import type { Actor, Role } from "@/utils/types";
 import { createMiddleware } from "hono/factory";
 import { HTTPException } from "hono/http-exception";
 
-export function authGuard(whitelist?: Role[]) {
+export function rbac(whitelist?: Role[]) {
   return createMiddleware<{ Variables: { actor: Actor } }>((c, next) => {
     // 从请求头中获取用户的 ID 和角色。
     const id = c.req.header("X-User-Id");

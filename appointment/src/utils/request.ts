@@ -2,20 +2,23 @@ import { HTTPException } from "hono/http-exception";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
 
 const serviceDiscovery = {
+  user: "http://user:3000",
   notification: "http://notification:3000",
 } as const;
 
 type DiscoveredService = keyof typeof serviceDiscovery;
 
-async function wrappedFetch<T>(url: string, init: RequestInit = {}) {
+type ResponseJson<T> = {
+  code: number;
+  message: string;
+  data: T;
+};
+
+async function wrappedFetch<T>(url: string, init: RequestInit) {
   try {
     const res = await fetch(url, init);
-    const json = await res.json();
-    const { message, data } = json as {
-      code: number;
-      message: "";
-      data: T;
-    };
+
+    const { message, data } = (await res.json()) as ResponseJson<T>;
 
     if (!res.ok) {
       throw new HTTPException(res.status as ContentfulStatusCode, { message });
@@ -23,8 +26,7 @@ async function wrappedFetch<T>(url: string, init: RequestInit = {}) {
 
     return data;
   } catch (error) {
-    console.error(error);
-    throw new HTTPException(502, { message: "Server error" });
+    throw new HTTPException(502, { message: "Server error", cause: error });
   }
 }
 
@@ -90,4 +92,5 @@ function createRequestToService(service: DiscoveredService) {
   };
 }
 
+export const requestUser = createRequestToService("user");
 export const requestNotification = createRequestToService("notification");
