@@ -1,19 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  Select,
-  SelectTrigger,
-  SelectItem,
-  SelectContent,
-} from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
-import { CalendarClock } from "lucide-react";
+import { CalendarClock, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Doctor } from "@/types/doctor";
 import { ConfirmDialog } from "@/components/dialog/confirm-dialog";
 import { ScheduleDialog } from "@/components/dialog/clinic-schedule-dialog";
 import { useSession } from "next-auth/react";
+import { Input } from "@/components/ui/input";
 
 const weekdays = [
   "Sunday",
@@ -30,7 +25,6 @@ function timeToMinutes(time: string): number {
   const [h, m] = time.split(":").map(Number);
   return h * 60 + m;
 }
-
 function getPercent(time: string) {
   const minutes = timeToMinutes(time);
   return ((minutes - 480) / 720) * 100;
@@ -48,31 +42,29 @@ export default function SchedulePage() {
     startTime: string;
     endTime: string;
   } | null>(null);
+  const [doctorName, setDoctorName] = useState("");
+  const [searchAttempted, setSearchAttempted] = useState(false);
+  const [searchFailed, setSearchFailed] = useState(false);
+  const [loadingTimes, setLoadingTimes] = useState(false);
 
   const { data: session } = useSession();
   const id = session?.user?.clinicId;
 
-  // 可以优化，使用只返回医生id和姓名的接口
   useEffect(() => {
-    fetch(`/api/clinic/doctor?clinicId=${id}`)
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("/api/clinic/doctor", data);
-        setDoctors(data.data.doctors);
-      });
+    if (id) {
+      fetch(`/api/clinic/doctor?clinicId=${id}`)
+        .then((res) => res.json())
+        .then((data) => setDoctors(data.data.doctors));
+    }
   }, [id]);
 
   useEffect(() => {
     if (selectedId) {
+      setLoadingTimes(true);
       fetch(`/api/clinic/doctor/${selectedId}/available-times`)
         .then((res) => res.json())
-        .then((data) => {
-          console.log(
-            `/api/clinic/doctor/${selectedId}/available-times`,
-            data
-          );
-          setAvailableTimes(data.data || []);
-        });
+        .then((data) => setAvailableTimes(data.data || []))
+        .finally(() => setLoadingTimes(false));
     }
   }, [selectedId]);
 
@@ -87,7 +79,6 @@ export default function SchedulePage() {
       endTime: string;
       slots: typeof slots;
     }[] = [];
-
     for (const slot of sorted) {
       if (merged.length === 0) {
         merged.push({
@@ -112,7 +103,6 @@ export default function SchedulePage() {
         }
       }
     }
-
     return merged;
   }
 
@@ -124,7 +114,6 @@ export default function SchedulePage() {
       (a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime)
     );
     let prevEnd = START;
-
     for (const slot of sorted) {
       if (timeToMinutes(slot.startTime) > timeToMinutes(prevEnd)) {
         result.push({ startTime: prevEnd, endTime: slot.startTime });
@@ -134,20 +123,16 @@ export default function SchedulePage() {
           ? slot.endTime
           : prevEnd;
     }
-
     if (timeToMinutes(prevEnd) < timeToMinutes(END)) {
       result.push({ startTime: prevEnd, endTime: END });
     }
-
     return result;
   }
 
   async function handleDelete(id: string) {
     await fetch(
       `/api/clinic/doctor/${selectedId}/available-times?availabilityId=${id}`,
-      {
-        method: "DELETE",
-      }
+      { method: "DELETE" }
     );
     refresh();
   }
@@ -167,9 +152,11 @@ export default function SchedulePage() {
 
   function refresh() {
     if (selectedId) {
-      fetch(`/api/clinic/doctor/${selectedId}`)
+      setLoadingTimes(true);
+      fetch(`/api/clinic/doctor/${selectedId}/available-times`)
         .then((res) => res.json())
-        .then((data) => setAvailableTimes(data.availableTimes || []));
+        .then((data) => setAvailableTimes(data.data || []))
+        .finally(() => setLoadingTimes(false));
     }
   }
 
@@ -191,30 +178,59 @@ export default function SchedulePage() {
           >
             {editMode ? "Exit Edit Mode" : "Edit Schedule"}
           </Button>
-          <Select onValueChange={setSelectedId}>
-            <SelectTrigger className="w-[220px] cursor-pointer">
-              {selectedId
-                ? doctors.find((d) => d.id === selectedId)?.firstName +
-                  " " +
-                  doctors.find((d) => d.id === selectedId)?.lastName
-                : "Select Doctor"}
-            </SelectTrigger>
-            <SelectContent>
-              {doctors.map((doc) => (
-                <SelectItem
-                  className="cursor-pointer"
-                  key={doc.id}
-                  value={doc.id}
-                >
-                  {doc.firstName} {doc.lastName}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Input
+            placeholder="Enter doctor's full name"
+            value={doctorName}
+            onChange={(e) => setDoctorName(e.target.value)}
+            className="w-[200px]"
+          />
+          <Button
+            className="cursor-pointer"
+            onClick={() => {
+              if (!doctorName || !id) return;
+              setSearchAttempted(true);
+              fetch(
+                `/api/clinic/doctor?clinicId=${id}&name=${encodeURIComponent(
+                  doctorName
+                )}`
+              )
+                .then((res) => res.json())
+                .then((data) => {
+                  const found = data.data.doctors?.[0];
+                  if (found) {
+                    setSelectedId(found.id);
+                    setSearchFailed(false);
+                  } else {
+                    setSelectedId(undefined);
+                    setSearchFailed(true);
+                  }
+                });
+            }}
+          >
+            Search
+          </Button>
         </div>
       </div>
 
-      {selectedId && (
+      {!searchAttempted && (
+        <Card className="p-6 h-[500px] flex items-center justify-center text-gray-400 text-base">
+          No data, please search a doctor's full name to view their schedule.
+        </Card>
+      )}
+
+      {searchAttempted && searchFailed && (
+        <Card className="p-6 h-[500px] flex items-center justify-center text-red-500 text-base text-center">
+          No doctor found with the name "{doctorName}". Please try again.
+        </Card>
+      )}
+
+      {searchAttempted && !searchFailed && selectedId && loadingTimes && (
+        <Card className="p-6 h-[500px] flex items-center justify-center text-gray-500 text-base">
+          <Loader2 className="animate-spin w-6 h-6 mr-2" /> Loading schedule...
+        </Card>
+      )}
+
+      {searchAttempted && !searchFailed && selectedId && !loadingTimes && (
         <Card className="p-6 space-y-2 overflow-auto">
           <div className="grid grid-cols-[100px_1fr] items-center text-sm font-medium text-gray-600">
             <div></div>
@@ -246,7 +262,6 @@ export default function SchedulePage() {
                   className="grid grid-cols-[100px_1fr] items-center text-sm"
                 >
                   <div className="text-gray-700 font-medium">{label}</div>
-
                   <div className="relative h-12 rounded overflow-hidden">
                     {freeSlots.map((s, i) => (
                       <div
@@ -310,8 +325,6 @@ export default function SchedulePage() {
                           <div className="h-full flex items-center justify-center">
                             {slot.startTime} - {slot.endTime}
                           </div>
-
-                          {/* × 删除按钮 */}
                           <ConfirmDialog
                             onConfirm={() => handleDelete(slot.id)}
                             title="Delete Time Slot"
