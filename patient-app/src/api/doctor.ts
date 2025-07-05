@@ -36,7 +36,7 @@ export function useDoctorAvailabilitiesQuery(doctorId: string) {
   });
 }
 
-export function useDoctorSearchQuery(q: string) {
+export function useDoctorSearchQuery(q: string, limit = 10) {
   return useInfiniteQuery<
     {
       doctors: Omit<Doctor, "role" | "email">[];
@@ -51,7 +51,7 @@ export function useDoctorSearchQuery(q: string) {
     queryFn: async ({ pageParam: cursor }) => {
       const params = new URLSearchParams({
         q,
-        limit: String(10),
+        limit: String(limit),
         ...(cursor === null ? {} : { cursor: String(cursor) }),
       });
       return await request.get(`/doctors/search?${params}`);
