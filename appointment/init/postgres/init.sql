@@ -42,6 +42,7 @@ create table appointments (
   end_at timestamptz not null,
   remark text not null,
   status appointment_status default 'normal' not null,
+  medical_record_id uuid default null,
   created_at timestamptz default now() not null
 );
 
@@ -53,6 +54,7 @@ create view full_appointments as (
     a.end_at,
     a.remark,
     a.status,
+    a.medical_record_id,
     a.created_at,
     p.id as patient_id,
     p.nickname as patient_nickname,
