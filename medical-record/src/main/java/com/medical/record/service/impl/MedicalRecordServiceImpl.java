@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.medical.record.config.QWenConfig;
 import com.medical.record.model.dto.MedicalRecordCreateDTO;
+import com.medical.record.model.dto.MedicalRecordCreatedEvent;
 import com.medical.record.model.dto.MedicalRecordQueryDTO;
 import com.medical.record.model.dto.MedicalRecordUpdateDTO;
 import com.medical.record.model.entity.MedicalRecord;
@@ -13,6 +14,8 @@ import com.medical.record.repository.MedicalRecordRepository;
 
 import com.medical.record.service.MedicalRecordService;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,10 +29,14 @@ import java.util.Date;
 import java.util.List;
 
 @Service
+@Slf4j
 public class MedicalRecordServiceImpl extends ServiceImpl<MedicalRecordRepository, MedicalRecord> implements MedicalRecordService {
 
     @Resource
     private QWenConfig qWenConfig;
+    @Resource
+    private KafkaTemplate<String, Object> kafkaTemplate;
+    private static final String MEDICAL_RECORD_CREATED_TOPIC = "MedicalRecordCreated";
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -41,8 +48,40 @@ public class MedicalRecordServiceImpl extends ServiceImpl<MedicalRecordRepositor
         record.setUpdatedAt(LocalDateTime.now());
         save(record);
         MedicalRecordVO vo = BeanUtil.copyProperties(record,MedicalRecordVO.class);
+        //发送Kafka消息通知预约服务
+        sendMedicalRecordCreatedEvent(record);
         return vo;
     }
+
+    /**
+     * 发送病历创建事件到Kafka（核心逻辑）
+     */
+    public void sendMedicalRecordCreatedEvent(MedicalRecord medicalRecord) {
+        // 获取预约ID
+        String appointmentId = medicalRecord.getAppointmentId();
+
+        // 校验关键参数
+        if (medicalRecord.getId() == null || appointmentId == null) {
+            throw new IllegalArgumentException("病历ID和预约ID不能为空");
+        }
+
+        // 构建Kafka消息（仅包含必要字段）
+        MedicalRecordCreatedEvent event = new MedicalRecordCreatedEvent(
+                medicalRecord.getId(),
+                appointmentId,
+                LocalDateTime.now()
+        );
+
+        // 发送消息到Kafka
+        kafkaTemplate.send(MEDICAL_RECORD_CREATED_TOPIC, event);
+
+        // 记录消息发送日志
+        log.info("成功发送病历创建事件到Kafka，topic: {}, 病历ID: {}, 预约ID: {}",
+                MEDICAL_RECORD_CREATED_TOPIC,
+                medicalRecord.getId(),
+                appointmentId);
+    }
+
     public static Date strTODate(String str){
         LocalDate localDate = LocalDate.parse(str);
         Date date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
