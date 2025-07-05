@@ -14,6 +14,7 @@ type FullRow = {
   end_at: Date;
   remark: string;
   status: AppointmentStatus;
+  medical_record_id: string | null;
   created_at: Date;
   patient_id: string;
   patient_nickname: string | null;
@@ -32,6 +33,7 @@ function normalizeFullRow(row: FullRow): FullAppointment {
     endAt: row.end_at.toISOString(),
     remark: row.remark,
     status: row.status,
+    medicalRecordId: row.medical_record_id,
     createdAt: row.created_at.toISOString(),
     patient: {
       id: row.patient_id,
@@ -59,7 +61,7 @@ export async function selectManyFull(query: {
   cursor?: string;
 }) {
   const rows = (await sql`
-    select id, start_at, end_at, remark, status, created_at, patient_id, patient_nickname, patient_avatar_url, doctor_id, doctor_first_name, doctor_last_name, doctor_avatar_url, clinic_id
+    select id, start_at, end_at, remark, status, medical_record_id, created_at, patient_id, patient_nickname, patient_avatar_url, doctor_id, doctor_first_name, doctor_last_name, doctor_avatar_url, clinic_id
     from full_appointments
     where true
     ${query.patientId ? sql`and patient_id = ${query.patientId}` : sql``}
@@ -76,7 +78,7 @@ export async function selectManyFull(query: {
 
 export async function selectOneFull(query: { id?: string }) {
   const [row] = await sql`
-    select id, start_at, end_at, remark, status, created_at, patient_id, patient_nickname, patient_avatar_url, doctor_id, doctor_first_name, doctor_last_name, doctor_avatar_url, clinic_id
+    select id, start_at, end_at, remark, status, medical_record_id, created_at, patient_id, patient_nickname, patient_avatar_url, doctor_id, doctor_first_name, doctor_last_name, doctor_avatar_url, clinic_id
     from full_appointments
     where true
     ${query.id ? sql`and id = ${query.id}` : sql``}
@@ -105,7 +107,7 @@ export async function insertOne(
   }
 
   const [row] = (await sql`
-    select id, start_at, end_at, remark, status, created_at, patient_id, patient_nickname, patient_avatar_url, doctor_id, doctor_first_name, doctor_last_name, doctor_avatar_url, clinic_id
+    select id, start_at, end_at, remark, status, medical_record_id, created_at, patient_id, patient_nickname, patient_avatar_url, doctor_id, doctor_first_name, doctor_last_name, doctor_avatar_url, clinic_id
     from full_appointments
     where id = ${insertedRow.id}
   `) as FullRow[];
@@ -120,7 +122,10 @@ export async function insertOne(
 export async function updateOneById(
   id: string,
   data: Partial<
-    Pick<Appointment, "doctorId" | "startAt" | "endAt" | "remark" | "status">
+    Pick<
+      Appointment,
+      "doctorId" | "startAt" | "endAt" | "remark" | "status" | "medicalRecordId"
+    >
   >,
 ) {
   const [updatedRow] = (await sql`
@@ -135,7 +140,7 @@ export async function updateOneById(
   }
 
   const [row] = (await sql`
-    select id, start_at, end_at, remark, status, created_at, patient_id, patient_nickname, patient_avatar_url, doctor_id, doctor_first_name, doctor_last_name, doctor_avatar_url, clinic_id
+    select id, start_at, end_at, remark, status, medical_record_id, created_at, patient_id, patient_nickname, patient_avatar_url, doctor_id, doctor_first_name, doctor_last_name, doctor_avatar_url, clinic_id
     from full_appointments
     where id = ${updatedRow.id}
   `) as FullRow[];

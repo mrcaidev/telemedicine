@@ -13,6 +13,7 @@ import {
   consumeAppointmentRescheduledEvent,
   consumeDoctorCreatedEvent,
   consumeDoctorUpdatedEvent,
+  consumeMedicalRecordCreatedEvent,
   consumePatientCreatedEvent,
   consumePatientUpdatedEvent,
 } from "@/events/consumer";
@@ -37,6 +38,8 @@ const producerSendSpy = spyOn(producer, "send").mockImplementation(
       await consumeAppointmentRescheduledEvent(event);
     } else if (topic === "AppointmentCancelled") {
       await consumeAppointmentCancelledEvent(event);
+    } else if (topic === "MedicalRecordCreated") {
+      await consumeMedicalRecordCreatedEvent(event);
     }
     return [];
   },
@@ -204,7 +207,7 @@ describe("doctor lifecycle", () => {
 });
 
 describe("appointment lifecycle", () => {
-  it("AppointmentBooked -> AppointmentRescheduled -> AppointmentCancelled", async () => {
+  it("AppointmentBooked -> MedicalRecordCreated -> AppointmentRescheduled -> AppointmentCancelled", async () => {
     await sql`
       insert into appointments (id, patient_id, doctor_id, start_at, end_at, remark, status, created_at) values
       ('b1d7b957-d516-41ac-864f-cae1cb599e58', ${mockData.patients[0].id}, ${mockData.doctors[0].id}, '2099-01-03T00:00:00.000Z', '2099-01-03T01:00:00.000Z', 'Statua sono deduco curiositas veritas', 'normal', '2099-01-01T00:00:00.000Z');
@@ -269,6 +272,26 @@ describe("appointment lifecycle", () => {
       appointment_id: "b1d7b957-d516-41ac-864f-cae1cb599e58",
       email_id: "6463ea54-6cd7-49bc-9986-8de960fb6851",
       scheduled_at: new Date("2099-01-02T00:00:00.000Z"),
+    });
+
+    await producerSendSpy({
+      topic: "MedicalRecordCreated",
+      messages: [
+        {
+          value: JSON.stringify({
+            recordId: "2520bd31-3d4c-4680-b7a7-95ac4d2fda07",
+            appointmentId: "b1d7b957-d516-41ac-864f-cae1cb599e58",
+          }),
+        },
+      ],
+    });
+    const [row15] = await sql`
+      select *
+      from appointments
+      where id = 'b1d7b957-d516-41ac-864f-cae1cb599e58'
+    `;
+    expect(row15).toMatchObject({
+      medical_record_id: "2520bd31-3d4c-4680-b7a7-95ac4d2fda07",
     });
 
     fetchSpy.mockResolvedValueOnce(

@@ -168,6 +168,7 @@ export const mockData = {
       endAt: "2025-01-06T02:00:00.000Z",
       remark: "appointment1",
       status: "normal",
+      medicalRecordId: null,
       createdAt: "2025-01-04T01:00:00.000Z",
     },
     {
@@ -188,6 +189,7 @@ export const mockData = {
       endAt: "2030-12-04T04:00:00.000Z",
       remark: "appointment2",
       status: "cancelled",
+      medicalRecordId: null,
       createdAt: "2030-12-02T03:00:00.000Z",
     },
     {
@@ -208,6 +210,7 @@ export const mockData = {
       endAt: "2030-12-05T05:00:00.000Z",
       remark: "appointment3",
       status: "to_be_rescheduled",
+      medicalRecordId: null,
       createdAt: "2030-12-03T04:00:00.000Z",
     },
     {
@@ -228,6 +231,7 @@ export const mockData = {
       endAt: "2030-12-03T03:00:00.000Z",
       remark: "appointment4",
       status: "cancelled",
+      medicalRecordId: null,
       createdAt: "2030-12-01T02:00:00.000Z",
     },
   ],
