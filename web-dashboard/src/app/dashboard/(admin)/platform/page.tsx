@@ -21,30 +21,50 @@ const { RangePicker } = DatePicker;
 
 export default function PlatformDashboard() {
   const [range, setRange] = useState<[dayjs.Dayjs, dayjs.Dayjs]>([
-    dayjs().startOf("month"),
+    dayjs().subtract(12, "month").startOf("month"),
     dayjs().endOf("month"),
   ]);
 
   const [stats, setStats] = useState({
     totalAppointments: 0,
     totalClinics: 0,
-    totalClinicAdmins: 0,
+    totalDoctors: 0,
   });
 
   const [clinicTrend, setClinicTrend] = useState([]);
   const [doctorTrend, setDoctorTrend] = useState([]);
   const [clinicRanking, setClinicRanking] = useState([]);
 
-  useEffect(() => {
-    fetch("/api/platform/dashboard")
+  const disableFutureMonths = (current: dayjs.Dayjs) => {
+    return current && current.isAfter(dayjs().endOf("month"), "month");
+  };
+  const fetchTrends = (startMonth: dayjs.Dayjs, endMonth: dayjs.Dayjs) => {
+    const startMonthFormatted = startMonth.format("YYYY-MM");
+    const endMonthFormatted = endMonth.format("YYYY-MM");
+
+    fetch(
+      `/api/platform/dashboard/platformTrend?startMonth=${startMonthFormatted}&endMonth=${endMonthFormatted}`
+    )
       .then((res) => res.json())
       .then((data) => {
-        setStats(data.stats);
         setClinicTrend(data.clinicTrend);
         setDoctorTrend(data.doctorTrend);
-        setClinicRanking(data.clinicRanking);
       });
-  }, []);
+  };
+
+  useEffect(() => {
+    fetch("/api/platform/dashboard/stats")
+      .then((res) => res.json())
+      .then((data) => setStats(data.data.data));
+
+    fetchTrends(range[0], range[1]);
+
+    fetch("/api/platform/dashboard/clinicRank")
+      .then((res) => res.json())
+      .then((data) => {
+        setClinicRanking(data.ranks);
+      });
+  }, [range]);
 
   return (
     <div className="p-6">
@@ -73,8 +93,8 @@ export default function PlatformDashboard() {
         <Col span={8}>
           <Card>
             <Statistic
-              title="Clinic Admins"
-              value={stats.totalClinicAdmins}
+              title="Total Doctors"
+              value={stats.totalDoctors}
               prefix={<UserOutlined />}
               valueStyle={{ fontSize: 28 }}
             />
@@ -92,9 +112,14 @@ export default function PlatformDashboard() {
               <RangePicker
                 allowClear={false}
                 value={range}
+                picker="month"
                 onChange={(val) => {
-                  if (val) setRange(val as [dayjs.Dayjs, dayjs.Dayjs]);
+                  if (val && val[0] && val[1]) {
+                    setRange(val as [dayjs.Dayjs, dayjs.Dayjs]);
+                    fetchTrends(val[0], val[1]);
+                  }
                 }}
+                disabledDate={disableFutureMonths}
               />
             }
           >
@@ -110,7 +135,7 @@ export default function PlatformDashboard() {
                         <XAxis dataKey="month" />
                         <YAxis />
                         <Tooltip />
-                        <Bar dataKey="count" fill="#1890ff" />
+                        <Bar dataKey="clinicCount" fill="#1890ff" />
                       </BarChart>
                     </ResponsiveContainer>
                   ),
@@ -124,7 +149,7 @@ export default function PlatformDashboard() {
                         <XAxis dataKey="month" />
                         <YAxis />
                         <Tooltip />
-                        <Bar dataKey="count" fill="#82ca9d" />
+                        <Bar dataKey="doctorCount" fill="#82ca9d" />
                       </BarChart>
                     </ResponsiveContainer>
                   ),
@@ -141,8 +166,12 @@ export default function PlatformDashboard() {
               dataSource={clinicRanking}
               columns={[
                 { title: "Rank", dataIndex: "rank", key: "rank" },
-                { title: "Clinic", dataIndex: "clinic", key: "clinic" },
-                { title: "Doctors", dataIndex: "doctorCount", key: "doctorCount" },
+                { title: "Clinic", dataIndex: "clinicName", key: "clinicName" },
+                {
+                  title: "Doctors",
+                  dataIndex: "doctorCount",
+                  key: "doctorCount",
+                },
               ]}
               pagination={false}
               size="small"

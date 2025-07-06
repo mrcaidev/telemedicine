@@ -149,9 +149,33 @@ export default function AppointmentDetailPage() {
       {/* Notes Section */}
       <Card className="w-full bg-muted border rounded-xl bg-white shadow-sm min-h-[280px]">
         <CardContent className="space-y-4 p-6 h-full">
-          <h2 className="text-xl font-semibold flex items-center gap-2">
-            <StickyNote className="w-5 h-5 text-gray-700" /> Notes
-          </h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold flex items-center gap-2">
+              <StickyNote className="w-5 h-5 text-gray-700" /> Notes
+            </h2>
+
+            {true && (
+              // !appointment.medicalRecord
+              <Button
+                size="sm"
+                variant="outline"
+                className={`cursor-pointer  ${
+                  false
+                    ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                    : "bg-blue-500 text-white hover:bg-blue-600"
+                }`}
+                disabled={false}
+                onClick={() =>
+                  router.push(
+                    `/dashboard/doctor/appointments/${appointment.id}/record`
+                  )
+                }
+              >
+                Create Record
+              </Button>
+            )}
+          </div>
+
           <p className="text-base text-gray-800 leading-relaxed whitespace-pre-line">
             {appointment.remark || "No notes available"}
           </p>
