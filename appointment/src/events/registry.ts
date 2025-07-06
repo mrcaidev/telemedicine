@@ -39,6 +39,10 @@ export type EventRegistry = {
   AppointmentBooked: FullAppointment;
   AppointmentRescheduled: FullAppointment;
   AppointmentCancelled: FullAppointment;
+  MedicalRecordCreated: {
+    recordId: string;
+    appointmentId: string;
+  };
   EmailRequested: {
     subject: string;
     to: string[];

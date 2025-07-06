@@ -5,6 +5,7 @@ import {
   consumeAppointmentRescheduledEvent,
   consumeDoctorCreatedEvent,
   consumeDoctorUpdatedEvent,
+  consumeMedicalRecordCreatedEvent,
   consumePatientCreatedEvent,
   consumePatientUpdatedEvent,
 } from "./consumer";
@@ -105,6 +106,7 @@ await consumer.subscribe({
     "AppointmentBooked",
     "AppointmentRescheduled",
     "AppointmentCancelled",
+    "MedicalRecordCreated",
   ],
 });
 console.log("kafka consumer subscribed to topics");
@@ -134,6 +136,8 @@ await consumer.run({
       await consumeAppointmentRescheduledEvent(json);
     } else if (topic === "AppointmentCancelled") {
       await consumeAppointmentCancelledEvent(json);
+    } else if (topic === "MedicalRecordCreated") {
+      await consumeMedicalRecordCreatedEvent(json);
     }
   },
 });
