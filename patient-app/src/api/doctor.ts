@@ -47,7 +47,7 @@ export function useDoctorSearchQuery(q: string, limit = 10) {
     QueryKey,
     number | null
   >({
-    queryKey: ["doctors", q],
+    queryKey: ["doctors", { q, limit }],
     queryFn: async ({ pageParam: cursor }) => {
       const params = new URLSearchParams({
         q,
