@@ -15,38 +15,83 @@ import {
   UserSwitchOutlined,
   CalendarOutlined,
 } from "@ant-design/icons";
-import dayjs from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 
 const { RangePicker } = DatePicker;
 
 export default function ClinicDashboard() {
-  const [range, setRange] = useState<[dayjs.Dayjs, dayjs.Dayjs]>([
-    dayjs().startOf("year"),
-    dayjs().endOf("year"),
+  const [range, setRange] = useState<[Dayjs, Dayjs]>([
+    dayjs().subtract(5, "month").startOf("month"),
+    dayjs().endOf("month"),
   ]);
 
   const [stats, setStats] = useState({
     totalAppointments: 0,
-    pendingDoctors: 0,
+    todayAppointments: 0,
+    pendingDoctorRequest: 0,
+    urgentDoctorRequest: 0,
     doctorCount: 0,
+    doctorAvailableCount: 0,
   });
 
   const [appointmentTrendData, setAppointmentTrendData] = useState([]);
-  const [perDoctorData, setPerDoctorData] = useState([]);
+  const [perDoctorData, setPerDoctorData] = useState<Record<string, any>[]>([]);
   const [perSymptomData, setPerSymptomData] = useState([]);
   const [doctorRanking, setDoctorRanking] = useState([]);
 
-  useEffect(() => {
-    fetch("/api/clinic/dashboard")
-      .then((res) => res.json())
-      .then((data) => {
-        setStats(data.stats);
-        setAppointmentTrendData(data.appointmentTrendData);
-        setPerDoctorData(data.perDoctorData);
-        setPerSymptomData(data.perSymptomData);
-        setDoctorRanking(data.doctorRanking);
+  function transformDoctorAppointments(raw: any[]) {
+    const allDoctors = new Set<string>();
+
+    // 先收集所有医生名称
+    raw.forEach((item) => {
+      item.doctorAppointments.forEach((d: any) => {
+        allDoctors.add(d.doctorName);
       });
+    });
+
+    return raw.map((item) => {
+      const base: Record<string, any> = { month: item.month };
+      allDoctors.forEach((doctor) => {
+        const found = item.doctorAppointments.find(
+          (entry: any) => entry.doctorName === doctor
+        );
+        base[doctor] = found ? found.appointments : 0;
+      });
+      return base;
+    });
+  }
+
+  const fetchTrends = (startMonth: dayjs.Dayjs, endMonth: dayjs.Dayjs) => {
+    const startMonthFormatted = startMonth.format("YYYY-MM");
+    const endMonthFormatted = endMonth.format("YYYY-MM");
+
+    fetch(
+      `/api/clinic/dashboard/trends?startMonth=${startMonthFormatted}&endMonth=${endMonthFormatted}`
+    )
+      .then((res) => res.json())
+      .then((res) => {
+        setAppointmentTrendData(res.data.clinicAppointments);
+        setPerSymptomData(res.data.perSymptomData.symptoms);
+
+        const rawPerDoctorData = res.data.perDoctorData.doctorAppointments;
+        const transformed = transformDoctorAppointments(rawPerDoctorData);
+        setPerDoctorData(transformed);
+      });
+  };
+
+  useEffect(() => {
+    fetch("/api/clinic/dashboard/stats")
+      .then((res) => res.json())
+      .then((res) => setStats(res.data.data));
+
+    fetch("/api/clinic/dashboard/rank")
+      .then((res) => res.json())
+      .then((res) => setDoctorRanking(res.data));
   }, []);
+
+  useEffect(() => {
+    fetchTrends(range[0], range[1]);
+  }, [range]);
 
   return (
     <div className="p-6">
@@ -61,7 +106,7 @@ export default function ClinicDashboard() {
               valueStyle={{ fontSize: 28 }}
             />
             <div className="mt-2 pt-2 border-t text-gray-500 text-sm">
-              This Month: 120
+              Today: {stats.todayAppointments}
             </div>
           </Card>
         </Col>
@@ -69,12 +114,12 @@ export default function ClinicDashboard() {
           <Card>
             <Statistic
               title="Pending Doctor Requests"
-              value={stats.pendingDoctors}
+              value={stats.pendingDoctorRequest}
               prefix={<UserSwitchOutlined />}
               valueStyle={{ fontSize: 28 }}
             />
             <div className="mt-2 pt-2 border-t text-gray-500 text-sm">
-              Urgent: 1
+              Urgent: {stats.urgentDoctorRequest}
             </div>
           </Card>
         </Col>
@@ -87,7 +132,7 @@ export default function ClinicDashboard() {
               valueStyle={{ fontSize: 28 }}
             />
             <div className="mt-2 pt-2 border-t text-gray-500 text-sm">
-              No appointment today: 1
+              No appointment today: {stats.doctorAvailableCount}
             </div>
           </Card>
         </Col>
@@ -100,18 +145,22 @@ export default function ClinicDashboard() {
             title="Appointment Trend Analysis"
             extra={
               <RangePicker
+                picker="month"
                 allowClear={false}
                 value={range}
                 onChange={(val) => {
-                  if (val) setRange(val as [dayjs.Dayjs, dayjs.Dayjs]);
+                  if (val && val[0] && val[1]) {
+                    setRange(val as [Dayjs, Dayjs]);
+                    fetchTrends(val[0], val[1]);
+                  }
                 }}
+                disabledDate={(date) => date.isAfter(dayjs(), "month")}
               />
             }
           >
             <Tabs
               defaultActiveKey="1"
               items={[
-                // 按月展示预约
                 {
                   key: "1",
                   label: "Total Appointments",
@@ -126,7 +175,6 @@ export default function ClinicDashboard() {
                     </ResponsiveContainer>
                   ),
                 },
-                // 按医生展示预约，只展示前三医生，剩余医生为其它
                 {
                   key: "2",
                   label: "Appointments Per Doctor",
@@ -135,14 +183,29 @@ export default function ClinicDashboard() {
                       <BarChart data={perDoctorData}>
                         <XAxis dataKey="month" />
                         <YAxis />
-                        <Tooltip />
-                        <Bar dataKey="DrLee" stackId="a" fill="#82ca9d" />
-                        <Bar dataKey="DrWang" stackId="a" fill="#8884d8" />
+                        <Tooltip shared={false} />
+                        {Object.keys(perDoctorData[0] || {})
+                          .filter((key) => key !== "month")
+                          .map((doctor, i) => (
+                            <Bar
+                              key={doctor}
+                              dataKey={doctor}
+                              stackId="a"
+                              fill={
+                                [
+                                  "#82ca9d",
+                                  "#8884d8",
+                                  "#ffc658",
+                                  "#a0d911",
+                                  "#ff4d4f",
+                                ][i % 5]
+                              }
+                            />
+                          ))}
                       </BarChart>
                     </ResponsiveContainer>
                   ),
                 },
-                // 按症状展示预约，只展示前三症状，剩余症状为其它
                 {
                   key: "3",
                   label: "Top Symptoms",
@@ -169,7 +232,7 @@ export default function ClinicDashboard() {
               dataSource={doctorRanking}
               columns={[
                 { title: "Rank", dataIndex: "rank", key: "rank" },
-                { title: "Doctor", dataIndex: "doctor", key: "doctor" },
+                { title: "Doctor", dataIndex: "doctorName", key: "doctorName" },
                 { title: "Appointments", dataIndex: "count", key: "count" },
               ]}
               pagination={false}

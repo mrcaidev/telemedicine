@@ -57,13 +57,13 @@ export default function PlatformDashboard() {
       .then((res) => res.json())
       .then((data) => setStats(data.data.data));
 
-    fetchTrends(range[0], range[1]);
-
     fetch("/api/platform/dashboard/clinicRank")
       .then((res) => res.json())
-      .then((data) => {
-        setClinicRanking(data.ranks);
-      });
+      .then((data) => setClinicRanking(data.ranks));
+  }, []);
+
+  useEffect(() => {
+    fetchTrends(range[0], range[1]);
   }, [range]);
 
   return (

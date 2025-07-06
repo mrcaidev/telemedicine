@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const res = await fetch(`${BACKEND_API}/dashboard/platform/clinicRank`, {
+    const res = await fetch(`${BACKEND_API}/dashboard/doctor/stats`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${session.user.token}`,
@@ -27,22 +27,10 @@ export async function GET(request: NextRequest) {
     }
 
     const data = await res.json();
-    const ranks = data.data.ranks
-      .sort(
-        (a: { doctorCount: number }, b: { doctorCount: number }) =>
-          b.doctorCount - a.doctorCount
-      )
-      .map(
-        (item: { clinicName: string; doctorCount: number }, index: number) => ({
-          rank: index + 1,
-          clinicName: item.clinicName,
-          doctorCount: item.doctorCount,
-        })
-      );
-    return NextResponse.json({ ranks });
+    return NextResponse.json({ data });
   } catch (err) {
     return NextResponse.json(
-      { error: "Failed to fetch ranks" },
+      { error: "Failed to fetch stats" },
       { status: 500 }
     );
   }
