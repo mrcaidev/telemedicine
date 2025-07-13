@@ -1,309 +1,107 @@
-# 智能助手项目单元测试指南
+# 智能助手项目测试指南
 
-## 概述
+## 测试方式
 
-本项目包含完整的单元测试套件，使用 `pytest` 框架进行测试。测试覆盖了数据模型、响应代码、HTTP中间件、Redis工具、助手模块和API集成测试。
-
-## 环境准备
-
-### 1. 安装测试依赖
-
-```bash
-# 安装pytest和相关插件
-pip install pytest pytest-asyncio httpx python-dotenv
-
-# 或者使用requirements文件
-pip install -r requirements.txt
-```
-
-### 2. 配置测试环境
-
-创建测试环境配置文件 `.env.test`（可选）：
-
-```bash
-# 测试环境配置
-REDIS_URL=redis://localhost:6379/1
-MONGO_URL=mongodb://localhost:27017/test_db
-OPENAI_API_KEY=test_openai_api_key
-AGENT_ACCESS_KEY=test_key
-DEBUG=true
-ENVIRONMENT=test
-```
-
-## 运行测试
-
-### 基本命令
+### 1. 本地测试（原有方式）
 
 ```bash
 # 运行所有测试
-python -m pytest
+python run_tests.py
 
-# 运行测试并显示详细信息
-python -m pytest -v
+# 或者直接使用pytest
+python -m pytest tests/ -v
 
-# 运行测试并显示输出
-python -m pytest -s
-
-# 运行测试并显示详细信息及输出
-python -m pytest -v -s
-```
-
-### 运行特定测试
-
-```bash
 # 运行特定测试文件
-python -m pytest tests/test_models.py
+python -m pytest tests/test_assistant.py -v
 
-# 运行特定测试类
-python -m pytest tests/test_httpMiddleware.py::TestHttpMiddleware
-
-# 运行特定测试方法
-python -m pytest tests/test_httpMiddleware.py::TestHttpMiddleware::test_validate_request_header_success
-
-# 运行包含特定关键字的测试
-python -m pytest -k "httpMiddleware"
+# 运行特定测试函数
+python -m pytest tests/test_assistant.py::test_assistant_creation -v
 ```
 
-### 运行测试目录
+### 2. Docker测试（推荐方式）
+
+#### 使用Docker Compose运行测试
 
 ```bash
-# 运行tests目录下的所有测试
-python -m pytest tests/
+# 运行所有测试
+docker-compose -f docker-compose.test.yml up --abort-on-container-exit
 
-# 运行特定目录下的测试
-python -m pytest tests/unit/
+# 或者使用脚本（Linux/Mac）
+./scripts/run_tests_docker.sh
+
+# Windows PowerShell
+.\scripts\run_tests_docker.ps1
 ```
 
-### 测试覆盖率
+#### 手动构建和运行
 
 ```bash
-# 安装pytest-cov
-pip install pytest-cov
+# 构建测试镜像
+docker-compose -f docker-compose.test.yml build
 
-# 运行测试并生成覆盖率报告
-python -m pytest --cov=app tests/
+# 运行测试
+docker-compose -f docker-compose.test.yml up test
 
-# 生成HTML覆盖率报告
-python -m pytest --cov=app --cov-report=html tests/
+# 清理测试环境
+docker-compose -f docker-compose.test.yml down -v
 ```
+
+## 测试环境配置
+
+### Docker测试环境变量
+
+Docker测试使用以下环境变量（来自docker-compose.test.yml）：
+
+- `AGENT_ACCESS_KEY`: OpenAI API密钥
+- `MONGO_URL`: MongoDB连接URL
+- `REDIS_URL`: Redis连接URL
+- `PYTHONPATH`: Python模块搜索路径
+
+### 测试依赖服务
+
+Docker测试会自动启动以下服务：
+
+- **Redis**: 端口6380（避免与开发环境冲突）
+- **MongoDB**: 端口27018（避免与开发环境冲突）
 
 ## 测试文件结构
 
 ```
 tests/
-├── __init__.py
-├── conftest.py              # pytest配置文件
-├── test_config.py           # 测试配置模块
-├── test_simple.py           # 简单测试验证
-├── test_models.py           # 数据模型测试
-├── test_respCode.py         # 响应代码测试
-├── test_httpMiddleware.py   # HTTP中间件测试
-├── test_redisUtils.py       # Redis工具测试
-├── test_assistant.py        # 助手模块测试
-├── test_app_integration.py  # API集成测试
-└── test_utils.py            # 工具函数测试
+├── conftest.py          # pytest配置文件
+├── test_assistant.py    # 助手功能测试
+├── test_config.py       # 配置测试
+├── test_httpMiddleware.py # HTTP中间件测试
+├── test_redisUtils.py   # Redis工具测试
+├── test_simple.py       # 简单功能测试
+└── test_utils.py        # 工具函数测试
 ```
 
-## 测试类型说明
+## 测试最佳实践
 
-### 1. 单元测试 (Unit Tests)
+1. **使用Docker测试**: 确保测试环境与生产环境一致
+2. **隔离测试**: 每个测试应该独立运行，不依赖其他测试
+3. **清理资源**: 测试完成后清理数据库和缓存
+4. **环境变量**: 使用环境变量而不是硬编码配置
 
-测试独立的函数和类：
+## 故障排除
+
+### 常见问题
+
+1. **Docker未运行**: 确保Docker Desktop已启动
+2. **端口冲突**: 测试环境使用不同端口避免冲突
+3. **环境变量缺失**: 确保设置了必要的环境变量
+4. **网络问题**: 检查Docker网络配置
+
+### 调试命令
 
 ```bash
-# 运行单元测试
-python -m pytest tests/test_models.py tests/test_respCode.py tests/test_httpMiddleware.py
-```
+# 查看测试容器日志
+docker-compose -f docker-compose.test.yml logs test
 
-### 2. 集成测试 (Integration Tests)
+# 进入测试容器调试
+docker-compose -f docker-compose.test.yml run --rm test bash
 
-测试模块间的交互：
-
-```bash
-# 运行集成测试
-python -m pytest tests/test_redisUtils.py tests/test_assistant.py
-```
-
-### 3. API测试 (API Tests)
-
-测试API端点：
-
-```bash
-# 运行API测试
-python -m pytest tests/test_app_integration.py
-```
-
-### 4. 异步测试 (Async Tests)
-
-测试异步函数：
-
-```bash
-# 运行异步测试
-python -m pytest tests/test_httpMiddleware.py tests/test_redisUtils.py
-```
-
-## 测试标记
-
-使用pytest标记来分类测试：
-
-```bash
-# 运行标记为unit的测试
-python -m pytest -m unit
-
-# 运行标记为integration的测试
-python -m pytest -m integration
-
-# 运行标记为slow的测试
-python -m pytest -m slow
-
-# 跳过标记为slow的测试
-python -m pytest -m "not slow"
-```
-
-## 调试测试
-
-### 1. 详细输出
-
-```bash
-# 显示详细的测试输出
-python -m pytest -v -s
-
-# 显示最详细的输出
-python -m pytest -vvv -s
-```
-
-### 2. 失败时停止
-
-```bash
-# 遇到第一个失败就停止
-python -m pytest -x
-
-# 遇到第一个失败就停止并显示详细信息
-python -m pytest -x -v -s
-```
-
-### 3. 调试模式
-
-```bash
-# 在失败时进入pdb调试器
-python -m pytest --pdb
-
-# 在失败时进入pdb调试器并显示详细信息
-python -m pytest --pdb -v -s
-```
-
-## 测试配置
-
-### pytest.ini 配置
-
-```ini
-[tool:pytest]
-testpaths = tests
-python_files = test_*.py
-python_classes = Test*
-python_functions = test_*
-addopts = -v -s
-markers =
-    unit: Unit tests
-    integration: Integration tests
-    slow: Slow running tests
-```
-
-### conftest.py 配置
-
-测试配置文件会自动加载环境变量：
-
-```python
-# 优先级顺序：
-1. .env.test      # 测试专用配置
-2. .env.local     # 本地开发配置  
-3. .env           # 默认配置
-```
-
-## 常见问题
-
-### Q: 测试导入模块失败怎么办？
-A: 确保在项目根目录运行测试：
-```bash
-cd /path/to/smart-assistant
-python -m pytest
-```
-
-### Q: 异步测试失败怎么办？
-A: 确保安装了 `pytest-asyncio`：
-```bash
-pip install pytest-asyncio
-```
-
-### Q: 测试需要外部服务（Redis/MongoDB）怎么办？
-A: 使用mock或启动测试服务：
-```bash
-# 使用Docker启动测试服务
-docker-compose up -d redis mongo
-
-# 或使用mock（推荐）
-python -m pytest tests/test_redisUtils.py
-```
-
-### Q: 如何生成测试报告？
-A: 使用pytest-html插件：
-```bash
-pip install pytest-html
-python -m pytest --html=report.html --self-contained-html
-```
-
-## 持续集成
-
-### GitHub Actions 示例
-
-```yaml
-name: Tests
-on: [push, pull_request]
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.9
-    - name: Install dependencies
-      run: |
-        pip install -r requirements.txt
-        pip install pytest pytest-asyncio httpx
-    - name: Run tests
-      run: python -m pytest -v
-```
-
-## 最佳实践
-
-1. **测试命名**：使用描述性的测试名称
-2. **测试隔离**：每个测试应该独立运行
-3. **Mock外部依赖**：避免依赖外部服务
-4. **测试覆盖率**：保持高测试覆盖率
-5. **快速反馈**：测试应该快速运行
-6. **清晰断言**：使用清晰的断言消息
-
-## 快速开始
-
-```bash
-# 1. 安装依赖
-pip install pytest pytest-asyncio httpx python-dotenv
-
-# 2. 运行简单测试验证
-python -m pytest tests/test_simple.py -v
-
-# 3. 运行所有测试
-python -m pytest -v
-
-# 4. 查看测试覆盖率
-python -m pytest --cov=app tests/ -v
-```
-
-## 测试维护
-
-- 定期运行测试：`python -m pytest`
-- 检查测试覆盖率：`python -m pytest --cov=app`
-- 更新测试文档：保持README-TEST.md最新
-- 添加新测试：为新功能编写测试 
+# 查看测试环境状态
+docker-compose -f docker-compose.test.yml ps
+``` 

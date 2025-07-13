@@ -1,0 +1,24 @@
+FROM python:3.10-slim
+
+# 设置工作目录
+WORKDIR /code
+
+# 复制依赖文件
+COPY ./requirements.txt /code/requirements.txt
+COPY ./requirements-test.txt /code/requirements-test.txt
+
+# 安装依赖
+RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
+RUN pip install --no-cache-dir --upgrade -r /code/requirements-test.txt
+
+# 复制应用代码
+COPY ./app /code/app
+
+# 复制测试代码
+COPY ./tests /code/tests
+
+# 设置Python路径
+ENV PYTHONPATH=/code
+
+# 默认命令（可以被docker-compose覆盖）
+CMD ["python", "-m", "pytest", "tests/", "-v"] 
