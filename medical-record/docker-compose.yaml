@@ -1,4 +1,36 @@
+
+version: "3.8"
+
 services:
+  medical-record-service:
+    build:
+      context: D:\capstone2\medical-record\medical-record
+      dockerfile: Dockerfile
+    image: medical-record-java-service
+    environment:
+      - MYSQL_URL=jdbc:mysql://mysql:3306/records_db?useUnicode=true&characterEncoding=utf-8&allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=Asia/Shanghai
+      - MYSQL_USERNAME=root
+      - MYSQL_PASSWORD=root
+      - KAFKA_BROKERS=kafka:9092
+      - QWEN_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions
+      - QWEN_API_KEY=your-api-key
+    command: ["java", "-jar", "app.jar", "--debug"]
+    depends_on:
+      mysql:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+    ports:
+      - "8082:8082"
+    restart: always
+    networks:
+      - backend
+    # 添加dns配置
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+
+
   zookeeper:
     image: confluentinc/cp-zookeeper:7.4.0
     container_name: zookeeper
@@ -18,6 +50,10 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
+
+    networks:
+      - backend
+
 
   kafka:
     image: confluentinc/cp-kafka:7.4.0
@@ -40,6 +76,10 @@ services:
     volumes:
       - kafka_data:/var/lib/kafka/data
 
+    networks:
+      - backend
+
+
   mysql:
     image: mysql:8.0
     container_name: mysql
@@ -53,14 +93,23 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -proot || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 5s
+      start_period: 30s  # 增加启动时间
+    networks:
+      - backend
 
 volumes:
   zookeeper_data:
   zookeeper_log:
   kafka_data:
+
   mysql_data:
+
+networks:
+  backend:
+    driver: bridge
+

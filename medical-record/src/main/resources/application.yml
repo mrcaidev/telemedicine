@@ -6,13 +6,17 @@ spring:
     name: medical-records
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-#    url: jdbc:mysql://host.docker.internal:3307/records_db?useUnicode=true&characterEncoding=utf-8&allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=Asia/Shanghai
-    url: jdbc:mysql://localhost:3307/records_db?useUnicode=true&characterEncoding=utf-8&allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=Asia/Shanghai
-    username: root
-    password: root
-#    password: root
+
+    url: ${MYSQL_URL}
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
+    hikari:
+      connection-timeout: 30000
+      maximum-pool-size: 10
+      max-lifetime: 1800000
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: ${KAFKA_BROKERS:localhost:9092}
+
     producer:
       # 发生错误后的重试次数
       retries: 3
@@ -86,7 +90,13 @@ springdoc:
 
 
 qwen:
-  baseURL: https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions
-  apiKey:
+  baseURL: "${QWEN_BASE_URL:https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions}"
+  apiKey: ${QWEN_API_KEY:t}
   model: qwen-turbo
   timeout: -1
+
+logging:
+  level:
+    root: INFO
+    com.medical.records: DEBUG
+
