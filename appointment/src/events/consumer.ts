@@ -1,3 +1,4 @@
+import * as appointmentRepository from "@/repositories/appointment";
 import * as appointmentReminderEmailRepository from "@/repositories/appointment-reminder-email";
 import * as doctorRepository from "@/repositories/doctor";
 import * as patientRepository from "@/repositories/patient";
@@ -172,4 +173,12 @@ export async function consumeAppointmentCancelledEvent(
   await requestNotification.delete<null>(
     `/scheduled-emails/${appointmentReminderEmail.emailId}`,
   );
+}
+
+export async function consumeMedicalRecordCreatedEvent(
+  event: EventRegistry["MedicalRecordCreated"],
+) {
+  await appointmentRepository.updateOneById(event.appointmentId, {
+    medicalRecordId: event.recordId,
+  });
 }

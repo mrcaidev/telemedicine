@@ -6,6 +6,7 @@ spring:
     name: medical-records
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
+
     url: ${MYSQL_URL}
     username: ${MYSQL_USERNAME}
     password: ${MYSQL_PASSWORD}
@@ -15,6 +16,7 @@ spring:
       max-lifetime: 1800000
   kafka:
     bootstrap-servers: ${KAFKA_BROKERS:localhost:9092}
+
     producer:
       # 发生错误后的重试次数
       retries: 3
@@ -43,7 +45,6 @@ spring:
       auto-offset-reset: earliest
       properties:
         spring.json.trusted.packages: "*"
-
 
 eureka:
   client:
@@ -98,3 +99,4 @@ logging:
   level:
     root: INFO
     com.medical.records: DEBUG
+
