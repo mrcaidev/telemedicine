@@ -70,6 +70,7 @@ describe("lifecycle", () => {
         endAt: expect.stringMatching(/T03:00:00.000Z$/),
         remark: "hello",
         status: "normal",
+        medicalRecordId: null,
         createdAt: expect.any(String),
       }),
     });

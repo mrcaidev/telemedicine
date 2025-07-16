@@ -7,4 +7,5 @@ kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic D
 kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic AppointmentBooked
 kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic AppointmentRescheduled
 kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic AppointmentCancelled
+kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic MedicalRecordCreated
 kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic EmailRequested

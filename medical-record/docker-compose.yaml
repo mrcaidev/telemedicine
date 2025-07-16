@@ -1,3 +1,4 @@
+
 version: "3.8"
 
 services:
@@ -29,6 +30,7 @@ services:
       - 8.8.8.8
       - 8.8.4.4
 
+
   zookeeper:
     image: confluentinc/cp-zookeeper:7.4.0
     container_name: zookeeper
@@ -48,8 +50,10 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
+
     networks:
       - backend
+
 
   kafka:
     image: confluentinc/cp-kafka:7.4.0
@@ -71,8 +75,10 @@ services:
       - "9092:9092"
     volumes:
       - kafka_data:/var/lib/kafka/data
+
     networks:
       - backend
+
 
   mysql:
     image: mysql:8.0
@@ -87,6 +93,7 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
+
       test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -proot || exit 1"]
       interval: 10s
       timeout: 5s
@@ -99,8 +106,10 @@ volumes:
   zookeeper_data:
   zookeeper_log:
   kafka_data:
+
   mysql_data:
 
 networks:
   backend:
     driver: bridge
+

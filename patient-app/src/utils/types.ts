@@ -60,6 +60,7 @@ export type ChatEvaluation = {
   symptom: string;
   urgency: number;
   suggestion: string;
+  keyword: string;
 };
 
 export type ChatSession = {
