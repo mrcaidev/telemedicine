@@ -11,6 +11,7 @@
 #ENV TZ=Asia/Shanghai
 #
 #ENTRYPOINT ["java", "-jar", "app.jar"]
+
 FROM maven:amazoncorretto AS builder
 WORKDIR /code
 COPY pom.xml .
