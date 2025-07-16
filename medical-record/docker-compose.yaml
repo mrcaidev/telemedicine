@@ -1,115 +1,78 @@
-
-version: "3.8"
-
 services:
-  medical-record-service:
+  api:
     build:
-      context: D:\capstone2\medical-record\medical-record
+      context: .
       dockerfile: Dockerfile
-    image: medical-record-java-service
+    ports:
+      - 8082:8082
     environment:
-      - MYSQL_URL=jdbc:mysql://mysql:3306/records_db?useUnicode=true&characterEncoding=utf-8&allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=Asia/Shanghai
-      - MYSQL_USERNAME=root
-      - MYSQL_PASSWORD=root
+      - MYSQL_URL=jdbc:mysql://mysql:3306/records_db?useUnicode=true&characterEncoding=utf-8&allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=Asia/Singapore
+      - MYSQL_USERNAME=dev
+      - MYSQL_PASSWORD=dev
       - KAFKA_BROKERS=kafka:9092
       - QWEN_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions
       - QWEN_API_KEY=your-api-key
-    command: ["java", "-jar", "app.jar", "--debug"]
     depends_on:
       mysql:
         condition: service_healthy
-      kafka:
-        condition: service_started
-    ports:
-      - "8082:8082"
+      init-kafka:
+        condition: service_completed_successfully
     restart: always
-    networks:
-      - backend
     # 添加dns配置
     dns:
       - 8.8.8.8
       - 8.8.4.4
 
-
-  zookeeper:
-    image: confluentinc/cp-zookeeper:7.4.0
-    container_name: zookeeper
-    restart: always
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-      TZ: Asia/Shanghai
-    ports:
-      - "2181:2181"
-    volumes:
-      - zookeeper_data:/var/lib/zookeeper/data
-      - zookeeper_log:/var/lib/zookeeper/log
-    healthcheck:
-      test: ["CMD", "echo", "ruok", "|", "nc", "localhost", "2181", "|", "grep", "imok"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
-
-    networks:
-      - backend
-
-
-  kafka:
-    image: confluentinc/cp-kafka:7.4.0
-    container_name: kafka
-    restart: always
-    depends_on:
-      zookeeper:
-        condition: service_healthy
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://kafka:29092
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,PLAINTEXT_INTERNAL://0.0.0.0:29092
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-      TZ: Asia/Shanghai
-    ports:
-      - "9092:9092"
-    volumes:
-      - kafka_data:/var/lib/kafka/data
-
-    networks:
-      - backend
-
-
   mysql:
-    image: mysql:8.0
-    container_name: mysql
-    restart: always
+    image: bitnami/mysql
     environment:
       MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: dev
+      MYSQL_PASSWORD: dev
       MYSQL_DATABASE: records_db
-      TZ: Asia/Shanghai
-    ports:
-      - "3307:3306"
+      TZ: Asia/Singapore
     volumes:
-      - mysql_data:/var/lib/mysql
+      - mysql-data:/bitnami/mysql/data
     healthcheck:
+      test: mysqladmin ping -h localhost
+      interval: 30s
+      timeout: 10s
+      start_period: 30s
+      start_interval: 5s
+    restart: always
 
-      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -proot || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s  # 增加启动时间
-    networks:
-      - backend
+  init-kafka:
+    image: bitnami/kafka
+    init: true
+    command: sh /init/init.sh
+    volumes:
+      - ./init/kafka:/init
+    depends_on:
+      kafka:
+        condition: service_healthy
+
+  kafka:
+    image: bitnami/kafka
+    environment:
+      - KAFKA_CFG_NODE_ID=0
+      - KAFKA_CFG_PROCESS_ROLES=broker,controller
+      - KAFKA_CFG_LISTENERS=INTERNAL://:9092,CONTROLLER://:9093
+      - KAFKA_CFG_ADVERTISED_LISTENERS=INTERNAL://kafka:9092
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=INTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=INTERNAL
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
+    volumes:
+      - kafka-data:/bitnami/kafka
+    healthcheck:
+      test: kafka-topics.sh --bootstrap-server kafka:9092 --list
+      interval: 30s
+      timeout: 10s
+      start_period: 30s
+      start_interval: 5s
+    restart: always
 
 volumes:
-  zookeeper_data:
-  zookeeper_log:
-  kafka_data:
-
-  mysql_data:
-
-networks:
-  backend:
-    driver: bridge
+  mysql-data:
+  kafka-data:
 
