@@ -12,21 +12,34 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const res = await fetch(`${BACKEND_API}/dashboard/platform/stats`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${session.user.token}`,
-        "Content-Type": "application/json",
-      },
-    });
+    const headers = {
+      Authorization: `Bearer ${session.user.token}`,
+      "Content-Type": "application/json",
+    };
 
-    if (!res.ok) {
-      const errText = await res.text();
-      console.error("Backend error:", res.status, errText);
-      return new Response("Backend Error", { status: res.status });
+    const [appointmentStats, platformStats] = await Promise.all([
+      fetch(`${BACKEND_API}/dashboard/platform/appointmentStats`, { headers }),
+      fetch(`${BACKEND_API}/dashboard/platform/platformStats`, { headers }),
+    ]);
+
+    if (!appointmentStats.ok || !platformStats.ok) {
+      return NextResponse.json(
+        { error: "One or both resources failed to load." },
+        { status: 500 }
+      );
     }
 
-    const data = await res.json();
+    const appointmentsData = await appointmentStats.json();
+    const platformData = await platformStats.json();
+
+    console.log("Appointments Data:", appointmentsData);
+    console.log("Platform Data:", platformData);
+
+    const data = {
+      totalAppointments: appointmentsData.data.totalAppointments,
+      totalClinics: platformData.data.totalClinics,
+      totalDoctors: platformData.data.totalDoctors,
+    };
     return NextResponse.json({ data });
   } catch (err) {
     return NextResponse.json(

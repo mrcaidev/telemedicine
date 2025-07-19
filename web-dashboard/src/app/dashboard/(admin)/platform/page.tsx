@@ -55,7 +55,7 @@ export default function PlatformDashboard() {
   useEffect(() => {
     fetch("/api/platform/dashboard/stats")
       .then((res) => res.json())
-      .then((data) => setStats(data.data.data));
+      .then((data) => setStats(data.data));
 
     fetch("/api/platform/dashboard/clinicRank")
       .then((res) => res.json())
