@@ -73,9 +73,9 @@ public class DiagnosisControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code", is(ResultCode.SUCCESS.getCode())))
-                .andExpect(jsonPath("$.data.diagnosiss", hasSize(2)))
-                .andExpect(jsonPath("$.data.diagnosiss[0].code", is("C001")))
-                .andExpect(jsonPath("$.data.diagnosiss[1].code", is("C002")))
+                .andExpect(jsonPath("$.data.diagnosis", hasSize(2)))
+                .andExpect(jsonPath("$.data.diagnosis[0].code", is("C001")))
+                .andExpect(jsonPath("$.data.diagnosis[1].code", is("C002")))
                 .andExpect(jsonPath("$.data.nextCursor", is("C002")));
 
         // 验证服务方法调用
@@ -95,7 +95,7 @@ public class DiagnosisControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code", is(ResultCode.SUCCESS.getCode())))
-                .andExpect(jsonPath("$.data.diagnosiss", hasSize(0)))
+                .andExpect(jsonPath("$.data.diagnosis", hasSize(0)))
                 .andExpect(jsonPath("$.data.nextCursor").doesNotExist());
 
         // 验证服务方法调用
@@ -275,8 +275,8 @@ public class DiagnosisControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code", is(ResultCode.SUCCESS.getCode())))
-                .andExpect(jsonPath("$.data.diagnosiss", hasSize(1)))
-                .andExpect(jsonPath("$.data.diagnosiss[0].code", is("C001")));
+                .andExpect(jsonPath("$.data.diagnosis", hasSize(1)))
+                .andExpect(jsonPath("$.data.diagnosis[0].code", is("C001")));
 
         // 验证服务方法调用
         verify(diagnosisService, times(1)).listDiagnosis(any());

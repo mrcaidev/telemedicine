@@ -6,7 +6,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class DiagnosissVO {
-    private List<Diagnosis> diagnosiss;
+public class DiagnosisVO {
+    private List<Diagnosis> diagnosis;
     private String nextCursor;
 }
