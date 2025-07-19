@@ -12,11 +12,14 @@
 #
 #ENTRYPOINT ["java", "-jar", "app.jar"]
 
+
 FROM maven:amazoncorretto AS builder
 WORKDIR /code
 COPY pom.xml .
 COPY . .
 RUN mvn clean package -DskipTests
+
+
 
 FROM amazoncorretto:17-alpine
 WORKDIR /app
