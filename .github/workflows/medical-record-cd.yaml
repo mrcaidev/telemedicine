@@ -1,11 +1,11 @@
-name: User CD
+name: Medical Record CD
 
 on:
   push:
     branches:
       - main
     paths:
-      - user/**
+      - medical-record/**
   release:
     types:
       - published
@@ -53,11 +53,11 @@ jobs:
       - name: Build and push image
         uses: docker/build-push-action@v6
         with:
-          context: "{{defaultContext}}:user"
+          context: "{{defaultContext}}:medical-record"
           push: true
           tags: |
-            ${{ vars.DOCKERHUB_USERNAME }}/telemedicine-user:latest
-            ${{ vars.DOCKERHUB_USERNAME }}/telemedicine-user:${{ needs.set-env.outputs.tag }}
+            ${{ vars.DOCKERHUB_USERNAME }}/telemedicine-medical-record:latest
+            ${{ vars.DOCKERHUB_USERNAME }}/telemedicine-medical-record:${{ needs.set-env.outputs.tag }}
 
   deploy:
     name: Deploy
@@ -81,14 +81,14 @@ jobs:
 
       - name: Deploy to Kubernetes
         run: |
-          helm upgrade --install user ${{ github.workspace }}/deployment/user \
-            --values ${{ github.workspace }}/deployment/user/values-${{ needs.set-env.outputs.environment }}.yaml \
-            --set image=${{ vars.DOCKERHUB_USERNAME }}/telemedicine-user:${{ needs.set-env.outputs.tag }} \
-            --set secrets.JWT_SECRET=${{ secrets.JWT_SECRET }} \
-            --set secrets.SUPER_ADMIN_TOKEN=${{ secrets.SUPER_ADMIN_TOKEN }} \
-            --set secrets.GOOGLE_OAUTH_CLIENT_IDS=${{ secrets.GOOGLE_OAUTH_CLIENT_IDS }} \
-            --set secrets.OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} \
-            --set secrets.POSTGRES_URL=${{ secrets.USER_POSTGRES_URL }} \
+          helm upgrade --install medical-record ${{ github.workspace }}/deployment/medical-record \
+            --values ${{ github.workspace }}/deployment/medical-record/values-${{ needs.set-env.outputs.environment }}.yaml \
+            --set image=${{ vars.DOCKERHUB_USERNAME }}/telemedicine-medical-record:${{ needs.set-env.outputs.tag }} \
+            --set secrets.MYSQL_URL=${{ secrets.MEDICAL_RECORD_MYSQL_URL }} \
+            --set secrets.MYSQL_USERNAME=${{ secrets.MEDICAL_RECORD_MYSQL_USERNAME }} \
+            --set secrets.MYSQL_PASSWORD=${{ secrets.MEDICAL_RECORD_MYSQL_PASSWORD }} \
+            --set secrets.QWEN_BASE_URL=${{ secrets.QWEN_BASE_URL }} \
+            --set secrets.QWEN_API_KEY=${{ secrets.QWEN_API_KEY }} \
             --set secrets.KAFKA_BROKERS=${{ secrets.KAFKA_BROKERS }} \
             --set secrets.KAFKA_SECURITY_PROTOCOL=${{ secrets.KAFKA_SECURITY_PROTOCOL }} \
             --set secrets.KAFKA_SSL_CA=${{ secrets.KAFKA_SSL_CA }} \

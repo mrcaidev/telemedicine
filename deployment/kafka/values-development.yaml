@@ -16,4 +16,5 @@ provisioning:
     - name: AppointmentBooked
     - name: AppointmentRescheduled
     - name: AppointmentCancelled
+    - name: MedicalRecordCreated
     - name: EmailRequested
