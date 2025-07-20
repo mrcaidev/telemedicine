@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Card, Col, Row, Statistic, Table, DatePicker, Space } from "antd";
 import {
   BarChart,
@@ -14,77 +15,109 @@ import {
   UserAddOutlined,
   ClockCircleOutlined,
 } from "@ant-design/icons";
-import dayjs from "dayjs";
-import { useState } from "react";
+import dayjs, { Dayjs } from "dayjs";
 
 const { RangePicker } = DatePicker;
 
-// const presetRanges = {
-//   Today: [dayjs(), dayjs()],
-//   "This Week": [dayjs().startOf("week"), dayjs().endOf("week")],
-//   "This Month": [dayjs().startOf("month"), dayjs().endOf("month")],
-//   "This Year": [dayjs().startOf("year"), dayjs().endOf("year")],
-// };
-
-const stats = {
-  totalAppointments: 1280,
-  Patients: 6,
-  pendingAppointments: 20,
-};
-
-const fullMonthlyData = [
-  { month: "Jan", count: 215 },
-  { month: "Feb", count: 328 },
-  { month: "Mar", count: 252 },
-  { month: "Apr", count: 215 },
-  { month: "May", count: 263 },
-  { month: "Jun", count: 228 },
-  { month: "Jul", count: 289 },
-  { month: "Aug", count: 301 },
-  { month: "Sep", count: 312 },
-  { month: "Oct", count: 326 },
-  { month: "Nov", count: 337 },
-  { month: "Dec", count: 349 },
-];
-
-const symptomData = [
-  { rank: 1, symptom: "Cough", count: 87 },
-  { rank: 2, symptom: "Abdominal Pain", count: 76 },
-  { rank: 3, symptom: "Chest Tightness", count: 65 },
-  { rank: 4, symptom: "Headache", count: 59 },
-  { rank: 5, symptom: "Fever", count: 53 },
-  { rank: 6, symptom: "Sore Throat", count: 47 },
-  { rank: 7, symptom: "Nausea", count: 41 },
-  { rank: 8, symptom: "Dizziness", count: 39 },
-  { rank: 9, symptom: "Shortness of Breath", count: 36 },
-];
-
-const columns = [
-  { title: "Rank", dataIndex: "rank", key: "rank", width: 80 },
-  { title: "Symptom", dataIndex: "symptom", key: "symptom" },
-  { title: "Occurrences", dataIndex: "count", key: "count" },
-];
-
 export default function DoctorDashboard() {
-  const [monthlyData] = useState(fullMonthlyData);
-  const [range, setRange] = useState<[dayjs.Dayjs, dayjs.Dayjs]>([
-    dayjs().startOf("year"),
-    dayjs().endOf("year"),
+  const [stats, setStats] = useState({
+    totalAppointments: 0,
+    todayAppointments: 0,
+    newPatientsToday: 0,
+    newPatientsPercentage: 0,
+    pendingAppointments: 0,
+    pendingAppointmentsToday: 0,
+  });
+
+  const [monthlyData, setMonthlyData] = useState<
+    { month: string; count: number }[]
+  >([]);
+  const [symptomData, setSymptomData] = useState<
+    { rank: number; symptom: string; count: number }[]
+  >([]);
+  const [range, setRange] = useState<[Dayjs, Dayjs]>([
+    dayjs().subtract(11, "month").startOf("month"),
+    dayjs().endOf("month"),
   ]);
+
+  const [loading, setLoading] = useState(true); // For tracking data loading state
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [error, setError] = useState(false); // To handle API errors
+
+  const disableFutureMonths = (current: dayjs.Dayjs) => {
+    return current && current.isAfter(dayjs().endOf("month"), "month");
+  };
+
+  const fetchTrends = (startMonth: dayjs.Dayjs, endMonth: dayjs.Dayjs) => {
+    const startMonthFormatted = startMonth.format("YYYY-MM");
+    const endMonthFormatted = endMonth.format("YYYY-MM");
+
+    fetch(
+      `/api/doctor/dashboard/doctorTrends?startMonth=${startMonthFormatted}&endMonth=${endMonthFormatted}`
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.data) {
+          setMonthlyData(data.data.data.appointmentsTrends || []);
+          setSymptomData(data.data || []);
+        } else {
+          setMonthlyData([]); // Set empty array if data is not available
+          setSymptomData([]); // Set empty array if data is not available
+        }
+        setLoading(false); // Set loading to false when data is fetched
+        setError(false); // Reset error state
+      })
+      .catch(() => {
+        setLoading(false); // Set loading to false even if error occurs
+        setError(true); // Set error state when API fetch fails
+      });
+  };
+
+  useEffect(() => {
+    fetch("/api/doctor/dashboard/stats")
+      .then((res) => res.json())
+      .then((data) => {
+        setStats(data.data.data || {});
+      })
+      .catch(() => {
+        setError(true); // Set error state if fetch fails
+        setLoading(false); // Stop loading
+      });
+
+    fetch("/api/doctor/dashboard/rank")
+      .then((res) => res.json())
+      .then((res) => {
+        setSymptomData(res.data || []);
+      })
+      .catch(() => {
+        setError(true); // Set error state if fetch fails
+        setLoading(false); // Stop loading
+      });
+  }, []);
+
+  useEffect(() => {
+    fetchTrends(range[0], range[1]);
+  }, [range]);
+
+  // Display 'No Data' if no data is available or if there is an error
+  const renderNoDataMessage = () => {
+    return <div>No Data Available</div>;
+  };
 
   return (
     <div className="p-6">
+      {/* 统计卡片 */}
       <Row gutter={16} className="mb-6">
         <Col span={8}>
           <Card>
             <Statistic
               title="Total Appointments"
-              value={stats.totalAppointments}
+              value={stats?.totalAppointments || 0}
               prefix={<CalendarOutlined />}
               valueStyle={{ fontSize: 28 }}
             />
             <div className="mt-2 pt-2 border-t text-gray-500 text-sm">
-              This Month: 120
+              Today: {stats?.todayAppointments || 0}
             </div>
           </Card>
         </Col>
@@ -92,12 +125,12 @@ export default function DoctorDashboard() {
           <Card>
             <Statistic
               title="New Patients Today"
-              value={stats.Patients}
+              value={stats?.newPatientsToday || 0}
               prefix={<UserAddOutlined />}
               valueStyle={{ fontSize: 28 }}
             />
             <div className="mt-2 pt-2 border-t text-gray-500 text-sm">
-              New Patients Percentage: 66.7%
+              New Patients Percentage: {stats.newPatientsPercentage * 100}%
             </div>
           </Card>
         </Col>
@@ -105,17 +138,18 @@ export default function DoctorDashboard() {
           <Card>
             <Statistic
               title="Pending Appointments"
-              value={stats.pendingAppointments}
+              value={stats.pendingAppointments || 0}
               prefix={<ClockCircleOutlined />}
               valueStyle={{ fontSize: 28 }}
             />
             <div className="mt-2 pt-2 border-t text-gray-500 text-sm">
-              Pending Appointments Today: 9
+              Pending Appointments Today: {stats.pendingAppointmentsToday || 0}
             </div>
           </Card>
         </Col>
       </Row>
 
+      {/* 月度图 + 症状榜 */}
       <Row gutter={16} className="mb-6">
         <Col span={16}>
           <Card
@@ -123,40 +157,64 @@ export default function DoctorDashboard() {
             extra={
               <Space>
                 <RangePicker
+                  picker="month"
                   allowClear={false}
                   value={range}
                   onChange={(val) => {
-                    if (val) setRange(val as [dayjs.Dayjs, dayjs.Dayjs]);
+                    if (val && val[0] && val[1]) {
+                      setRange(val as [Dayjs, Dayjs]);
+                      fetchTrends(val[0], val[1]);
+                    }
                   }}
+                  disabledDate={disableFutureMonths}
                 />
               </Space>
             }
           >
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={monthlyData}>
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip />
-                <Bar
-                  dataKey="count"
-                  fill="#1890ff"
-                  barSize={40}
-                  radius={[4, 4, 0, 0]}
-                />
-              </BarChart>
-            </ResponsiveContainer>
+            {loading ? (
+              <div>Loading...</div>
+            ) : monthlyData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={monthlyData}>
+                  <XAxis dataKey="month" />
+                  <YAxis />
+                  <Tooltip
+                    shared={false}
+                    formatter={(v) => [`${v} appointments`, "Appointments"]}
+                  />
+                  <Bar
+                    dataKey="count"
+                    fill="#1890ff"
+                    barSize={40}
+                    radius={[4, 4, 0, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              renderNoDataMessage()
+            )}
           </Card>
         </Col>
         <Col span={8}>
           <Card title="Symptom Keyword Ranking">
-            <Table
-              dataSource={symptomData}
-              columns={columns}
-              pagination={false}
-              size="small"
-              rowKey="rank"
-              bordered={false}
-            />
+            {loading ? (
+              <div>Loading...</div>
+            ) : symptomData.length > 0 ? (
+              <Table
+                dataSource={symptomData}
+                columns={[
+                  { title: "Rank", dataIndex: "rank", key: "rank", width: 80 },
+                  { title: "Symptom", dataIndex: "symptom", key: "symptom" },
+                  { title: "Occurrences", dataIndex: "count", key: "count" },
+                ]}
+                pagination={false}
+                size="small"
+                rowKey="rank"
+                bordered={false}
+              />
+            ) : (
+              renderNoDataMessage()
+            )}
           </Card>
         </Col>
       </Row>

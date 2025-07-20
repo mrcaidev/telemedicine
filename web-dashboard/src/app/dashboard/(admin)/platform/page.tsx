@@ -21,30 +21,75 @@ const { RangePicker } = DatePicker;
 
 export default function PlatformDashboard() {
   const [range, setRange] = useState<[dayjs.Dayjs, dayjs.Dayjs]>([
-    dayjs().startOf("month"),
+    dayjs().subtract(12, "month").startOf("month"),
     dayjs().endOf("month"),
   ]);
 
   const [stats, setStats] = useState({
     totalAppointments: 0,
     totalClinics: 0,
-    totalClinicAdmins: 0,
+    totalDoctors: 0,
   });
 
   const [clinicTrend, setClinicTrend] = useState([]);
   const [doctorTrend, setDoctorTrend] = useState([]);
   const [clinicRanking, setClinicRanking] = useState([]);
 
-  useEffect(() => {
-    fetch("/api/platform/dashboard")
+  const [error, setError] = useState(false); // To track API errors
+
+  const disableFutureMonths = (current: dayjs.Dayjs) => {
+    return current && current.isAfter(dayjs().endOf("month"), "month");
+  };
+
+  const fetchTrends = (startMonth: dayjs.Dayjs, endMonth: dayjs.Dayjs) => {
+    const startMonthFormatted = startMonth.format("YYYY-MM");
+    const endMonthFormatted = endMonth.format("YYYY-MM");
+
+    fetch(
+      `/api/platform/dashboard/platformTrend?startMonth=${startMonthFormatted}&endMonth=${endMonthFormatted}`
+    )
       .then((res) => res.json())
-      .then((data) => {
-        setStats(data.stats);
-        setClinicTrend(data.clinicTrend);
-        setDoctorTrend(data.doctorTrend);
-        setClinicRanking(data.clinicRanking);
-      });
+      .then(
+        (data) => {
+          setClinicTrend(data.clinicTrend);
+          setDoctorTrend(data.doctorTrend);
+          setError(false); // Reset error state if data is received
+        },
+        () => {
+          setError(true); // Set error if the fetch fails
+        }
+      );
+  };
+
+  useEffect(() => {
+    fetch("/api/platform/dashboard/stats")
+      .then((res) => res.json())
+      .then(
+        (data) => {
+          setStats(data.data);
+          setError(false); // Reset error state if data is received
+        },
+        () => {
+          setError(true); // Set error if the fetch fails
+        }
+      );
+
+    fetch("/api/platform/dashboard/clinicRank")
+      .then((res) => res.json())
+      .then(
+        (data) => {
+          setClinicRanking(data.ranks);
+          setError(false); // Reset error state if data is received
+        },
+        () => {
+          setError(true); // Set error if the fetch fails
+        }
+      );
   }, []);
+
+  useEffect(() => {
+    fetchTrends(range[0], range[1]);
+  }, [range]);
 
   return (
     <div className="p-6">
@@ -54,7 +99,7 @@ export default function PlatformDashboard() {
           <Card>
             <Statistic
               title="Total Appointments"
-              value={stats.totalAppointments}
+              value={stats?.totalAppointments}
               prefix={<CalendarOutlined />}
               valueStyle={{ fontSize: 28 }}
             />
@@ -64,7 +109,7 @@ export default function PlatformDashboard() {
           <Card>
             <Statistic
               title="Total Clinics"
-              value={stats.totalClinics}
+              value={stats?.totalClinics}
               prefix={<ClusterOutlined />}
               valueStyle={{ fontSize: 28 }}
             />
@@ -73,8 +118,8 @@ export default function PlatformDashboard() {
         <Col span={8}>
           <Card>
             <Statistic
-              title="Clinic Admins"
-              value={stats.totalClinicAdmins}
+              title="Total Doctors"
+              value={stats?.totalDoctors}
               prefix={<UserOutlined />}
               valueStyle={{ fontSize: 28 }}
             />
@@ -92,9 +137,14 @@ export default function PlatformDashboard() {
               <RangePicker
                 allowClear={false}
                 value={range}
+                picker="month"
                 onChange={(val) => {
-                  if (val) setRange(val as [dayjs.Dayjs, dayjs.Dayjs]);
+                  if (val && val[0] && val[1]) {
+                    setRange(val as [dayjs.Dayjs, dayjs.Dayjs]);
+                    fetchTrends(val[0], val[1]);
+                  }
                 }}
+                disabledDate={disableFutureMonths}
               />
             }
           >
@@ -104,29 +154,37 @@ export default function PlatformDashboard() {
                 {
                   key: "clinic",
                   label: "Clinic Count",
-                  children: (
+                  children: clinicTrend.length > 0 ? (
                     <ResponsiveContainer width="100%" height={300}>
                       <BarChart data={clinicTrend}>
                         <XAxis dataKey="month" />
                         <YAxis />
                         <Tooltip />
-                        <Bar dataKey="count" fill="#1890ff" />
+                        <Bar dataKey="clinicCount" fill="#1890ff" />
                       </BarChart>
                     </ResponsiveContainer>
+                  ) : error ? (
+                    <div>No Data (API Error)</div>
+                  ) : (
+                    <div>No Data</div>
                   ),
                 },
                 {
                   key: "doctor",
                   label: "Doctor Count",
-                  children: (
+                  children: doctorTrend.length > 0 ? (
                     <ResponsiveContainer width="100%" height={300}>
                       <BarChart data={doctorTrend}>
                         <XAxis dataKey="month" />
                         <YAxis />
                         <Tooltip />
-                        <Bar dataKey="count" fill="#82ca9d" />
+                        <Bar dataKey="doctorCount" fill="#82ca9d" />
                       </BarChart>
                     </ResponsiveContainer>
+                  ) : error ? (
+                    <div>No Data (API Error)</div>
+                  ) : (
+                    <div>No Data</div>
                   ),
                 },
               ]}
@@ -137,17 +195,27 @@ export default function PlatformDashboard() {
         {/* 右侧诊所榜单 */}
         <Col span={8}>
           <Card title="Top Clinics by Doctor Count">
-            <Table
-              dataSource={clinicRanking}
-              columns={[
-                { title: "Rank", dataIndex: "rank", key: "rank" },
-                { title: "Clinic", dataIndex: "clinic", key: "clinic" },
-                { title: "Doctors", dataIndex: "doctorCount", key: "doctorCount" },
-              ]}
-              pagination={false}
-              size="small"
-              rowKey="rank"
-            />
+            {clinicRanking.length > 0 ? (
+              <Table
+                dataSource={clinicRanking}
+                columns={[
+                  { title: "Rank", dataIndex: "rank", key: "rank" },
+                  { title: "Clinic", dataIndex: "clinicName", key: "clinicName" },
+                  {
+                    title: "Doctors",
+                    dataIndex: "doctorCount",
+                    key: "doctorCount",
+                  },
+                ]}
+                pagination={false}
+                size="small"
+                rowKey="rank"
+              />
+            ) : error ? (
+              <div>No Data (API Error)</div>
+            ) : (
+              <div>No Data</div>
+            )}
           </Card>
         </Col>
       </Row>

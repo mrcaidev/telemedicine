@@ -7,6 +7,7 @@ export interface Doctor {
   gender: "male" | "female";
   description: string;
   specialties: string[];
+  createdAt: string;
   availableTimes: AvailableTime[];
 }
 
