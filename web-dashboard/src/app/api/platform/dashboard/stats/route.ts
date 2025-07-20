@@ -18,8 +18,8 @@ export async function GET(request: NextRequest) {
     };
 
     const [appointmentStats, platformStats] = await Promise.all([
-      fetch(`${BACKEND_API}/dashboard/platform/appointmentStats`, { headers }),
-      fetch(`${BACKEND_API}/dashboard/platform/platformStats`, { headers }),
+      fetch(`${BACKEND_API}/meta/appointment/totals`, { headers }),
+      fetch(`${BACKEND_API}/meta/user/totals`, { headers }),
     ]);
 
     if (!appointmentStats.ok || !platformStats.ok) {

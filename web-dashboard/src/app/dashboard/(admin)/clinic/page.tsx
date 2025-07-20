@@ -16,6 +16,7 @@ import {
   CalendarOutlined,
 } from "@ant-design/icons";
 import dayjs, { Dayjs } from "dayjs";
+import { useSession } from "next-auth/react";
 
 const { RangePicker } = DatePicker;
 
@@ -39,10 +40,38 @@ export default function ClinicDashboard() {
   const [perSymptomData, setPerSymptomData] = useState([]);
   const [doctorRanking, setDoctorRanking] = useState([]);
 
-  function transformDoctorAppointments(raw: any[]) {
+  const [error, setError] = useState(false); // To track API errors
+
+  const { data: session } = useSession();
+  const clinicId = session?.user?.clinicId;
+
+  const fetchTrends = (startMonth: dayjs.Dayjs, endMonth: dayjs.Dayjs) => {
+    const startMonthFormatted = startMonth.format("YYYY-MM");
+    const endMonthFormatted = endMonth.format("YYYY-MM");
+
+    fetch(
+      `/api/clinic/dashboard/trends?startMonth=${startMonthFormatted}&endMonth=${endMonthFormatted}`
+    )
+      .then((res) => res.json())
+      .then(
+        (res) => {
+          setAppointmentTrendData(res.data.clinicAppointments || []); // Default to empty array if no data
+          setPerSymptomData(res.data.perSymptomData.symptoms || []); // Default to empty array if no data
+
+          const rawPerDoctorData = res.data.perDoctorData.doctorAppointments || [];
+          const transformed = transformDoctorAppointments(rawPerDoctorData);
+          setPerDoctorData(transformed);
+        },
+        () => {
+          setError(true); // Set error if the fetch fails
+        }
+      );
+  };
+
+  const transformDoctorAppointments = (raw: any[]) => {
     const allDoctors = new Set<string>();
 
-    // 先收集所有医生名称
+    // Collect all doctor names
     raw.forEach((item) => {
       item.doctorAppointments.forEach((d: any) => {
         allDoctors.add(d.doctorName);
@@ -59,34 +88,32 @@ export default function ClinicDashboard() {
       });
       return base;
     });
-  }
-
-  const fetchTrends = (startMonth: dayjs.Dayjs, endMonth: dayjs.Dayjs) => {
-    const startMonthFormatted = startMonth.format("YYYY-MM");
-    const endMonthFormatted = endMonth.format("YYYY-MM");
-
-    fetch(
-      `/api/clinic/dashboard/trends?startMonth=${startMonthFormatted}&endMonth=${endMonthFormatted}`
-    )
-      .then((res) => res.json())
-      .then((res) => {
-        setAppointmentTrendData(res.data.clinicAppointments);
-        setPerSymptomData(res.data.perSymptomData.symptoms);
-
-        const rawPerDoctorData = res.data.perDoctorData.doctorAppointments;
-        const transformed = transformDoctorAppointments(rawPerDoctorData);
-        setPerDoctorData(transformed);
-      });
   };
 
   useEffect(() => {
     fetch("/api/clinic/dashboard/stats")
       .then((res) => res.json())
-      .then((res) => setStats(res.data.data));
+      .then(
+        (res) => {
+          setStats(res.data.data || { totalAppointments: 0, totalClinics: 0, totalDoctors: 0 });
+          setError(false); // Reset error state if data is received
+        },
+        () => {
+          setError(true); // Set error if the fetch fails
+        }
+      );
 
     fetch("/api/clinic/dashboard/rank")
       .then((res) => res.json())
-      .then((res) => setDoctorRanking(res.data));
+      .then(
+        (res) => {
+          setDoctorRanking(res.data || []); // Default to empty array if no data
+          setError(false); // Reset error state if data is received
+        },
+        () => {
+          setError(true); // Set error if the fetch fails
+        }
+      );
   }, []);
 
   useEffect(() => {
@@ -101,12 +128,12 @@ export default function ClinicDashboard() {
           <Card>
             <Statistic
               title="Total Appointments"
-              value={stats.totalAppointments}
+              value={stats?.totalAppointments || 0} // Display 0 if data is unavailable
               prefix={<CalendarOutlined />}
               valueStyle={{ fontSize: 28 }}
             />
             <div className="mt-2 pt-2 border-t text-gray-500 text-sm">
-              Today: {stats.todayAppointments}
+              Today: {stats?.todayAppointments || 0}
             </div>
           </Card>
         </Col>
@@ -114,12 +141,12 @@ export default function ClinicDashboard() {
           <Card>
             <Statistic
               title="Pending Doctor Requests"
-              value={stats.pendingDoctorRequest}
+              value={stats?.pendingDoctorRequest || 0} // Display 0 if data is unavailable
               prefix={<UserSwitchOutlined />}
               valueStyle={{ fontSize: 28 }}
             />
             <div className="mt-2 pt-2 border-t text-gray-500 text-sm">
-              Urgent: {stats.urgentDoctorRequest}
+              Urgent: {stats.urgentDoctorRequest || 0}
             </div>
           </Card>
         </Col>
@@ -127,12 +154,12 @@ export default function ClinicDashboard() {
           <Card>
             <Statistic
               title="Total Doctors"
-              value={stats.doctorCount}
+              value={stats.doctorCount || 0} // Display 0 if data is unavailable
               prefix={<TeamOutlined />}
               valueStyle={{ fontSize: 28 }}
             />
             <div className="mt-2 pt-2 border-t text-gray-500 text-sm">
-              No appointment today: {stats.doctorAvailableCount}
+              No appointment today: {stats.doctorAvailableCount || 0}
             </div>
           </Card>
         </Col>
@@ -164,7 +191,7 @@ export default function ClinicDashboard() {
                 {
                   key: "1",
                   label: "Total Appointments",
-                  children: (
+                  children: appointmentTrendData.length > 0 ? (
                     <ResponsiveContainer width="100%" height={300}>
                       <BarChart data={appointmentTrendData}>
                         <XAxis dataKey="month" />
@@ -173,12 +200,16 @@ export default function ClinicDashboard() {
                         <Bar dataKey="count" fill="#1890ff" />
                       </BarChart>
                     </ResponsiveContainer>
+                  ) : error ? (
+                    <div>No Data (API Error)</div> // Handle API failure
+                  ) : (
+                    <div>No Data</div> // Handle empty data
                   ),
                 },
                 {
                   key: "2",
                   label: "Appointments Per Doctor",
-                  children: (
+                  children: perDoctorData.length > 0 ? (
                     <ResponsiveContainer width="100%" height={300}>
                       <BarChart data={perDoctorData}>
                         <XAxis dataKey="month" />
@@ -204,12 +235,16 @@ export default function ClinicDashboard() {
                           ))}
                       </BarChart>
                     </ResponsiveContainer>
+                  ) : error ? (
+                    <div>No Data (API Error)</div> // Handle API failure
+                  ) : (
+                    <div>No Data</div> // Handle empty data
                   ),
                 },
                 {
                   key: "3",
                   label: "Top Symptoms",
-                  children: (
+                  children: perSymptomData.length > 0 ? (
                     <ResponsiveContainer width="100%" height={300}>
                       <BarChart data={perSymptomData}>
                         <XAxis dataKey="symptom" />
@@ -218,6 +253,10 @@ export default function ClinicDashboard() {
                         <Bar dataKey="count" fill="#ffc658" />
                       </BarChart>
                     </ResponsiveContainer>
+                  ) : error ? (
+                    <div>No Data (API Error)</div> // Handle API failure
+                  ) : (
+                    <div>No Data</div> // Handle empty data
                   ),
                 },
               ]}
@@ -228,17 +267,23 @@ export default function ClinicDashboard() {
         {/* 医生排行榜 */}
         <Col span={8}>
           <Card title="Doctor Appointment Ranking">
-            <Table
-              dataSource={doctorRanking}
-              columns={[
-                { title: "Rank", dataIndex: "rank", key: "rank" },
-                { title: "Doctor", dataIndex: "doctorName", key: "doctorName" },
-                { title: "Appointments", dataIndex: "count", key: "count" },
-              ]}
-              pagination={false}
-              size="small"
-              rowKey="rank"
-            />
+            {doctorRanking.length > 0 ? (
+              <Table
+                dataSource={doctorRanking}
+                columns={[
+                  { title: "Rank", dataIndex: "rank", key: "rank" },
+                  { title: "Doctor", dataIndex: "doctorName", key: "doctorName" },
+                  { title: "Appointments", dataIndex: "count", key: "count" },
+                ]}
+                pagination={false}
+                size="small"
+                rowKey="rank"
+              />
+            ) : error ? (
+              <div>No Data (API Error)</div> // Handle API failure
+            ) : (
+              <div>No Data</div> // Handle empty data
+            )}
           </Card>
         </Col>
       </Row>

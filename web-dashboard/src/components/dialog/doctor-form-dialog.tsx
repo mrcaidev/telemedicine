@@ -73,6 +73,34 @@ export function DoctorFormDialog({
 
   const handleSubmit = async (values: CreateDoctorForm | EditDoctorForm) => {
     try {
+      const payload = isEdit
+        ? Object.keys(values).reduce((diff: any, key) => {
+            const k = key as keyof EditDoctorForm;
+            const editValues = values as EditDoctorForm;
+            const newValue = editValues[k];
+            const oldValue = defaultValues?.[k];
+
+            const isEqual =
+              Array.isArray(newValue) && Array.isArray(oldValue)
+                ? JSON.stringify(newValue) === JSON.stringify(oldValue)
+                : newValue === oldValue;
+
+            if (!isEqual) {
+              diff[k] = newValue;
+            }
+
+            return diff;
+          }, {})
+        : {
+            ...(values as CreateDoctorForm),
+          };
+
+      if (isEdit && Object.keys(payload).length === 0) {
+        toast.info("No changes to update");
+        setOpen(false);
+        return;
+      }
+
       const res = await fetch(
         isEdit
           ? `/api/clinic/doctor/${defaultValues!.id}`
@@ -80,7 +108,7 @@ export function DoctorFormDialog({
         {
           method: isEdit ? "PATCH" : "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(values),
+          body: JSON.stringify(payload),
         }
       );
 

@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ant-design/charts": "^2.6.0",
     "@ant-design/plots": "^2.3.3",
     "@hookform/resolvers": "^5.0.1",
     "@radix-ui/react-alert-dialog": "^1.1.13",
@@ -34,6 +35,7 @@
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.55.0",
     "recharts": "^2.15.2",
+    "rollup": "^2.79.2",
     "sonner": "^2.0.3",
     "tailwind-merge": "^3.2.0",
     "tw-animate-css": "^1.2.5",

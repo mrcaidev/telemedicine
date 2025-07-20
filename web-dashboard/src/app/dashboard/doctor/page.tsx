@@ -40,9 +40,13 @@ export default function DoctorDashboard() {
     dayjs().endOf("month"),
   ]);
 
+  const [loading, setLoading] = useState(true); // For tracking data loading state
+  const [error, setError] = useState(false); // To handle API errors
+
   const disableFutureMonths = (current: dayjs.Dayjs) => {
     return current && current.isAfter(dayjs().endOf("month"), "month");
   };
+
   const fetchTrends = (startMonth: dayjs.Dayjs, endMonth: dayjs.Dayjs) => {
     const startMonthFormatted = startMonth.format("YYYY-MM");
     const endMonthFormatted = endMonth.format("YYYY-MM");
@@ -52,23 +56,52 @@ export default function DoctorDashboard() {
     )
       .then((res) => res.json())
       .then((data) => {
-        setMonthlyData(data.data.data.appointmentsTrends);
+        if (data && data.data) {
+          setMonthlyData(data.data.data.appointmentsTrends || []);
+          setSymptomData(data.data || []);
+        } else {
+          setMonthlyData([]); // Set empty array if data is not available
+          setSymptomData([]); // Set empty array if data is not available
+        }
+        setLoading(false); // Set loading to false when data is fetched
+        setError(false); // Reset error state
+      })
+      .catch(() => {
+        setLoading(false); // Set loading to false even if error occurs
+        setError(true); // Set error state when API fetch fails
       });
   };
 
   useEffect(() => {
     fetch("/api/doctor/dashboard/stats")
       .then((res) => res.json())
-      .then((res) => setStats(res.data.data));
+      .then((data) => {
+        setStats(data.data.data || {});
+      })
+      .catch(() => {
+        setError(true); // Set error state if fetch fails
+        setLoading(false); // Stop loading
+      });
 
     fetch("/api/doctor/dashboard/rank")
       .then((res) => res.json())
-      .then((res) => setSymptomData(res.data));
+      .then((res) => {
+        setSymptomData(res.data || []);
+      })
+      .catch(() => {
+        setError(true); // Set error state if fetch fails
+        setLoading(false); // Stop loading
+      });
   }, []);
 
   useEffect(() => {
     fetchTrends(range[0], range[1]);
   }, [range]);
+
+  // Display 'No Data' if no data is available or if there is an error
+  const renderNoDataMessage = () => {
+    return <div>No Data Available</div>;
+  };
 
   return (
     <div className="p-6">
@@ -78,12 +111,12 @@ export default function DoctorDashboard() {
           <Card>
             <Statistic
               title="Total Appointments"
-              value={stats.totalAppointments}
+              value={stats?.totalAppointments || 0}
               prefix={<CalendarOutlined />}
               valueStyle={{ fontSize: 28 }}
             />
             <div className="mt-2 pt-2 border-t text-gray-500 text-sm">
-              Today: {stats.todayAppointments}
+              Today: {stats?.todayAppointments || 0}
             </div>
           </Card>
         </Col>
@@ -91,7 +124,7 @@ export default function DoctorDashboard() {
           <Card>
             <Statistic
               title="New Patients Today"
-              value={stats.newPatientsToday}
+              value={stats?.newPatientsToday || 0}
               prefix={<UserAddOutlined />}
               valueStyle={{ fontSize: 28 }}
             />
@@ -104,12 +137,12 @@ export default function DoctorDashboard() {
           <Card>
             <Statistic
               title="Pending Appointments"
-              value={stats.pendingAppointments}
+              value={stats.pendingAppointments || 0}
               prefix={<ClockCircleOutlined />}
               valueStyle={{ fontSize: 28 }}
             />
             <div className="mt-2 pt-2 border-t text-gray-500 text-sm">
-              Pending Appointments Today: {stats.pendingAppointmentsToday}
+              Pending Appointments Today: {stats.pendingAppointmentsToday || 0}
             </div>
           </Card>
         </Col>
@@ -137,38 +170,50 @@ export default function DoctorDashboard() {
               </Space>
             }
           >
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={monthlyData}>
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip
-                  shared={false}
-                  formatter={(v) => [`${v} appointments`, "Appointments"]}
-                />
-                <Bar
-                  dataKey="count"
-                  fill="#1890ff"
-                  barSize={40}
-                  radius={[4, 4, 0, 0]}
-                />
-              </BarChart>
-            </ResponsiveContainer>
+            {loading ? (
+              <div>Loading...</div>
+            ) : monthlyData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={monthlyData}>
+                  <XAxis dataKey="month" />
+                  <YAxis />
+                  <Tooltip
+                    shared={false}
+                    formatter={(v) => [`${v} appointments`, "Appointments"]}
+                  />
+                  <Bar
+                    dataKey="count"
+                    fill="#1890ff"
+                    barSize={40}
+                    radius={[4, 4, 0, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              renderNoDataMessage()
+            )}
           </Card>
         </Col>
         <Col span={8}>
           <Card title="Symptom Keyword Ranking">
-            <Table
-              dataSource={symptomData}
-              columns={[
-                { title: "Rank", dataIndex: "rank", key: "rank", width: 80 },
-                { title: "Symptom", dataIndex: "symptom", key: "symptom" },
-                { title: "Occurrences", dataIndex: "count", key: "count" },
-              ]}
-              pagination={false}
-              size="small"
-              rowKey="rank"
-              bordered={false}
-            />
+            {loading ? (
+              <div>Loading...</div>
+            ) : symptomData.length > 0 ? (
+              <Table
+                dataSource={symptomData}
+                columns={[
+                  { title: "Rank", dataIndex: "rank", key: "rank", width: 80 },
+                  { title: "Symptom", dataIndex: "symptom", key: "symptom" },
+                  { title: "Occurrences", dataIndex: "count", key: "count" },
+                ]}
+                pagination={false}
+                size="small"
+                rowKey="rank"
+                bordered={false}
+              />
+            ) : (
+              renderNoDataMessage()
+            )}
           </Card>
         </Col>
       </Row>

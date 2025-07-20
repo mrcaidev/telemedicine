@@ -16,4 +16,5 @@ export interface RawAppointment {
   remark: string;
   status: "normal" | "to_be_rescheduled" | "cancelled";
   createdAt: string;
+  recordId: string;
 }

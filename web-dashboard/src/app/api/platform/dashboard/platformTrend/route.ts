@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const res = await fetch(
-      `${BACKEND_API}/dashboard/platform/platformTrend?startMonth=${startMonth}&endMonth=${endMonth}`,
+      `${BACKEND_API}/meta/user/trends?startMonth=${startMonth}&endMonth=${endMonth}`,
       {
         method: "GET",
         headers: {
