@@ -100,6 +100,7 @@ export default function MedicalRecordDetailPage() {
     router.push(`/dashboard/doctor/appointments`);
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleChange = (field: keyof MedicalRecord, value: any) => {
     setFormData((prev) => ({
       ...prev,
@@ -113,6 +114,7 @@ export default function MedicalRecordDetailPage() {
     for (const key in formData) {
       const typedKey = key as keyof MedicalRecord;
       if (formData[typedKey] !== record?.[typedKey]) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         updates[typedKey] = formData[typedKey] as any;
       }
     }
@@ -297,7 +299,7 @@ export default function MedicalRecordDetailPage() {
       if (!res.ok) throw new Error("Failed to fetch summary");
       const data = await res.json();
       setSummary(data.data.data);
-    } catch (err) {
+    } catch {
       setSummary("No summary available.");
     } finally {
       setLoading(false);
@@ -330,7 +332,9 @@ export default function MedicalRecordDetailPage() {
           <DialogContent className="sm:max-w-lg">
             <DialogHeader>
               <DialogTitle>AI Summary</DialogTitle>
-              <DialogDescription>Below is the Ai-generated summary of the record</DialogDescription>
+              <DialogDescription>
+                Below is the Ai-generated summary of the record
+              </DialogDescription>
             </DialogHeader>
 
             <div className="max-h-[60vh] overflow-auto mt-2 text-sm text-gray-700 whitespace-pre-line">

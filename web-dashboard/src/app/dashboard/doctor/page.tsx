@@ -41,6 +41,7 @@ export default function DoctorDashboard() {
   ]);
 
   const [loading, setLoading] = useState(true); // For tracking data loading state
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [error, setError] = useState(false); // To handle API errors
 
   const disableFutureMonths = (current: dayjs.Dayjs) => {

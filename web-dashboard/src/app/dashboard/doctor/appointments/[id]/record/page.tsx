@@ -103,7 +103,7 @@ export default function CreateMedicalRecordPage() {
         const pid = data.data.data.patient.id;
         form.setValue("patientId", pid);
       });
-  }, [appointmentId]);
+  }, [appointmentId, form]);
 
   const onSubmit = async (values: MedicalRecordFormValues) => {
     const cleanValue = (value: string | null | undefined, key: string) => {

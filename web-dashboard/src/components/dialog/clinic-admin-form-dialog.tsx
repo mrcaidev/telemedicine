@@ -57,7 +57,8 @@ export function ClinicAdminFormDialog({
     values: CreateClinicAdminForm | EditClinicAdminForm
   ) => {
     const payload = isEdit
-      ? Object.keys(values).reduce((diff: any, key) => {
+      ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        Object.keys(values).reduce((diff: any, key) => {
           const k = key as keyof EditClinicAdminForm;
           if (values[k] !== defaultValues?.[k]) {
             diff[k] = values[k];

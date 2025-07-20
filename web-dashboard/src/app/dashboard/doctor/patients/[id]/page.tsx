@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { UserCircle, ArrowLeft } from "lucide-react";
 import { RawPatient, MedicalRecord } from "@/types/patient";
+import { useCallback } from "react";
 import MedicalRecordCard from "@/components/medical-record/medical-record";
 import Spinner from "@/components/ui/spinner";
 
@@ -26,7 +27,7 @@ export default function PatientDetailPage() {
       .then((data) => setPatient(data.data.data));
   }, [id]);
 
-  const fetchMoreRecords = async () => {
+  const fetchMoreRecords = useCallback(async () => {
     if (isLoading || !hasMore) return;
     setIsLoading(true);
 
@@ -54,11 +55,11 @@ export default function PatientDetailPage() {
     }
 
     setIsLoading(false);
-  };
+  },[isLoading, hasMore, cursor, id, LIMIT]);
 
   useEffect(() => {
     if (id) fetchMoreRecords();
-  }, [id]);
+  }, [fetchMoreRecords, id]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -73,7 +74,7 @@ export default function PatientDetailPage() {
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [cursor, isLoading, hasMore]);
+  }, [fetchMoreRecords, cursor, isLoading, hasMore]);
 
   return (
     <div className="w-full px-8 py-6 min-h-screen space-y-6">

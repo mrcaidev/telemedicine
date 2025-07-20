@@ -31,6 +31,7 @@ function getPercent(time: string) {
 }
 
 export default function SchedulePage() {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [selectedId, setSelectedId] = useState<string>();
   const [availableTimes, setAvailableTimes] = useState<
@@ -214,13 +215,13 @@ export default function SchedulePage() {
 
       {!searchAttempted && (
         <Card className="p-6 h-[500px] flex items-center justify-center text-gray-400 text-base">
-          No data, please search a doctor's full name to view their schedule.
+          No data, please search a doctor&apos;s full name to view their schedule.
         </Card>
       )}
 
       {searchAttempted && searchFailed && (
         <Card className="p-6 h-[500px] flex items-center justify-center text-red-500 text-base text-center">
-          No doctor found with the name "{doctorName}". Please try again.
+          No doctor found with the name &ldquo;{doctorName}&ldquo;. Please try again.
         </Card>
       )}
 

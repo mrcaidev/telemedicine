@@ -19,6 +19,7 @@ import { DoctorFormDialog } from "@/components/dialog/doctor-form-dialog";
 import { ConfirmDialog } from "@/components/dialog/confirm-dialog";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { useCallback } from "react";
 import SearchBar from "@/components/search/search-bar";
 
 export default function ClinicDoctorList() {
@@ -49,46 +50,49 @@ export default function ClinicDoctorList() {
     setRefreshTrigger((prev) => prev + 1);
   };
 
-  const fetchDoctors = async (loadMore = false) => {
-    if (loading || (!hasMore && loadMore)) return;
-    setLoading(true);
+  const fetchDoctors = useCallback(
+    async (loadMore = false) => {
+      if (loading || (!hasMore && loadMore)) return;
+      setLoading(true);
 
-    try {
-      const queryParams = new URLSearchParams({
-        clinicId: id || "",
-        limit: "10",
-        sortBy: "createdAt",
-        sortOrder: "asc",
-      });
+      try {
+        const queryParams = new URLSearchParams({
+          clinicId: id || "",
+          limit: "10",
+          sortBy: "createdAt",
+          sortOrder: "asc",
+        });
 
-      if (cursor && loadMore) queryParams.append("cursor", cursor);
+        if (cursor && loadMore) queryParams.append("cursor", cursor);
 
-      const res = await fetch(`/api/clinic/doctor?${queryParams.toString()}`);
-      const data = await res.json();
-      const newDoctors: Doctor[] = data.data.doctors;
+        const res = await fetch(`/api/clinic/doctor?${queryParams.toString()}`);
+        const data = await res.json();
+        const newDoctors: Doctor[] = data.data.doctors;
 
-      if (loadMore) {
-        setDoctors((prev) => [...prev, ...newDoctors]);
-      } else {
-        setDoctors(newDoctors);
+        if (loadMore) {
+          setDoctors((prev) => [...prev, ...newDoctors]);
+        } else {
+          setDoctors(newDoctors);
+        }
+
+        if (newDoctors.length < 10) setHasMore(false);
+        if (newDoctors.length > 0) {
+          setCursor(newDoctors[newDoctors.length - 1].createdAt);
+        }
+      } catch {
+        toast.error("Loading doctors failed", {
+          description: "Can't load doctors, please try again later.",
+        });
+      } finally {
+        setLoading(false);
       }
-
-      if (newDoctors.length < 10) setHasMore(false);
-      if (newDoctors.length > 0) {
-        setCursor(newDoctors[newDoctors.length - 1].createdAt); // 默认用 createdAt 为 cursor
-      }
-    } catch {
-      toast.error("Loading doctors failed", {
-        description: "Can't load doctors, please try again later.",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [loading, hasMore, cursor, id, setDoctors, setHasMore, setCursor]
+  );
 
   useEffect(() => {
     if (id) fetchDoctors(false);
-  }, [refreshTrigger, id]);
+  }, [fetchDoctors, refreshTrigger, id]);
 
   useEffect(() => {
     const onScroll = () => {
@@ -103,7 +107,7 @@ export default function ClinicDoctorList() {
     };
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
-  }, [cursor, hasMore, loading]);
+  }, [fetchDoctors, cursor, hasMore, loading]);
 
   const handleDelete = async (id: string) => {
     try {

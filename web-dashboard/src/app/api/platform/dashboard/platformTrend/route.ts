@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
       data.data.platformtrends
     );
     return NextResponse.json({ clinicTrend, doctorTrend });
-  } catch (err) {
+  } catch  {
     return NextResponse.json(
       { error: "Failed to fetch trends" },
       { status: 500 }
@@ -47,6 +47,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function formatPlatformTrends(platformtrends: any[]) {
   const clinicTrend = platformtrends.map((item) => ({
     month: item.month,

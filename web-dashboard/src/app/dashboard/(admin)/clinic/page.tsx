@@ -15,8 +15,9 @@ import {
   UserSwitchOutlined,
   CalendarOutlined,
 } from "@ant-design/icons";
+import { useCallback } from "react";
 import dayjs, { Dayjs } from "dayjs";
-import { useSession } from "next-auth/react";
+// import { useSession } from "next-auth/react";
 
 const { RangePicker } = DatePicker;
 
@@ -36,52 +37,61 @@ export default function ClinicDashboard() {
   });
 
   const [appointmentTrendData, setAppointmentTrendData] = useState([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [perDoctorData, setPerDoctorData] = useState<Record<string, any>[]>([]);
   const [perSymptomData, setPerSymptomData] = useState([]);
   const [doctorRanking, setDoctorRanking] = useState([]);
 
   const [error, setError] = useState(false); // To track API errors
 
-  const { data: session } = useSession();
-  const clinicId = session?.user?.clinicId;
+  // const { data: session } = useSession();
+  // const clinicId = session?.user?.clinicId;
 
-  const fetchTrends = (startMonth: dayjs.Dayjs, endMonth: dayjs.Dayjs) => {
-    const startMonthFormatted = startMonth.format("YYYY-MM");
-    const endMonthFormatted = endMonth.format("YYYY-MM");
+  const fetchTrends = useCallback(
+    (startMonth: dayjs.Dayjs, endMonth: dayjs.Dayjs) => {
+      const startMonthFormatted = startMonth.format("YYYY-MM");
+      const endMonthFormatted = endMonth.format("YYYY-MM");
 
-    fetch(
-      `/api/clinic/dashboard/trends?startMonth=${startMonthFormatted}&endMonth=${endMonthFormatted}`
-    )
-      .then((res) => res.json())
-      .then(
-        (res) => {
-          setAppointmentTrendData(res.data.clinicAppointments || []); // Default to empty array if no data
-          setPerSymptomData(res.data.perSymptomData.symptoms || []); // Default to empty array if no data
+      fetch(
+        `/api/clinic/dashboard/trends?startMonth=${startMonthFormatted}&endMonth=${endMonthFormatted}`
+      )
+        .then((res) => res.json())
+        .then(
+          (res) => {
+            setAppointmentTrendData(res.data.clinicAppointments || []); // Default to empty array if no data
+            setPerSymptomData(res.data.perSymptomData.symptoms || []); // Default to empty array if no data
 
-          const rawPerDoctorData = res.data.perDoctorData.doctorAppointments || [];
-          const transformed = transformDoctorAppointments(rawPerDoctorData);
-          setPerDoctorData(transformed);
-        },
-        () => {
-          setError(true); // Set error if the fetch fails
-        }
-      );
-  };
+            const rawPerDoctorData =
+              res.data.perDoctorData.doctorAppointments || [];
+            const transformed = transformDoctorAppointments(rawPerDoctorData);
+            setPerDoctorData(transformed);
+          },
+          () => {
+            setError(true); // Set error if the fetch fails
+          }
+        );
+    },
+    [setAppointmentTrendData, setPerSymptomData, setPerDoctorData, setError]
+  );
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const transformDoctorAppointments = (raw: any[]) => {
     const allDoctors = new Set<string>();
 
     // Collect all doctor names
     raw.forEach((item) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       item.doctorAppointments.forEach((d: any) => {
         allDoctors.add(d.doctorName);
       });
     });
 
     return raw.map((item) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const base: Record<string, any> = { month: item.month };
       allDoctors.forEach((doctor) => {
         const found = item.doctorAppointments.find(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (entry: any) => entry.doctorName === doctor
         );
         base[doctor] = found ? found.appointments : 0;
@@ -95,7 +105,13 @@ export default function ClinicDashboard() {
       .then((res) => res.json())
       .then(
         (res) => {
-          setStats(res.data.data || { totalAppointments: 0, totalClinics: 0, totalDoctors: 0 });
+          setStats(
+            res.data.data || {
+              totalAppointments: 0,
+              totalClinics: 0,
+              totalDoctors: 0,
+            }
+          );
           setError(false); // Reset error state if data is received
         },
         () => {
@@ -118,7 +134,7 @@ export default function ClinicDashboard() {
 
   useEffect(() => {
     fetchTrends(range[0], range[1]);
-  }, [range]);
+  }, [fetchTrends, range]);
 
   return (
     <div className="p-6">
@@ -191,73 +207,76 @@ export default function ClinicDashboard() {
                 {
                   key: "1",
                   label: "Total Appointments",
-                  children: appointmentTrendData.length > 0 ? (
-                    <ResponsiveContainer width="100%" height={300}>
-                      <BarChart data={appointmentTrendData}>
-                        <XAxis dataKey="month" />
-                        <YAxis />
-                        <Tooltip />
-                        <Bar dataKey="count" fill="#1890ff" />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  ) : error ? (
-                    <div>No Data (API Error)</div> // Handle API failure
-                  ) : (
-                    <div>No Data</div> // Handle empty data
-                  ),
+                  children:
+                    appointmentTrendData.length > 0 ? (
+                      <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={appointmentTrendData}>
+                          <XAxis dataKey="month" />
+                          <YAxis />
+                          <Tooltip />
+                          <Bar dataKey="count" fill="#1890ff" />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    ) : error ? (
+                      <div>No Data (API Error)</div> // Handle API failure
+                    ) : (
+                      <div>No Data</div> // Handle empty data
+                    ),
                 },
                 {
                   key: "2",
                   label: "Appointments Per Doctor",
-                  children: perDoctorData.length > 0 ? (
-                    <ResponsiveContainer width="100%" height={300}>
-                      <BarChart data={perDoctorData}>
-                        <XAxis dataKey="month" />
-                        <YAxis />
-                        <Tooltip shared={false} />
-                        {Object.keys(perDoctorData[0] || {})
-                          .filter((key) => key !== "month")
-                          .map((doctor, i) => (
-                            <Bar
-                              key={doctor}
-                              dataKey={doctor}
-                              stackId="a"
-                              fill={
-                                [
-                                  "#82ca9d",
-                                  "#8884d8",
-                                  "#ffc658",
-                                  "#a0d911",
-                                  "#ff4d4f",
-                                ][i % 5]
-                              }
-                            />
-                          ))}
-                      </BarChart>
-                    </ResponsiveContainer>
-                  ) : error ? (
-                    <div>No Data (API Error)</div> // Handle API failure
-                  ) : (
-                    <div>No Data</div> // Handle empty data
-                  ),
+                  children:
+                    perDoctorData.length > 0 ? (
+                      <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={perDoctorData}>
+                          <XAxis dataKey="month" />
+                          <YAxis />
+                          <Tooltip shared={false} />
+                          {Object.keys(perDoctorData[0] || {})
+                            .filter((key) => key !== "month")
+                            .map((doctor, i) => (
+                              <Bar
+                                key={doctor}
+                                dataKey={doctor}
+                                stackId="a"
+                                fill={
+                                  [
+                                    "#82ca9d",
+                                    "#8884d8",
+                                    "#ffc658",
+                                    "#a0d911",
+                                    "#ff4d4f",
+                                  ][i % 5]
+                                }
+                              />
+                            ))}
+                        </BarChart>
+                      </ResponsiveContainer>
+                    ) : error ? (
+                      <div>No Data (API Error)</div> // Handle API failure
+                    ) : (
+                      <div>No Data</div> // Handle empty data
+                    ),
                 },
                 {
                   key: "3",
                   label: "Top Symptoms",
-                  children: perSymptomData.length > 0 ? (
-                    <ResponsiveContainer width="100%" height={300}>
-                      <BarChart data={perSymptomData}>
-                        <XAxis dataKey="symptom" />
-                        <YAxis />
-                        <Tooltip />
-                        <Bar dataKey="count" fill="#ffc658" />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  ) : error ? (
-                    <div>No Data (API Error)</div> // Handle API failure
-                  ) : (
-                    <div>No Data</div> // Handle empty data
-                  ),
+                  children:
+                    perSymptomData.length > 0 ? (
+                      <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={perSymptomData}>
+                          <XAxis dataKey="symptom" />
+                          <YAxis />
+                          <Tooltip />
+                          <Bar dataKey="count" fill="#ffc658" />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    ) : error ? (
+                      <div>No Data (API Error)</div> // Handle API failure
+                    ) : (
+                      <div>No Data</div> // Handle empty data
+                    ),
                 },
               ]}
             />
@@ -272,7 +291,11 @@ export default function ClinicDashboard() {
                 dataSource={doctorRanking}
                 columns={[
                   { title: "Rank", dataIndex: "rank", key: "rank" },
-                  { title: "Doctor", dataIndex: "doctorName", key: "doctorName" },
+                  {
+                    title: "Doctor",
+                    dataIndex: "doctorName",
+                    key: "doctorName",
+                  },
                   { title: "Appointments", dataIndex: "count", key: "count" },
                 ]}
                 pagination={false}

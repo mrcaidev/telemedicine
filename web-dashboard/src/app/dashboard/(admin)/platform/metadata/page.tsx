@@ -38,6 +38,7 @@ export default function ReferenceManager() {
   const [selected, setSelected] = useState("diagnoses");
   const [data, setData] = useState<ReferenceItem[]>([]);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [openCreateDialog, setOpenCreateDialog] = useState(false);
 
   useEffect(() => {

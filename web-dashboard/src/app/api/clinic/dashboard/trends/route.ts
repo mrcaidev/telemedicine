@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
       perSymptomData: perSymptomData.data,
     };
     return NextResponse.json({ data: mergedData, status: 200 });
-  } catch (err) {
+  } catch  {
     return NextResponse.json(
       { error: "Failed to fetch trends" },
       { status: 500 }

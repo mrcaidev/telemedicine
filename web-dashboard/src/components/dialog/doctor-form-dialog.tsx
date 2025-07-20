@@ -74,7 +74,8 @@ export function DoctorFormDialog({
   const handleSubmit = async (values: CreateDoctorForm | EditDoctorForm) => {
     try {
       const payload = isEdit
-        ? Object.keys(values).reduce((diff: any, key) => {
+        ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          Object.keys(values).reduce((diff: any, key) => {
             const k = key as keyof EditDoctorForm;
             const editValues = values as EditDoctorForm;
             const newValue = editValues[k];
