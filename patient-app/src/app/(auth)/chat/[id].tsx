@@ -1,4 +1,6 @@
+import { useDoctorSearchQuery } from "@/api/doctor";
 import { useSendMessageMutation, useSessionQuery } from "@/api/session";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
@@ -117,6 +119,7 @@ function ChatInterface() {
       {session.evaluation && (
         <View className="py-4">
           <EvaluationCard evaluation={session.evaluation} />
+          <RecommendedDoctorCards keyword={session.evaluation.keyword} />
         </View>
       )}
     </ScrollView>
@@ -203,6 +206,41 @@ function EvaluationCard({ evaluation }: { evaluation: ChatEvaluation }) {
         <Text className="leading-snug">{evaluation.suggestion}</Text>
       </View>
     </LinearGradient>
+  );
+}
+
+function RecommendedDoctorCards({ keyword }: { keyword: string }) {
+  const { data: doctors, isPending, error } = useDoctorSearchQuery(keyword, 3);
+
+  if (isPending || error) {
+    return (
+      <Muted className="text-center">
+        Recommending doctors based on this result...
+      </Muted>
+    );
+  }
+
+  return (
+    <View className="flex-row items-center gap-2 py-4">
+      {doctors.map((doctor) => (
+        <Link key={doctor.id} href={`/doctor/${doctor.id}`} className="grow">
+          <View className="p-4 bg-white rounded-md shadow-sm">
+            <Avatar alt="Doctor's profile photo">
+              <AvatarImage source={{ uri: doctor.avatarUrl ?? undefined }} />
+              <AvatarFallback>
+                <Muted>
+                  {doctor.firstName[0]}
+                  {doctor.lastName[0]}
+                </Muted>
+              </AvatarFallback>
+            </Avatar>
+            <Text className="font-medium">
+              {doctor.firstName} {doctor.lastName}
+            </Text>
+          </View>
+        </Link>
+      ))}
+    </View>
   );
 }
 

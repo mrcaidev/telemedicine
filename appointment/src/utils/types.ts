@@ -44,6 +44,7 @@ export type Appointment = {
   endAt: string;
   remark: string;
   status: AppointmentStatus;
+  medicalRecordId: string | null;
   createdAt: string;
 };
 
