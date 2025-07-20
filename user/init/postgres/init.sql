@@ -287,3 +287,34 @@ create table audit_logs (
   action text not null,
   created_at timestamptz default now() not null
 );
+
+select
+  to_char(months.month, 'YYYY-MM') as month,
+  coalesce(clinic_count, 0) as "clinicCount",
+  coalesce(doctor_count, 0) as "doctorCount"
+from (
+  select
+    date_trunc('month', gs)::date as month
+  from generate_series(
+    (select min(created_at) from clinics),
+    (select max(created_at) from clinics),
+    interval '1 month'
+  ) gs
+) months
+left join (
+  select
+    date_trunc('month', created_at)::date as month,
+    count(*) as clinic_count
+  from clinics
+  where deleted_at is null
+  group by month
+) c on months.month = c.month
+left join (
+  select
+    date_trunc('month', created_at)::date as month,
+    count(*) as doctor_count
+  from doctor_profiles
+  where deleted_by is null
+  group by month
+) d on months.month = d.month
+order by months.month asc;
