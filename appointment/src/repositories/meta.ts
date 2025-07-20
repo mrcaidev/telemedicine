@@ -108,11 +108,11 @@ export async function selectClinicStats(clinicId: string) {
   `) as { count: number }[];
 
   return {
-    totalAppointments: Number(totalAppointmentsRow?.count ?? 0),
-    todayAppointments: Number(todayAppointmentsRow?.count ?? 0),
-    pendingDoctorRequest: Number(pendingDoctorRequestRow?.count ?? 0),
-    doctorCount: Number(doctorCountRow?.count ?? 0),
-    doctorAvailableCount: Number(doctorAvailableCountRow?.count ?? 0),
+    totalAppointments: totalAppointmentsRow?.count ?? 0,
+    todayAppointments: todayAppointmentsRow?.count ?? 0,
+    pendingDoctorRequest: pendingDoctorRequestRow?.count ?? 0,
+    doctorCount: doctorCountRow?.count ?? 0,
+    doctorAvailableCount: doctorAvailableCountRow?.count ?? 0,
   };
 }
 
@@ -155,10 +155,10 @@ export async function selectDoctorStats(doctorId: string) {
   `) as { count: number }[];
 
   return {
-    totalAppointments: Number(totalAppointmentsRow?.count ?? 0),
-    todayAppointments: Number(todayAppointmentsRow?.count ?? 0),
-    pendingDoctorRequest: Number(pendingDoctorRequestRow?.count ?? 0),
-    todayPendingDoctorRequest: Number(todayPendingDoctorRequestRow?.count ?? 0),
+    totalAppointments: totalAppointmentsRow?.count ?? 0,
+    todayAppointments: todayAppointmentsRow?.count ?? 0,
+    pendingDoctorRequest: pendingDoctorRequestRow?.count ?? 0,
+    todayPendingDoctorRequest: todayPendingDoctorRequestRow?.count ?? 0,
   };
 }
 
