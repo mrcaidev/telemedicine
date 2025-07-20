@@ -3,7 +3,7 @@ import { sql } from "bun";
 
 export async function countUsers() {
   const rows = (await sql`
-    select role, count(*) as total
+    select role, count(*)::integer as total
     from accounts
     group by role
   `) as { role: Role; total: number }[];
@@ -13,7 +13,7 @@ export async function countUsers() {
 
 export async function countClinics() {
   const [row] = (await sql`
-    select count(*) as total
+    select count(*)::integer as total
     from clinics
   `) as { total: number }[];
   return row?.total || 0;
@@ -37,7 +37,7 @@ export async function countClinicsAndDoctorsByMonth() {
     left join (
       select
         date_trunc('month', created_at)::date as month,
-        count(*) as clinic_count
+        count(*)::integer as clinic_count
       from clinics
       where deleted_at is null
       group by month
@@ -45,7 +45,7 @@ export async function countClinicsAndDoctorsByMonth() {
     left join (
       select
         date_trunc('month', a.created_at)::date as month,
-        count(*) as doctor_count
+        count(*)::integer as doctor_count
       from doctor_profiles dp
       left join accounts a on dp.id = a.id
       where dp.deleted_by is null
@@ -62,7 +62,7 @@ export async function rankClinics() {
     select
       row_number() over (order by count(dp.id) desc) as rank,
       c.name as "clinicName",
-      count(dp.id) as "doctorCount"
+      count(dp.id)::integer as "doctorCount"
     from clinics c
     left join doctor_profiles dp on c.id = dp.clinic_id and dp.deleted_by is null
     where c.deleted_at is null
