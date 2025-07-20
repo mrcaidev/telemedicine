@@ -7,6 +7,7 @@ import { authController } from "./controllers/auth";
 import { clinicController } from "./controllers/clinic";
 import { clinicAdminController } from "./controllers/clinic-admin";
 import { doctorController } from "./controllers/doctor";
+import { metaController } from "./controllers/meta";
 import { oauthController } from "./controllers/oauth";
 import { otpVerificationController } from "./controllers/otp-verification";
 import { patientController } from "./controllers/patient";
@@ -34,6 +35,7 @@ app.route("/clinics", clinicController);
 app.route("/clinic-admins", clinicAdminController);
 app.route("/doctors", doctorController);
 app.route("/patients", patientController);
+app.route("/meta/user", metaController);
 
 // 集中处理错误。
 app.onError((error, c) => {
