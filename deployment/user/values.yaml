@@ -11,6 +11,7 @@ paths:
   - /clinic-admins
   - /platform-admins
   - /clinics
+  - /meta/user
 resources:
   requests:
     cpu: 100m
