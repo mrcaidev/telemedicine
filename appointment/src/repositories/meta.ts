@@ -8,28 +8,52 @@ export async function countAppointments() {
   return rows[0]?.total ?? 0;
 }
 
-export async function countClinicAppointmentsByMonth(clinicId: string) {
+export async function countClinicAppointmentsByMonth(
+  clinicId: string,
+  timeRange: { startAt: string; endAt: string },
+) {
   const rows = (await sql`
+    with month_series as (
+      select to_char(generate_series(
+        date_trunc('month', ${timeRange.startAt}::date),
+        date_trunc('month', ${timeRange.endAt}::date),
+        '1 month'::interval
+      ), 'YYYY-MM') as month
+    )
     select
-      to_char(created_at, 'YYYY-MM') as month,
-      count(*)::integer as count
-    from full_appointments
-    where clinic_id = ${clinicId}
-    group by to_char(created_at, 'YYYY-MM')
-    order by month
+      ms.month,
+      coalesce(count(fa.id), 0)::integer as count
+    from month_series ms
+    left join full_appointments fa on
+      to_char(fa.created_at, 'YYYY-MM') = ms.month
+      and fa.clinic_id = ${clinicId}
+    group by ms.month
+    order by ms.month
   `) as { month: string; count: number }[];
   return rows;
 }
 
-export async function countDoctorAppointmentsByMonth(doctorId: string) {
+export async function countDoctorAppointmentsByMonth(
+  doctorId: string,
+  timeRange: { startAt: string; endAt: string },
+) {
   const rows = (await sql`
+    with month_series as (
+      select to_char(generate_series(
+        date_trunc('month', ${timeRange.startAt}::date),
+        date_trunc('month', ${timeRange.endAt}::date),
+        '1 month'::interval
+      ), 'YYYY-MM') as month
+    )
     select
-      to_char(created_at, 'YYYY-MM') as month,
-      count(*)::integer as count
-    from appointments
-    where doctor_id = ${doctorId}
-    group by to_char(created_at, 'YYYY-MM')
-    order by month
+      ms.month,
+      coalesce(count(a.id), 0)::integer as count
+    from month_series ms
+    left join appointments a on
+      to_char(a.created_at, 'YYYY-MM') = ms.month
+      and a.doctor_id = ${doctorId}
+    group by ms.month
+    order by ms.month
   `) as { month: string; count: number }[];
   return rows;
 }
@@ -138,17 +162,45 @@ export async function selectDoctorStats(doctorId: string) {
   };
 }
 
-export async function selectClinicAppointmentsGroupByDoctors(clinicId: string) {
+export async function selectClinicAppointmentsGroupByDoctors(
+  clinicId: string,
+  timeRange: { startAt: string; endAt: string },
+) {
   const rows = (await sql`
+    with month_series as (
+      select to_char(generate_series(
+        date_trunc('month', ${timeRange.startAt}::date),
+        date_trunc('month', ${timeRange.endAt}::date),
+        '1 month'::interval
+      ), 'YYYY-MM') as month
+    ),
+    clinic_doctors as (
+      select distinct
+        d.id as doctor_id,
+        concat(d.first_name, ' ', d.last_name) as doctor_name
+      from doctors d
+      where d.clinic_id = ${clinicId}
+    ),
+    month_doctor_combinations as (
+      select
+        ms.month,
+        cd.doctor_id,
+        cd.doctor_name
+      from month_series ms
+      cross join clinic_doctors cd
+    )
     select
-      to_char(created_at, 'YYYY-MM') as month,
-      doctor_id,
-      concat(doctor_first_name, ' ', doctor_last_name) as doctor_name,
-      count(*)::integer as appointments
-    from full_appointments
-    where clinic_id = ${clinicId}
-    group by to_char(created_at, 'YYYY-MM'), doctor_id, doctor_first_name, doctor_last_name
-    order by month, doctor_name
+      mdc.month,
+      mdc.doctor_id,
+      mdc.doctor_name,
+      coalesce(count(fa.id), 0)::integer as appointments
+    from month_doctor_combinations mdc
+    left join full_appointments fa on
+      to_char(fa.created_at, 'YYYY-MM') = mdc.month
+      and fa.doctor_id = mdc.doctor_id
+      and fa.clinic_id = ${clinicId}
+    group by mdc.month, mdc.doctor_id, mdc.doctor_name
+    order by mdc.month, mdc.doctor_name
   `) as {
     month: string;
     doctor_id: string;

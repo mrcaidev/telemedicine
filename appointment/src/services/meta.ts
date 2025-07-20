@@ -5,13 +5,25 @@ export async function countAppointments() {
   return total;
 }
 
-export async function findClinicAppointmentTrends(clinicId: string) {
-  const trends = await metaRepository.countClinicAppointmentsByMonth(clinicId);
+export async function findClinicAppointmentTrends(
+  clinicId: string,
+  timeRange: { startAt: string; endAt: string },
+) {
+  const trends = await metaRepository.countClinicAppointmentsByMonth(
+    clinicId,
+    timeRange,
+  );
   return trends;
 }
 
-export async function findDoctorAppointmentTrends(doctorId: string) {
-  const trends = await metaRepository.countDoctorAppointmentsByMonth(doctorId);
+export async function findDoctorAppointmentTrends(
+  doctorId: string,
+  timeRange: { startAt: string; endAt: string },
+) {
+  const trends = await metaRepository.countDoctorAppointmentsByMonth(
+    doctorId,
+    timeRange,
+  );
   return trends;
 }
 
@@ -25,9 +37,15 @@ export async function findDoctorStats(clinicId: string) {
   return stats;
 }
 
-export async function findClinicAppointmentsGroupByDoctors(clinicId: string) {
+export async function findClinicAppointmentsGroupByDoctors(
+  clinicId: string,
+  timeRange: { startAt: string; endAt: string },
+) {
   const appointments =
-    await metaRepository.selectClinicAppointmentsGroupByDoctors(clinicId);
+    await metaRepository.selectClinicAppointmentsGroupByDoctors(
+      clinicId,
+      timeRange,
+    );
   return appointments;
 }
 

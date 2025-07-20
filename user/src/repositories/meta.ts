@@ -19,7 +19,10 @@ export async function countClinics() {
   return row?.total || 0;
 }
 
-export async function countClinicsAndDoctorsByMonth() {
+export async function countClinicsAndDoctorsByMonth(timeRange: {
+  startAt: string;
+  endAt: string;
+}) {
   const rows = (await sql`
     select
       to_char(months.month, 'YYYY-MM') as month,
@@ -29,8 +32,8 @@ export async function countClinicsAndDoctorsByMonth() {
       select
         date_trunc('month', gs)::date as month
       from generate_series(
-        (select min(created_at) from clinics),
-        (select max(created_at) from clinics),
+        ${timeRange.startAt}::date,
+        ${timeRange.endAt}::date,
         interval '1 month'
       ) gs
     ) months

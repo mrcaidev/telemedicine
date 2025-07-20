@@ -14,8 +14,11 @@ export async function findTotals() {
   };
 }
 
-export async function findTrends() {
-  const trends = await metaRepository.countClinicsAndDoctorsByMonth();
+export async function findTrends(timeRange: {
+  startAt: string;
+  endAt: string;
+}) {
+  const trends = await metaRepository.countClinicsAndDoctorsByMonth(timeRange);
   return trends;
 }
 
