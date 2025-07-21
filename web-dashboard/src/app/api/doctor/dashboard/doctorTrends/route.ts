@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const res = await fetch(
-      `${BACKEND_API}/meta/appointment/trends?startMonth=${startDateISO}&endMonth=${endDateISO}`,
+      `${BACKEND_API}/meta/appointment/trends?startAt=${startDateISO}&endAt=${endDateISO}`,
       {
         method: "GET",
         headers: {
@@ -46,6 +46,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function convertToISO8601(month: any) {
   if (!month) return "";
   const [year, monthNumber] = month.split("-");

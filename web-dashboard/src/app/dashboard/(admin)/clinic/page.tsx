@@ -70,7 +70,7 @@ export default function ClinicDashboard() {
           }
         );
     },
-    [setAppointmentTrendData, setPerDoctorData, setError]
+    [setAppointmentTrendData, setPerDoctorData, setError, clinicId]
   );
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -129,7 +129,7 @@ export default function ClinicDashboard() {
           setError(true); // Set error if the fetch fails
         }
       );
-  }, []);
+  }, [clinicId]);
 
   useEffect(() => {
     fetchTrends(range[0], range[1]);

@@ -26,11 +26,11 @@ export async function GET(request: NextRequest) {
 
     const [appointments, appointmentsPerDoctor] = await Promise.all([
       fetch(
-        `${BACKEND_API}/meta/appointment/trends?startMonth=${startDateISO}&endMonth=${endDateISO}`,
+        `${BACKEND_API}/meta/appointment/trends?startAt=${startDateISO}&endAt=${endDateISO}`,
         { headers }
       ),
       fetch(
-        `${BACKEND_API}/meta/appointment/per-doctor-month?startMonth=${startDateISO}&endMonth=${endDateISO}`,
+        `${BACKEND_API}/meta/appointment/per-doctor-month?startAt=${startDateISO}&endAt=${endDateISO}`,
         {
           headers,
         }

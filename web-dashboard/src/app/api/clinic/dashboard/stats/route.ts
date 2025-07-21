@@ -12,11 +12,6 @@ export async function GET() {
   }
 
   try {
-    const headers = {
-      Authorization: `Bearer ${session.user.token}`,
-      "Content-Type": "application/json",
-    };
-
     const res = await fetch(`${BACKEND_API}/meta/appointment/stats`, {
       method: "GET",
       headers: {
