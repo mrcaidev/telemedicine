@@ -12,6 +12,11 @@ export async function GET() {
   }
 
   try {
+    const headers = {
+      Authorization: `Bearer ${session.user.token}`,
+      "Content-Type": "application/json",
+    };
+
     const res = await fetch(`${BACKEND_API}/meta/appointment/stats`, {
       method: "GET",
       headers: {
@@ -27,6 +32,7 @@ export async function GET() {
     }
 
     const data = await res.json();
+    console.log("Stats Data:", data);
     return NextResponse.json({ data });
   } catch  {
     return NextResponse.json(

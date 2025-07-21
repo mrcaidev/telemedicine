@@ -15,9 +15,12 @@ export async function GET(request: NextRequest) {
   const startMonth = url.searchParams.get("startMonth");
   const endMonth = url.searchParams.get("endMonth");
 
+  const startDateISO = convertToISO8601(startMonth);
+  const endDateISO = convertToISO8601(endMonth);
+
   try {
     const res = await fetch(
-      `${BACKEND_API}/dashboard/doctor/doctorTrend?startMonth=${startMonth}&endMonth=${endMonth}`,
+      `${BACKEND_API}/meta/appointment/trends?startMonth=${startDateISO}&endMonth=${endDateISO}`,
       {
         method: "GET",
         headers: {
@@ -35,10 +38,18 @@ export async function GET(request: NextRequest) {
 
     const data = await res.json();
     return NextResponse.json({ data });
-  } catch  {
+  } catch {
     return NextResponse.json(
       { error: "Failed to fetch trends" },
       { status: 500 }
     );
   }
+}
+
+function convertToISO8601(month: any) {
+  if (!month) return "";
+  const [year, monthNumber] = month.split("-");
+  const date = new Date(year, monthNumber - 1, 1); 
+
+  return date.toISOString().split("T")[0];
 }

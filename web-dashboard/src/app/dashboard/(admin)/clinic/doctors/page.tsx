@@ -52,7 +52,7 @@ export default function ClinicDoctorList() {
 
   const fetchDoctors = useCallback(
     async (loadMore = false) => {
-      if (loading || (!hasMore && loadMore)) return;
+      if (loading || !hasMore) return;
       setLoading(true);
 
       try {
@@ -226,16 +226,19 @@ export default function ClinicDoctorList() {
       </Table>
 
       {/* 加载提示 */}
-      {loading && (
+      {loading ? (
         <p className="text-center text-muted-foreground text-sm mt-4">
           Loading...
         </p>
+      ) : (
+        !hasMore &&
+        doctors.length > 0 && (
+          <p className="text-center text-muted-foreground text-sm mt-4">
+            No more doctors to load.
+          </p>
+        )
       )}
-      {!hasMore && doctors.length > 0 && (
-        <p className="text-center text-muted-foreground text-sm mt-4">
-          No more doctors to load.
-        </p>
-      )}
+
       {!loading && filteredDoctors.length === 0 && (
         <p className="text-center text-muted-foreground text-sm mt-4">
           No doctors found.

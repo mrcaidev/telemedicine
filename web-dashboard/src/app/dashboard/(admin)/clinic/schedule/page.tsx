@@ -161,6 +161,37 @@ export default function SchedulePage() {
     }
   }
 
+  const handleSearch = () => {
+    if (!doctorName || !id) return;
+    setSearchAttempted(true);
+    setSearchFailed(false);
+    console.log(selectedId, "Resetting selectedId");
+    setSelectedId(undefined);
+    console.log("Searching for doctor:", selectedId);
+
+    fetch(`/api/clinic/doctor?clinicId=${id}`)
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("Search results:", data);
+        const foundDoctor = data.data.doctors?.find((doctor: Doctor) => {
+          const fullName =
+            `${doctor.firstName} ${doctor.lastName}`.toLowerCase();
+          console.log("Checking doctor:", fullName);
+          console.log("Against search term:", doctorName.toLowerCase());
+
+          return fullName.includes(doctorName.toLowerCase());
+        });
+        console.log("Found doctor:", foundDoctor);
+        if (foundDoctor) {
+          setSelectedId(foundDoctor.id);
+          setSearchFailed(false);
+        } else {
+          setSelectedId(undefined);
+          setSearchFailed(true);
+        }
+      });
+  };
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
@@ -185,29 +216,7 @@ export default function SchedulePage() {
             onChange={(e) => setDoctorName(e.target.value)}
             className="w-[200px]"
           />
-          <Button
-            className="cursor-pointer"
-            onClick={() => {
-              if (!doctorName || !id) return;
-              setSearchAttempted(true);
-              fetch(
-                `/api/clinic/doctor?clinicId=${id}&name=${encodeURIComponent(
-                  doctorName
-                )}`
-              )
-                .then((res) => res.json())
-                .then((data) => {
-                  const found = data.data.doctors?.[0];
-                  if (found) {
-                    setSelectedId(found.id);
-                    setSearchFailed(false);
-                  } else {
-                    setSelectedId(undefined);
-                    setSearchFailed(true);
-                  }
-                });
-            }}
-          >
+          <Button className="cursor-pointer" onClick={() => handleSearch()}>
             Search
           </Button>
         </div>
@@ -215,13 +224,15 @@ export default function SchedulePage() {
 
       {!searchAttempted && (
         <Card className="p-6 h-[500px] flex items-center justify-center text-gray-400 text-base">
-          No data, please search a doctor&apos;s full name to view their schedule.
+          No data, please search a doctor&apos;s full name to view their
+          schedule.
         </Card>
       )}
 
       {searchAttempted && searchFailed && (
         <Card className="p-6 h-[500px] flex items-center justify-center text-red-500 text-base text-center">
-          No doctor found with the name &ldquo;{doctorName}&ldquo;. Please try again.
+          No doctor found with the name &ldquo;{doctorName}&ldquo;. Please try
+          again.
         </Card>
       )}
 
