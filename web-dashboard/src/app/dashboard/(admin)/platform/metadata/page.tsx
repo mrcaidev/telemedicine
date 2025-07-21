@@ -46,7 +46,7 @@ export default function ReferenceManager() {
       const res = await fetch("/api/platform/metadata/diagnoses");
       const json = await res.json();
       console.log("Diagnoses data:", json);
-      setData(json.data.diagnosis || []);
+      setData(json.data.diagnosiss || []);
     };
 
     const fetchMedications = async () => {

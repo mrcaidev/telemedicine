@@ -12,7 +12,7 @@ export async function GET() {
   }
 
   try {
-    const res = await fetch(`${BACKEND_API}/dashboard/doctor/stats`, {
+    const res = await fetch(`${BACKEND_API}/meta/appointment/stats`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${session.user.token}`,

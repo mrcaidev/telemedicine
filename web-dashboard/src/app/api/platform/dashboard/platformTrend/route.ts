@@ -16,9 +16,12 @@ export async function GET(request: NextRequest) {
   const startMonth = url.searchParams.get("startMonth");
   const endMonth = url.searchParams.get("endMonth");
 
+  const startDateISO = convertToISO8601(startMonth);
+  const endDateISO = convertToISO8601(endMonth);
+
   try {
     const res = await fetch(
-      `${BACKEND_API}/meta/user/trends?startMonth=${startMonth}&endMonth=${endMonth}`,
+      `${BACKEND_API}/meta/user/trends?startAt=${startDateISO}&endAt=${endDateISO}`,
       {
         method: "GET",
         headers: {
@@ -39,7 +42,7 @@ export async function GET(request: NextRequest) {
       data.data.platformtrends
     );
     return NextResponse.json({ clinicTrend, doctorTrend });
-  } catch  {
+  } catch {
     return NextResponse.json(
       { error: "Failed to fetch trends" },
       { status: 500 }
@@ -63,4 +66,14 @@ function formatPlatformTrends(platformtrends: any[]) {
   doctorTrend.sort((a, b) => dayjs(a.month).diff(dayjs(b.month)));
 
   return { clinicTrend, doctorTrend };
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function convertToISO8601(month: any) {
+  if (!month) return null; // 如果没有传递参数，则返回 null
+  const [year, monthNumber] = month.split("-"); // 分解成 year 和 month
+  const date = new Date(year, monthNumber - 1, 1); // 创建日期对象，月份从 0 开始
+
+  // 返回 ISO 8601 格式的日期字符串 (YYYY-MM-DD)
+  return date.toISOString().split("T")[0];
 }

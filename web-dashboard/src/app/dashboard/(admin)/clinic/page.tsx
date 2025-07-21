@@ -17,7 +17,7 @@ import {
 } from "@ant-design/icons";
 import { useCallback } from "react";
 import dayjs, { Dayjs } from "dayjs";
-// import { useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 
 const { RangePicker } = DatePicker;
 
@@ -39,13 +39,12 @@ export default function ClinicDashboard() {
   const [appointmentTrendData, setAppointmentTrendData] = useState([]);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [perDoctorData, setPerDoctorData] = useState<Record<string, any>[]>([]);
-  const [perSymptomData, setPerSymptomData] = useState([]);
   const [doctorRanking, setDoctorRanking] = useState([]);
 
   const [error, setError] = useState(false); // To track API errors
 
-  // const { data: session } = useSession();
-  // const clinicId = session?.user?.clinicId;
+  const { data: session } = useSession();
+  const clinicId = session?.user?.clinicId;
 
   const fetchTrends = useCallback(
     (startMonth: dayjs.Dayjs, endMonth: dayjs.Dayjs) => {
@@ -53,13 +52,13 @@ export default function ClinicDashboard() {
       const endMonthFormatted = endMonth.format("YYYY-MM");
 
       fetch(
-        `/api/clinic/dashboard/trends?startMonth=${startMonthFormatted}&endMonth=${endMonthFormatted}`
+        `/api/clinic/dashboard/trends?startMonth=${startMonthFormatted}&endMonth=${endMonthFormatted}&clinicId=${clinicId}`
       )
         .then((res) => res.json())
         .then(
           (res) => {
+            console.log("Fetched trends data:", res);
             setAppointmentTrendData(res.data.clinicAppointments || []); // Default to empty array if no data
-            setPerSymptomData(res.data.perSymptomData.symptoms || []); // Default to empty array if no data
 
             const rawPerDoctorData =
               res.data.perDoctorData.doctorAppointments || [];
@@ -71,7 +70,7 @@ export default function ClinicDashboard() {
           }
         );
     },
-    [setAppointmentTrendData, setPerSymptomData, setPerDoctorData, setError]
+    [setAppointmentTrendData, setPerDoctorData, setError, clinicId]
   );
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -101,7 +100,7 @@ export default function ClinicDashboard() {
   };
 
   useEffect(() => {
-    fetch("/api/clinic/dashboard/stats")
+    fetch(`/api/clinic/dashboard/stats?clinicId=${clinicId}`)
       .then((res) => res.json())
       .then(
         (res) => {
@@ -119,7 +118,7 @@ export default function ClinicDashboard() {
         }
       );
 
-    fetch("/api/clinic/dashboard/rank")
+    fetch(`/api/clinic/dashboard/rank?clinicId=${clinicId}`)
       .then((res) => res.json())
       .then(
         (res) => {
@@ -130,7 +129,7 @@ export default function ClinicDashboard() {
           setError(true); // Set error if the fetch fails
         }
       );
-  }, []);
+  }, [clinicId]);
 
   useEffect(() => {
     fetchTrends(range[0], range[1]);
@@ -161,8 +160,8 @@ export default function ClinicDashboard() {
               prefix={<UserSwitchOutlined />}
               valueStyle={{ fontSize: 28 }}
             />
-            <div className="mt-2 pt-2 border-t text-gray-500 text-sm">
-              Urgent: {stats.urgentDoctorRequest || 0}
+            <div className="mt-2 pt-2 border-t text-gray-500 text-sm text-transparent">
+              placeholder
             </div>
           </Card>
         </Col>
@@ -251,25 +250,6 @@ export default function ClinicDashboard() {
                                 }
                               />
                             ))}
-                        </BarChart>
-                      </ResponsiveContainer>
-                    ) : error ? (
-                      <div>No Data (API Error)</div> // Handle API failure
-                    ) : (
-                      <div>No Data</div> // Handle empty data
-                    ),
-                },
-                {
-                  key: "3",
-                  label: "Top Symptoms",
-                  children:
-                    perSymptomData.length > 0 ? (
-                      <ResponsiveContainer width="100%" height={300}>
-                        <BarChart data={perSymptomData}>
-                          <XAxis dataKey="symptom" />
-                          <YAxis />
-                          <Tooltip />
-                          <Bar dataKey="count" fill="#ffc658" />
                         </BarChart>
                       </ResponsiveContainer>
                     ) : error ? (

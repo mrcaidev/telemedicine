@@ -15,37 +15,29 @@ export async function GET(request: NextRequest) {
   const startMonth = url.searchParams.get("startMonth");
   const endMonth = url.searchParams.get("endMonth");
 
+  const startDateISO = convertToISO8601(startMonth);
+  const endDateISO = convertToISO8601(endMonth);
+
   try {
     const headers = {
       Authorization: `Bearer ${session.user.token}`,
       "Content-Type": "application/json",
     };
 
-    const [appointments, appointmentsPerDoctor, appointmentsPerSymptom] =
-      await Promise.all([
-        fetch(
-          `${BACKEND_API}/dashboard/clinic/appointments?startMonth=${startMonth}&endMonth=${endMonth}`,
-          { headers }
-        ),
-        fetch(
-          `${BACKEND_API}/dashboard/clinic/appointmentsPerDoctor?startMonth=${startMonth}&endMonth=${endMonth}`,
-          {
-            headers,
-          }
-        ),
-        fetch(
-          `${BACKEND_API}/dashboard/clinic/appointmentsPerSymptom?startMonth=${startMonth}&endMonth=${endMonth}`,
-          {
-            headers,
-          }
-        ),
-      ]);
+    const [appointments, appointmentsPerDoctor] = await Promise.all([
+      fetch(
+        `${BACKEND_API}/meta/appointment/trends?startAt=${startDateISO}&endAt=${endDateISO}`,
+        { headers }
+      ),
+      fetch(
+        `${BACKEND_API}/meta/appointment/per-doctor-month?startAt=${startDateISO}&endAt=${endDateISO}`,
+        {
+          headers,
+        }
+      ),
+    ]);
 
-    if (
-      !appointments.ok ||
-      !appointmentsPerDoctor.ok ||
-      !appointmentsPerSymptom.ok
-    ) {
+    if (!appointments.ok || !appointmentsPerDoctor.ok) {
       return NextResponse.json(
         { error: "One or both resources failed to load." },
         { status: 500 }
@@ -54,18 +46,26 @@ export async function GET(request: NextRequest) {
 
     const appointmentsData = await appointments.json();
     const perDoctorData = await appointmentsPerDoctor.json();
-    const perSymptomData = await appointmentsPerSymptom.json();
 
     const mergedData = {
       ...appointmentsData.data,
       perDoctorData: perDoctorData.data,
-      perSymptomData: perSymptomData.data,
     };
     return NextResponse.json({ data: mergedData, status: 200 });
-  } catch  {
+  } catch {
     return NextResponse.json(
       { error: "Failed to fetch trends" },
       { status: 500 }
     );
   }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function convertToISO8601(month: any) {
+  if (!month) return null; // 如果没有传递参数，则返回 null
+  const [year, monthNumber] = month.split("-"); // 分解成 year 和 month
+  const date = new Date(year, monthNumber - 1, 1); // 创建日期对象，月份从 0 开始
+
+  // 返回 ISO 8601 格式的日期字符串 (YYYY-MM-DD)
+  return date.toISOString().split("T")[0];
 }

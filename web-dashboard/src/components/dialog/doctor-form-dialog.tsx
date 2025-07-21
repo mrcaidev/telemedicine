@@ -151,6 +151,7 @@ export function DoctorFormDialog({
               <Input placeholder="Avatar URL" {...form.register("avatarUrl")} />
 
               <Select
+                value={form.watch("gender")}
                 onValueChange={(val) => form.setValue("gender", val as Gender)}
               >
                 <SelectTrigger>
@@ -167,6 +168,7 @@ export function DoctorFormDialog({
                 {...form.register("description")}
               />
               <Textarea
+                value={form.watch("specialties")?.join(", ")}
                 placeholder="Specialties (comma separated)"
                 onChange={(e) =>
                   form.setValue(
