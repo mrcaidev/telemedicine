@@ -44,6 +44,8 @@ export async function POST(req: NextRequest) {
 
   const body = await req.json();
 
+  console.log("Creating medical record with body:", body);
+
   const res = await fetch(`${BACKEND_API}/medical-records`, {
     method: "POST",
     headers: {

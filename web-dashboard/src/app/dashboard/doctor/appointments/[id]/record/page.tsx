@@ -295,7 +295,7 @@ export default function CreateMedicalRecordPage() {
                 <SelectValue placeholder="Diagnosis Code" />
               </SelectTrigger>
               <SelectContent>
-                {diagnosisOptions.map((item) => (
+                {diagnosisOptions?.map((item) => (
                   <SelectItem key={item.code} value={item.code}>
                     {item.code}
                   </SelectItem>
@@ -310,7 +310,7 @@ export default function CreateMedicalRecordPage() {
                 <SelectValue placeholder="Diagnosis Description" />
               </SelectTrigger>
               <SelectContent>
-                {diagnosisOptions.map((item) => (
+                {diagnosisOptions?.map((item) => (
                   <SelectItem key={item.code} value={item.description}>
                     {item.description}
                   </SelectItem>
