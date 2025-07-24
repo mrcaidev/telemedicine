@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
  * 用户服务Feign客户端
  * https://m1.apifoxmock.com/m1/6162561-5854630-default/auth/me
  */
-@FeignClient(name = "medical-user",url = "http://localhost:3000/")
+@FeignClient(name = "medical-user",url = "http://user:3000/")
 //@FeignClient(name = "medical-user",url = "https://m1.apifoxmock.com/m1/6162561-5854630-default/")
 public interface UserFeignClient {
 

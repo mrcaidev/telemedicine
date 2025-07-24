@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 /**
  * 预约服务Feign客户端
  */
-@FeignClient(name = "medical-appointment",url = "http://localhost:3001/")
+@FeignClient(name = "medical-appointment",url = "http://appointment:3000/")
 //@FeignClient(name = "medical-appointment",url = "https://m1.apifoxmock.com/m1/6162561-5854630-default/")
 public interface AppointmentFeignClient {
 
