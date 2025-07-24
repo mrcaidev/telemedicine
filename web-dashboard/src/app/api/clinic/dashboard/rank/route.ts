@@ -1,15 +1,18 @@
-import {  NextResponse } from "next/server";
+import { NextRequest ,NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 
 const BACKEND_API =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080/api";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session || !session.user || !session.user.token) {
     return new Response("Unauthorized", { status: 401 });
   }
+
+    const { searchParams } = new URL(request.url);
+  const clinicId = searchParams.get("clinicId");
 
   try {
     const res = await fetch(`${BACKEND_API}/meta/appointment/doctor-ranks`, {

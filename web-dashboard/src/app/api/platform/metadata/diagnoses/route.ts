@@ -12,7 +12,7 @@ export async function GET() {
   }
 
   try {
-    const res = await fetch(`${BACKEND_API}/diagnoses`, {
+    const res = await fetch(`${BACKEND_API}/diagnoses?limit=999`, {
       headers: {
         Authorization: `Bearer ${session.user.token}`,
         "Content-Type": "application/json",

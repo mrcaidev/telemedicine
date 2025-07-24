@@ -47,10 +47,11 @@ export async function GET(request: NextRequest) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function convertToISO8601(month: any) {
-  if (!month) return "";
-  const [year, monthNumber] = month.split("-");
-  const date = new Date(year, monthNumber - 1, 1); 
+function convertToISO8601(month: string | null): string | null {
+  if (!month) return null; // 如果没有传递参数，则返回 null
 
-  return date.toISOString().split("T")[0];
+  const [year, monthNumber] = month.split("-"); // 分解成 year 和 month
+  const date = new Date(Date.UTC(+year, +monthNumber - 1, 1, 8, 0, 0)); // 设置为每个月的1号，08:00:00 UTC 时间
+
+  return date.toISOString(); // 返回完整的 ISO 8601 格式字符串
 }

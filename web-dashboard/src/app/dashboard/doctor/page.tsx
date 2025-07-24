@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card, Col, Row, Statistic, Table, DatePicker, Space } from "antd";
+import { Card, Col, Row, Statistic, DatePicker, Space } from "antd";
 import {
   BarChart,
   Bar,
@@ -32,9 +32,6 @@ export default function DoctorDashboard() {
   const [monthlyData, setMonthlyData] = useState<
     { month: string; count: number }[]
   >([]);
-  const [symptomData, setSymptomData] = useState<
-    { rank: number; symptom: string; count: number }[]
-  >([]);
   const [range, setRange] = useState<[Dayjs, Dayjs]>([
     dayjs().subtract(11, "month").startOf("month"),
     dayjs().endOf("month"),
@@ -59,10 +56,8 @@ export default function DoctorDashboard() {
       .then((data) => {
         if (data && data.data) {
           setMonthlyData(data.data.data.appointmentsTrends || []);
-          setSymptomData(data.data || []);
         } else {
           setMonthlyData([]); // Set empty array if data is not available
-          setSymptomData([]); // Set empty array if data is not available
         }
         setLoading(false); // Set loading to false when data is fetched
         setError(false); // Reset error state
@@ -78,16 +73,13 @@ export default function DoctorDashboard() {
       .then((res) => res.json())
       .then((data) => {
         setStats(data.data.data || {});
-      })
-      .catch(() => {
-        setError(true); // Set error state if fetch fails
-        setLoading(false); // Stop loading
-      });
-
-    fetch("/api/doctor/dashboard/rank")
-      .then((res) => res.json())
-      .then((res) => {
-        setSymptomData(res.data || []);
+        setStats((prevStats) => ({
+          ...prevStats,
+          newPatientsPercentage: prevStats.newPatientsPercentage
+            ? prevStats.newPatientsPercentage
+            : 0,
+          newPatientsToday: prevStats.newPatientsToday || 0,
+        }));
       })
       .catch(() => {
         setError(true); // Set error state if fetch fails
@@ -150,8 +142,8 @@ export default function DoctorDashboard() {
       </Row>
 
       {/* 月度图 + 症状榜 */}
-      <Row gutter={16} className="mb-6">
-        <Col span={16}>
+      <Row gutter={24} className="mb-6">
+        <Col span={24}>
           <Card
             title="Monthly Appointment Trend"
             extra={
@@ -190,28 +182,6 @@ export default function DoctorDashboard() {
                   />
                 </BarChart>
               </ResponsiveContainer>
-            ) : (
-              renderNoDataMessage()
-            )}
-          </Card>
-        </Col>
-        <Col span={8}>
-          <Card title="Symptom Keyword Ranking">
-            {loading ? (
-              <div>Loading...</div>
-            ) : symptomData.length > 0 ? (
-              <Table
-                dataSource={symptomData}
-                columns={[
-                  { title: "Rank", dataIndex: "rank", key: "rank", width: 80 },
-                  { title: "Symptom", dataIndex: "symptom", key: "symptom" },
-                  { title: "Occurrences", dataIndex: "count", key: "count" },
-                ]}
-                pagination={false}
-                size="small"
-                rowKey="rank"
-                bordered={false}
-              />
             ) : (
               renderNoDataMessage()
             )}

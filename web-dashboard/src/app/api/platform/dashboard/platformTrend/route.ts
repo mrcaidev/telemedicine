@@ -69,11 +69,11 @@ function formatPlatformTrends(platformtrends: any[]) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function convertToISO8601(month: any) {
+function convertToISO8601(month: string | null): string | null {
   if (!month) return null; // 如果没有传递参数，则返回 null
-  const [year, monthNumber] = month.split("-"); // 分解成 year 和 month
-  const date = new Date(year, monthNumber - 1, 1); // 创建日期对象，月份从 0 开始
 
-  // 返回 ISO 8601 格式的日期字符串 (YYYY-MM-DD)
-  return date.toISOString().split("T")[0];
+  const [year, monthNumber] = month.split("-"); // 分解成 year 和 month
+  const date = new Date(Date.UTC(+year, +monthNumber - 1, 1, 8, 0, 0)); // 设置为每个月的1号，08:00:00 UTC 时间
+
+  return date.toISOString(); // 返回完整的 ISO 8601 格式字符串
 }
