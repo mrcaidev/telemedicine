@@ -1,4 +1,4 @@
-import { NextRequest ,NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 
@@ -11,17 +11,20 @@ export async function GET(request: NextRequest) {
     return new Response("Unauthorized", { status: 401 });
   }
 
-    const { searchParams } = new URL(request.url);
+  const { searchParams } = new URL(request.url);
   const clinicId = searchParams.get("clinicId");
 
   try {
-    const res = await fetch(`${BACKEND_API}/meta/appointment/doctor-ranks`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${session.user.token}`,
-        "Content-Type": "application/json",
-      },
-    });
+    const res = await fetch(
+      `${BACKEND_API}/meta/appointment/doctor-ranks?clinicId=${clinicId}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${session.user.token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
     if (!res.ok) {
       const errText = await res.text();

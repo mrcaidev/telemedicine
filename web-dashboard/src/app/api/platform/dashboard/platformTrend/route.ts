@@ -68,7 +68,6 @@ function formatPlatformTrends(platformtrends: any[]) {
   return { clinicTrend, doctorTrend };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function convertToISO8601(month: string | null): string | null {
   if (!month) return null; // 如果没有传递参数，则返回 null
 
