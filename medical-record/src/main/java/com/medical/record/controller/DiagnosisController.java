@@ -3,7 +3,6 @@ package com.medical.record.controller;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
 import com.medical.record.common.Result;
-import com.medical.record.feign.UserFeignClient;
 import com.medical.record.model.dto.DiagnosisQueryDTO;
 import com.medical.record.model.entity.Diagnosis;
 import com.medical.record.model.vo.DiagnosisVO;
@@ -27,8 +26,6 @@ import java.util.List;
 public class DiagnosisController {
     @Resource
     private DiagnosisService diagnosisService;
-    @Resource
-    private UserFeignClient userFeignClient;
 
     /**
      *获取诊断列表
