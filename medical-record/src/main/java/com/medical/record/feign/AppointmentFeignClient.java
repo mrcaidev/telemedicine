@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RequestHeader;
 /**
  * 预约服务Feign客户端
  */
-//@FeignClient(name = "medical-appointment",url = "http://appointment:3000/")
-@FeignClient(name = "medical-appointment",url = "https://m1.apifoxmock.com/m1/6162561-5854630-default/")
+@FeignClient(name = "medical-appointment",url = "http://appointment:3000/")
+//@FeignClient(name = "medical-appointment",url = "https://m1.apifoxmock.com/m1/6162561-5854630-default/")
 public interface AppointmentFeignClient {
 
     /**
@@ -25,9 +25,7 @@ public interface AppointmentFeignClient {
      */
     @GetMapping("/appointments/{id}")
     Result<AppointmentVO> getAppointmentById(@Parameter(description = "预约ID") @PathVariable String id,
-                                             @RequestHeader(value = "X-User-Id",required = false) String userId,
-                                             @RequestHeader(value = "X-User-Role",required = false) String role,
-                                             @RequestHeader(value = "X-User-Email",required = false) String email);
+                                             @RequestHeader(value = "X-User-Id",required = false) String userId);
 
 
 }

@@ -57,12 +57,25 @@ export function ClinicAdminFormDialog({
     values: CreateClinicAdminForm | EditClinicAdminForm
   ) => {
     const payload = isEdit
-      ? values
+      ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        Object.keys(values).reduce((diff: any, key) => {
+          const k = key as keyof EditClinicAdminForm;
+          if (values[k] !== defaultValues?.[k]) {
+            diff[k] = values[k];
+          }
+          return diff;
+        }, {})
       : {
           ...values,
           role: "clinic_admin",
           id: clinicId,
         };
+
+    if (isEdit && Object.keys(payload).length === 0) {
+      toast.info("No changes to update");
+      setOpen(false);
+      return;
+    }
 
     try {
       const res = await fetch(

@@ -19,36 +19,102 @@ import { DoctorFormDialog } from "@/components/dialog/doctor-form-dialog";
 import { ConfirmDialog } from "@/components/dialog/confirm-dialog";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { useCallback } from "react";
+import SearchBar from "@/components/search/search-bar";
 
 export default function ClinicDoctorList() {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [searchInput, setSearchInput] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+
   const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const router = useRouter();
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const { data: session } = useSession();
   const id = session?.user?.clinicId;
+  const router = useRouter();
 
   useEffect(() => {
-    fetch(`/api/clinic/doctor?clinicId=${id}`)
-      .then((res) => res.json())
-      .then((data) => setDoctors(data.data.doctors))
-      .catch(() =>
+    const timeout = setTimeout(() => {
+      setSearchTerm(searchInput);
+    }, 300);
+    return () => clearTimeout(timeout);
+  }, [searchInput]);
+
+  const refreshDoctors = () => {
+    setDoctors([]);
+    setCursor(null);
+    setHasMore(true);
+    setRefreshTrigger((prev) => prev + 1);
+  };
+
+  const fetchDoctors = useCallback(
+    async (loadMore = false) => {
+      if (loading || !hasMore) return;
+      setLoading(true);
+
+      try {
+        const queryParams = new URLSearchParams({
+          clinicId: id || "",
+          limit: "10",
+          sortBy: "createdAt",
+          sortOrder: "asc",
+        });
+
+        if (cursor && loadMore) queryParams.append("cursor", cursor);
+
+        const res = await fetch(`/api/clinic/doctor?${queryParams.toString()}`);
+        const data = await res.json();
+        const newDoctors: Doctor[] = data.data.doctors;
+
+        if (loadMore) {
+          setDoctors((prev) => [...prev, ...newDoctors]);
+        } else {
+          setDoctors(newDoctors);
+        }
+
+        if (newDoctors.length < 10) setHasMore(false);
+        if (newDoctors.length > 0) {
+          setCursor(newDoctors[newDoctors.length - 1].createdAt);
+        }
+      } catch {
         toast.error("Loading doctors failed", {
-          description: "can't load doctors, please try again later.",
-        })
-      );
-  }, [refreshTrigger, id]);
-  const refreshDoctors = () => setRefreshTrigger((prev) => prev + 1);
+          description: "Can't load doctors, please try again later.",
+        });
+      } finally {
+        setLoading(false);
+      }
+    },
+    [loading, hasMore, cursor, id, setDoctors, setHasMore, setCursor]
+  );
+
+  useEffect(() => {
+    if (id) fetchDoctors(false);
+  }, [fetchDoctors, refreshTrigger, id]);
+
+  useEffect(() => {
+    const onScroll = () => {
+      if (
+        window.innerHeight + window.scrollY >=
+          document.body.offsetHeight - 300 &&
+        hasMore &&
+        !loading
+      ) {
+        fetchDoctors(true);
+      }
+    };
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [fetchDoctors, cursor, hasMore, loading]);
 
   const handleDelete = async (id: string) => {
     try {
       const res = await fetch(`/api/clinic/doctor/${id}`, {
         method: "DELETE",
       });
-
-      if (!res.ok) {
-        throw new Error("Failed to delete");
-      }
+      if (!res.ok) throw new Error("Failed to delete");
 
       setDoctors((prev) => prev.filter((c) => c.id !== id));
       toast.success("Deleted successfully", {
@@ -61,16 +127,30 @@ export default function ClinicDoctorList() {
     }
   };
 
+  const filteredDoctors = doctors.filter((doctor) => {
+    const fullName = `${doctor.firstName} ${doctor.lastName}`.toLowerCase();
+    return (
+      fullName.includes(searchTerm.toLowerCase()) ||
+      doctor.email.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  });
+
   return (
     <div className="p-6">
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-4">
         <h1 className="text-xl font-semibold">Doctor Management</h1>
-
-        <DoctorFormDialog onSuccess={refreshDoctors}>
-          <Button className="gap-2 cursor-pointer">
-            <Plus size={16} /> Add Doctor
-          </Button>
-        </DoctorFormDialog>
+        <div className="flex gap-2 items-center w-full sm:w-auto">
+          <SearchBar
+            value={searchInput}
+            onChange={setSearchInput}
+            placeholder="Search by doctor name or email"
+          />
+          <DoctorFormDialog onSuccess={refreshDoctors}>
+            <Button className="gap-2 cursor-pointer whitespace-nowrap">
+              <Plus size={16} /> Add Doctor
+            </Button>
+          </DoctorFormDialog>
+        </div>
       </div>
 
       <Table>
@@ -85,7 +165,7 @@ export default function ClinicDoctorList() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {doctors.map((doctor) => (
+          {filteredDoctors.map((doctor) => (
             <TableRow key={doctor.id}>
               <TableCell
                 className="hover:bg-gray-100 cursor-pointer"
@@ -107,7 +187,9 @@ export default function ClinicDoctorList() {
                 onClick={() =>
                   router.push(`/dashboard/clinic/doctors/${doctor.id}`)
                 }
-              >{`${doctor.firstName} ${doctor.lastName}`}</TableCell>
+              >
+                {`${doctor.firstName} ${doctor.lastName}`}
+              </TableCell>
               <TableCell>{doctor.email}</TableCell>
               <TableCell>{doctor.gender}</TableCell>
               <TableCell>{doctor.specialties.join(", ")}</TableCell>
@@ -120,7 +202,6 @@ export default function ClinicDoctorList() {
                     variant="outline"
                     size="sm"
                     className="cursor-pointer"
-                    onClick={() => console.log("Edit", doctor)}
                   >
                     <Pencil className="w-4 h-4" />
                   </Button>
@@ -143,6 +224,26 @@ export default function ClinicDoctorList() {
           ))}
         </TableBody>
       </Table>
+
+      {/* 加载提示 */}
+      {loading ? (
+        <p className="text-center text-muted-foreground text-sm mt-4">
+          Loading...
+        </p>
+      ) : (
+        !hasMore &&
+        doctors.length > 0 && (
+          <p className="text-center text-muted-foreground text-sm mt-4">
+            No more doctors to load.
+          </p>
+        )
+      )}
+
+      {!loading && filteredDoctors.length === 0 && (
+        <p className="text-center text-muted-foreground text-sm mt-4">
+          No doctors found.
+        </p>
+      )}
     </div>
   );
 }

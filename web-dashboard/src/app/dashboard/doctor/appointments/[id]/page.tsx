@@ -10,6 +10,8 @@ import { StatusBadge } from "@/components/dashboard/status-badge";
 import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
 import Image from "next/image";
+import MedicalRecordCard from "@/components/medical-record/medical-record";
+import { MedicalRecord } from "@/types/patient";
 
 const format = (d: string) =>
   new Date(d).toLocaleString(undefined, {
@@ -23,13 +25,32 @@ const format = (d: string) =>
 export default function AppointmentDetailPage() {
   const { id } = useParams();
   const router = useRouter();
+  const [recordId, setRecordId] = useState<string | null>(null);
   const [appointment, setAppointment] = useState<RawAppointment>();
+  const [medicalRecord, setMedicalRecord] = useState<MedicalRecord | null>(
+    null
+  );
 
   useEffect(() => {
     fetch(`/api/doctor/appointments/${id}`)
       .then((res) => res.json())
-      .then((data) => setAppointment(data.data.data));
+      .then((data) => {
+        console.log("Fetched appointment data:", data.data.data);
+        setAppointment(data.data.data);
+        setRecordId(data.data.data.recordId);
+      });
   }, [id]);
+
+  useEffect(() => {
+    if (recordId) {
+      fetch(`/api/doctor/patients/records/${recordId}`)
+        .then((res) => res.json())
+        .then((data) => {
+          console.log("Fetched medical record data:", data.data);
+          setMedicalRecord(data.data.data);
+        });
+    }
+  }, [recordId]);
 
   const handleReschedule = async (id: string) => {
     try {
@@ -149,14 +170,40 @@ export default function AppointmentDetailPage() {
       {/* Notes Section */}
       <Card className="w-full bg-muted border rounded-xl bg-white shadow-sm min-h-[280px]">
         <CardContent className="space-y-4 p-6 h-full">
-          <h2 className="text-xl font-semibold flex items-center gap-2">
-            <StickyNote className="w-5 h-5 text-gray-700" /> Notes
-          </h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold flex items-center gap-2">
+              <StickyNote className="w-5 h-5 text-gray-700" /> Notes
+            </h2>
+
+            <Button
+              size="sm"
+              variant="outline"
+              className={`cursor-pointer  ${
+                !!appointment.recordId
+                  ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                  : "bg-blue-500 text-white hover:bg-blue-600"
+              }`}
+              disabled={!!appointment.recordId}
+              onClick={() =>
+                router.push(
+                  `/dashboard/doctor/appointments/${appointment.id}/record`
+                )
+              }
+            >
+              Create Record
+            </Button>
+          </div>
+
           <p className="text-base text-gray-800 leading-relaxed whitespace-pre-line">
             {appointment.remark || "No notes available"}
           </p>
         </CardContent>
       </Card>
+
+      {/* Medical Record */}
+      {appointment.recordId && medicalRecord && (
+        <MedicalRecordCard record={medicalRecord} />
+      )}
     </div>
   );
 }

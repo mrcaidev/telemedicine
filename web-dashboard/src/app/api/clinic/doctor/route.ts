@@ -7,7 +7,7 @@ const BACKEND_API =
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const id = searchParams.get("clinicId");
+  const query = searchParams.toString();
 
   const session = await getServerSession(authOptions);
   if (!session || !session.user || !session.user.token) {
@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const res = await fetch(`${BACKEND_API}/doctors?clinicId=${id}`, {
+    const res = await fetch(`${BACKEND_API}/doctors?${query}`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${session.user.token}`,
