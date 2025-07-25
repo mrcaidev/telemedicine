@@ -2,7 +2,6 @@ package com.medical.record.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.medical.record.common.ResultCode;
-import com.medical.record.feign.UserFeignClient;
 import com.medical.record.model.dto.MedicationQueryDTO;
 import com.medical.record.model.entity.Medication;
 import com.medical.record.service.MedicationService;
@@ -40,9 +39,6 @@ public class MedicationControllerTest {
 
     @MockBean
     private MedicationService medicationService;
-
-    @MockBean
-    private UserFeignClient userFeignClient;
 
     @Autowired
     private WebApplicationContext webApplicationContext;

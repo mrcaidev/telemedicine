@@ -2,7 +2,6 @@ package com.medical.record.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.medical.record.common.ResultCode;
-import com.medical.record.feign.UserFeignClient;
 import com.medical.record.model.dto.LabTestQueryDTO;
 import com.medical.record.model.entity.LabTest;
 import com.medical.record.service.LabTestService;
@@ -40,9 +39,6 @@ public class LabTestControllerTest {
 
     @MockBean
     private LabTestService labTestService;
-
-    @MockBean
-    private UserFeignClient userFeignClient; // 保留FeignClient模拟，如需验证可补充Mock逻辑
 
     @Autowired
     private WebApplicationContext webApplicationContext;

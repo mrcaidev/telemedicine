@@ -31,6 +31,7 @@ services:
       MYSQL_PASSWORD: dev
       MYSQL_DATABASE: records_db
       TZ: Asia/Singapore
+
     volumes:
       - mysql-data:/bitnami/mysql/data
     healthcheck:
