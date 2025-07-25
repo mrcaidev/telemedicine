@@ -25,7 +25,9 @@ public interface AppointmentFeignClient {
      */
     @GetMapping("/appointments/{id}")
     Result<AppointmentVO> getAppointmentById(@Parameter(description = "预约ID") @PathVariable String id,
-                                             @RequestHeader(value = "X-User-Id",required = false) String userId);
+                                             @RequestHeader(value = "X-User-Id",required = false) String userId,
+                                             @RequestHeader(value = "X-User-Role",required = false) String role,
+                                             @RequestHeader(value = "X-User-Email",required = false) String email);
 
 
 }
