@@ -9,6 +9,7 @@ services:
       - "80:80"
     environment:
       - AGENT_ACCESS_KEY=${OPENAI_API_KEY}
+      - DIFY_API_KEY=${DIFY_API_KEY}
       - MONGO_URL=mongodb://mongo:27017/
       - REDIS_URL=redis://redis:6379/
     depends_on:
