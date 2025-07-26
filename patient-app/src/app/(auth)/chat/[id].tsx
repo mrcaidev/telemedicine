@@ -104,7 +104,7 @@ function ChatInterface() {
       onContentSizeChange={() => {
         scrollViewRef.current?.scrollToEnd({ animated: true });
       }}
-      className="grow"
+      className="grow max-h-[80vh] overflow-auto"
       contentContainerClassName="px-6 py-4"
     >
       {session.history.map((message, index) =>
@@ -223,8 +223,8 @@ function RecommendedDoctorCards({ keyword }: { keyword: string }) {
   return (
     <View className="flex-row items-center gap-2 py-4">
       {doctors.map((doctor) => (
-        <Link key={doctor.id} href={`/doctor/${doctor.id}`} className="grow">
-          <View className="p-4 bg-white rounded-md shadow-sm">
+        <Link key={doctor.id} href={`/doctor/${doctor.id}`}>
+          <View className="items-center p-4 bg-white rounded-md shadow-sm">
             <Avatar alt="Doctor's profile photo">
               <AvatarImage source={{ uri: doctor.avatarUrl ?? undefined }} />
               <AvatarFallback>
