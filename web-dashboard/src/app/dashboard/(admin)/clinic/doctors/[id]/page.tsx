@@ -30,29 +30,6 @@ const weekdayMap = [
   "Saturday",
 ];
 
-// // Function to check if the selected time is within the doctor's available times
-function isTimeWithinAvailable(
-  startTime: string,
-  endTime: string,
-  availableTimes: AvailableTime[],
-  weekday: number
-): boolean {
-  const toMinutes = (t: string) => {
-    const [h, m] = t.split(":").map(Number);
-    return h * 60 + m;
-  };
-
-  const startMin = toMinutes(startTime);
-  const endMin = toMinutes(endTime);
-
-  return availableTimes.some((slot) => {
-    if (slot.weekday !== weekday) return false;
-    const slotStart = toMinutes(slot.startTime);
-    const slotEnd = toMinutes(slot.endTime);
-    return startMin >= slotStart && endMin <= slotEnd;
-  });
-}
-
 // // Function to convert date and time strings to UTC ISO string
 function toUtcISOString(dateStr: string, timeStr: string): string {
   const [year, month, day] = dateStr.split("-").map(Number);
@@ -87,8 +64,7 @@ export default function DoctorDetailPage() {
       .then((data) => {
         console.log("Appointments data:", data);
         const appointments = data.data.appointments.filter(
-          (appt: RawAppointment) =>
-            appt.status === "to_be_rescheduled"
+          (appt: RawAppointment) => appt.status === "to_be_rescheduled"
         );
         setAppointments(appointments);
       });
@@ -103,73 +79,36 @@ export default function DoctorDetailPage() {
     setDialogOpen(true);
   };
 
-  const handleApprove = async (
-    startTime: string,
-    endTime: string,
-    date: Date
-  ) => {
+  const handleApprove = async (availabilityId: string) => {
     if (!selectedAppt || !doctor) return;
-
-    const appointmentDate = date.toISOString().split("T")[0];
-    const startAt = `${appointmentDate}T${startTime}`;
-    const endAt = `${appointmentDate}T${endTime}`;
-
-    const weekday = date.getDay(); // Sunday = 0
-    const isValid = isTimeWithinAvailable(
-      startTime,
-      endTime,
-      doctor.availableTimes,
-      weekday
-    );
-
-    if (!isValid) {
-      toast.error("Selected time is not within doctor's schedule.");
-      return;
-    }
-
-    const currentStart = new Date(selectedAppt.startAt).toISOString();
-    const currentEnd = new Date(selectedAppt.endAt).toISOString();
-    if (startAt === currentStart && endAt === currentEnd) {
-      toast.error("No changes made to the appointment time.");
-      return;
-    }
 
     try {
       const res = await fetch(
-        `/api/clinic/appointment?appointmentId=${selectedAppt?.id}`,
+        `/api/clinic/appointment?appointmentId=${selectedAppt.id}`,
         {
           method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
           body: JSON.stringify({
-            startTime,
-            endTime,
-            doctorId: id,
+            availabilityId,
+            doctorId: doctor.id,
           }),
         }
       );
 
       if (!res.ok) {
-        throw new Error("Failed to approve appointment");
+        const { error } = await res.json();
+        throw new Error(error || "Failed to approve appointment");
       }
 
-      toast.success("Appointment approved successfully!");
+      toast.success("Appointment rescheduled successfully!");
       router.refresh();
 
-      const appointmentDate = date.toISOString().split("T")[0];
-      setAppointments((prev) =>
-        prev.map((appt) =>
-          appt.id === selectedAppt?.id
-            ? {
-                ...appt,
-                status: "normal",
-                startAt: toUtcISOString(appointmentDate, startTime),
-                endAt: toUtcISOString(appointmentDate, endTime),
-              }
-            : appt
-        )
-      );
       setDialogOpen(false);
     } catch (error) {
       console.error("Error approving appointment:", error);
+      toast.error("Failed to reschedule appointment");
     }
   };
 
@@ -333,7 +272,6 @@ export default function DoctorDetailPage() {
                 open={dialogOpen}
                 onClose={() => setDialogOpen(false)}
                 onConfirm={handleApprove}
-                appointment={selectedAppt ?? undefined}
                 doctor={doctor}
               />
             </>
