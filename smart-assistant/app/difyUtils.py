@@ -172,7 +172,7 @@ async def send_dify_message(
     inputs: Optional[Dict[str, Any]] = None,
     conversation_id: str = "",
     user: str = "default-user",
-    api_key: str = "app-VW5jQgzue2Z0E9ONi8AOmyVp"
+    api_key: str = ""
 ) -> Dict[str, Any]:
     """
     便捷函数：发送消息到Dify
@@ -198,7 +198,7 @@ async def send_dify_message(
 
 async def get_dify_conversation_history(
     conversation_id: str,
-    api_key: str = "app-VW5jQgzue2Z0E9ONi8AOmyVp"
+    api_key: str
 ) -> Dict[str, Any]:
     """
     便捷函数：获取对话历史
@@ -216,7 +216,7 @@ async def get_dify_conversation_history(
 
 async def delete_dify_conversation(
     conversation_id: str,
-    api_key: str = "app-VW5jQgzue2Z0E9ONi8AOmyVp"
+    api_key: str
 ) -> Dict[str, Any]:
     """
     便捷函数：删除对话
@@ -236,9 +236,8 @@ async def main():
     """主函数 - 用于测试Dify API"""
     print("🧪 测试Dify API工具类")
     print("=" * 50)
-    
-    # 硬编码API密钥
-    API_KEY = "app-VW5jQgzue2Z0E9ONi8AOmyVp"
+
+    API_KEY = "xxxxxxx"
     
     try:
         # 创建API实例
