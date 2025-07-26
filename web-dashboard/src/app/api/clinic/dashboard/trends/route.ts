@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
 
     const [appointments, appointmentsPerDoctor] = await Promise.all([
       fetch(
-        `${BACKEND_API}/meta/appointment/trends?startAt=${startDateISO}&endAt=${endDateISO}$clinicId=${clinicId}`,
+        `${BACKEND_API}/meta/appointment/trends?startAt=${startDateISO}&endAt=${endDateISO}&clinicId=${clinicId}`,
         { headers }
       ),
       fetch(
@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ data: mergedData, status: 200 });
   } catch {
     return NextResponse.json(
-      { error: "Failed to fetch trends" },
+      { error: "Failed to fetch trends",},
       { status: 500 }
     );
   }
