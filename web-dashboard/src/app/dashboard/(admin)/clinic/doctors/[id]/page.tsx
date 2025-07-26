@@ -15,7 +15,7 @@ import {
   CalendarClock,
 } from "lucide-react";
 import Image from "next/image";
-import { Doctor} from "@/types/doctor";
+import { Doctor } from "@/types/doctor";
 import { RawAppointment } from "@/types/appointment";
 import { toast } from "sonner";
 import { RescheduleDialog } from "@/components/dialog/appointment-schedule-dialog";
@@ -96,6 +96,10 @@ export default function DoctorDetailPage() {
 
       toast.success("Appointment rescheduled successfully!");
       router.refresh();
+
+      setAppointments((prevAppointments) =>
+        prevAppointments.filter((appt) => appt.id !== selectedAppt.id)
+      );
 
       setDialogOpen(false);
     } catch (error) {

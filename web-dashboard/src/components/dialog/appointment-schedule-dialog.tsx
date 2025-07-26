@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { Doctor } from "@/types/doctor";
 import { RawAppointment } from "@/types/appointment";
+import { Calendar } from "@/components/ui/calendar";
 
 interface RescheduleDialogProps {
   open: boolean;
@@ -43,6 +44,7 @@ export function RescheduleDialog({
   onConfirm,
   doctor,
 }: RescheduleDialogProps) {
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [selectedWeekday, setSelectedWeekday] = useState<string>("");
   const [selectedAvailabilityId, setSelectedAvailabilityId] =
     useState<string>("");
@@ -50,6 +52,10 @@ export function RescheduleDialog({
     Doctor["availableTimes"]
   >([]);
   const [loading, setLoading] = useState(false);
+  const handleDateSelect = (date: Date) => {
+    console.log("Selected date:", date);
+    setSelectedDate(date); // 更新选中的日期
+  };
 
   useEffect(() => {
     if (open && doctor?.id) {
@@ -72,6 +78,13 @@ export function RescheduleDialog({
     }
   }, [open, doctor?.id]);
 
+  // 更新 selectedWeekday 当日期改变时
+  useEffect(() => {
+    if (selectedDate) {
+      setSelectedWeekday(selectedDate.getDay().toString());
+    }
+  }, [selectedDate]);
+
   const availabilitiesForDay = availabilities.filter(
     (a) => a.weekday.toString() === selectedWeekday
   );
@@ -89,30 +102,44 @@ export function RescheduleDialog({
           </p>
         ) : (
           <div className="space-y-4">
-            {/* Weekday Selector */}
+            {/* Date Selector */}
             <div className="flex items-center gap-3">
-              <span className="text-sm w-[120px]">Weekday:</span>
-              <Select
-                value={selectedWeekday}
-                onValueChange={(value) => {
-                  setSelectedWeekday(value);
-                  setSelectedAvailabilityId("");
-                }}
-              >
-                <SelectTrigger className="w-[280px] cursor-pointer">
-                  <SelectValue placeholder="Select weekday" />
-                </SelectTrigger>
-                <SelectContent className="cursor-pointer">
-                  {[...new Set(availabilities.map((a) => a.weekday))].map(
-                    (w) => (
-                      <SelectItem key={w} value={w.toString()}>
-                        {weekdayMap[w]}
-                      </SelectItem>
-                    )
-                  )}
-                </SelectContent>
-              </Select>
+              <span className="text-sm w-[120px]">Select Date:</span>
+              <Calendar
+                selected={selectedDate}
+                onDayClick={handleDateSelect}
+                className="w-[280px]"
+                disabled={[{ before: new Date() }]}
+              />
             </div>
+
+            {/* Weekday Selector */}
+            {selectedDate && (
+              <div className="flex items-center gap-3">
+                <span className="text-sm w-[120px]">Weekday:</span>
+                <Select
+                  value={selectedWeekday}
+                  onValueChange={(value) => {
+                    setSelectedWeekday(value);
+                    setSelectedAvailabilityId("");
+                  }}
+                  disabled
+                >
+                  <SelectTrigger className="w-[280px] cursor-pointer">
+                    <SelectValue placeholder="Select weekday" />
+                  </SelectTrigger>
+                  <SelectContent className="cursor-pointer">
+                    {[...new Set(availabilities.map((a) => a.weekday))].map(
+                      (w) => (
+                        <SelectItem key={w} value={w.toString()}>
+                          {weekdayMap[Number(w)]}
+                        </SelectItem>
+                      )
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
 
             {/* Time Slot Selector */}
             {selectedWeekday && (
