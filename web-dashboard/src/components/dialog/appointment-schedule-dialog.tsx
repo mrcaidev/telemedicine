@@ -44,8 +44,11 @@ export function RescheduleDialog({
   doctor,
 }: RescheduleDialogProps) {
   const [selectedWeekday, setSelectedWeekday] = useState<string>("");
-  const [selectedAvailabilityId, setSelectedAvailabilityId] = useState<string>("");
-  const [availabilities, setAvailabilities] = useState<Doctor["availableTimes"]>([]);
+  const [selectedAvailabilityId, setSelectedAvailabilityId] =
+    useState<string>("");
+  const [availabilities, setAvailabilities] = useState<
+    Doctor["availableTimes"]
+  >([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -81,7 +84,9 @@ export function RescheduleDialog({
         </DialogHeader>
 
         {loading ? (
-          <p className="text-center py-4 text-gray-500">Loading availabilities...</p>
+          <p className="text-center py-4 text-gray-500">
+            Loading availabilities...
+          </p>
         ) : (
           <div className="space-y-4">
             {/* Weekday Selector */}
@@ -97,12 +102,14 @@ export function RescheduleDialog({
                 <SelectTrigger className="w-[280px] cursor-pointer">
                   <SelectValue placeholder="Select weekday" />
                 </SelectTrigger>
-                <SelectContent>
-                  {[...new Set(availabilities.map((a) => a.weekday))].map((w) => (
-                    <SelectItem key={w} value={w.toString()}>
-                      {weekdayMap[w]}
-                    </SelectItem>
-                  ))}
+                <SelectContent className="cursor-pointer">
+                  {[...new Set(availabilities.map((a) => a.weekday))].map(
+                    (w) => (
+                      <SelectItem key={w} value={w.toString()}>
+                        {weekdayMap[w]}
+                      </SelectItem>
+                    )
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -118,7 +125,7 @@ export function RescheduleDialog({
                   <SelectTrigger className="w-[280px] cursor-pointer">
                     <SelectValue placeholder="Select time slot" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="cursor-pointer">
                     {availabilitiesForDay.map((a) => (
                       <SelectItem key={a.id} value={a.id}>
                         {a.startTime} - {a.endTime}
@@ -133,6 +140,7 @@ export function RescheduleDialog({
 
         <DialogFooter>
           <Button
+            className="cursor-pointer"
             disabled={!selectedAvailabilityId || loading}
             onClick={() => onConfirm(selectedAvailabilityId)}
           >

@@ -15,7 +15,7 @@ import {
   CalendarClock,
 } from "lucide-react";
 import Image from "next/image";
-import { Doctor, AvailableTime } from "@/types/doctor";
+import { Doctor} from "@/types/doctor";
 import { RawAppointment } from "@/types/appointment";
 import { toast } from "sonner";
 import { RescheduleDialog } from "@/components/dialog/appointment-schedule-dialog";
@@ -29,14 +29,6 @@ const weekdayMap = [
   "Friday",
   "Saturday",
 ];
-
-// // Function to convert date and time strings to UTC ISO string
-function toUtcISOString(dateStr: string, timeStr: string): string {
-  const [year, month, day] = dateStr.split("-").map(Number);
-  const [hour, minute] = timeStr.split(":").map(Number);
-  const date = new Date(Date.UTC(year, month - 1, day, hour, minute, 0));
-  return date.toISOString();
-}
 
 export default function DoctorDetailPage() {
   const { id } = useParams();
