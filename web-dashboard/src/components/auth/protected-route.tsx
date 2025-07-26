@@ -3,6 +3,7 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import Spinner from "@/components/ui/spinner";
 
 export default function ProtectedRoute({
   children,
@@ -19,7 +20,11 @@ export default function ProtectedRoute({
   }, [status, router]);
 
   if (status === "loading") {
-    return <div className="p-6">🔒 Checking authentication...</div>;
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Spinner />
+      </div>
+    );
   }
 
   return <>{children}</>;

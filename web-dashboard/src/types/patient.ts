@@ -9,31 +9,47 @@ export interface RawPatient {
 }
 
 export interface MedicalRecord {
-  id?: string;
+  id: string;
+
   appointmentId?: string;
+
+  // Diagnosis
   assessmentDiagnosisCode?: string;
   assessmentDiagnosisDate?: string;
   assessmentDiagnosisDesc?: string;
-  createdAt?: string;
+
+  // Vitals (Objective)
   objectiveBloodPressure?: string;
   objectiveHeartRate?: number;
   objectiveHeight?: number;
   objectiveOtherVitals?: string;
   objectiveTemperature?: number;
   objectiveWeight?: number;
-  patientId?: string;
-  planDosageValue?: string;
-  planFollowupDate?: string;
-  planFollowupType?: string;
-  planFrequencyCode?: string;
-  planLabTestCode?: string;
-  planLabTestName?: string;
+
+  // Subjective
+  subjectiveNotes?: string;
+
+  // Plan (Medication / Follow-up)
   planMedicationCode?: string;
   planMedicationName?: string;
+  planDosageValue?: string;
+  planFrequencyCode?: string;
+  planUsageCode?: string;
   planStartDate?: string;
   planStopDate?: string;
-  planUsageCode?: string;
+
+  // Follow-up
+  planFollowupDate?: string;
+  planFollowupType?: string;
+
+  // Lab
+  planLabTestCode?: string;
+  planLabTestName?: string;
+
+  // Metadata
+  patientId?: string;
   recordDate?: string;
-  subjectiveNotes?: string;
+  createdAt?: string;
   updatedAt?: string;
 }
+

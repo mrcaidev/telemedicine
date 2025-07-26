@@ -1,70 +1,69 @@
+import Link from "next/link";
 import { MedicalRecord } from "@/types/patient";
+import { Card } from "@/components/ui/card";
 
-interface MedicalRecordCardProps {
+export default function MedicalRecordCard({
+  record,
+}: {
   record: MedicalRecord;
-}
-
-export default function MedicalRecordCard({ record }: MedicalRecordCardProps) {
-  const format = (date?: string) =>
-    date ? new Date(date).toLocaleDateString() : "N/A";
-
+}) {
   return (
-    <div className="border rounded-lg p-4 shadow-sm space-y-2">
-      <div className="text-gray-600 text-sm">Record Date</div>
-      <div className="text-base font-medium">{format(record.recordDate)}</div>
+    <div>
+      <Link href={`/dashboard/doctor/records/${record.id}`}>
+        <Card className="p-4 space-y-2 hover:bg-gray-50 cursor-pointer">
+          {/* 日期 & 诊断 */}
+          <div className="text-sm text-gray-600">
+            <span className="font-semibold">Date:</span>{" "}
+            {record.recordDate || "N/A"}
+          </div>
+          <div className="text-base font-medium">
+            {record.assessmentDiagnosisDesc || "No diagnosis description"}
+          </div>
 
-      {record.subjectiveNotes && (
-        <div>
-          <div className="text-gray-600 text-sm">Subjective Notes</div>
-          <div>{record.subjectiveNotes}</div>
-        </div>
-      )}
+          {/* 生命体征 */}
+          <div className="grid grid-cols-2 gap-2 text-sm text-gray-700">
+            {record.objectiveBloodPressure && (
+              <div>
+                <span className="font-semibold">Blood Pressure:</span>{" "}
+                {record.objectiveBloodPressure}
+              </div>
+            )}
+            {record.objectiveHeartRate != null && (
+              <div>
+                <span className="font-semibold">Heart Rate:</span>{" "}
+                {record.objectiveHeartRate} bpm
+              </div>
+            )}
+            {record.objectiveTemperature != null && (
+              <div>
+                <span className="font-semibold">Temperature:</span>{" "}
+                {record.objectiveTemperature} °C
+              </div>
+            )}
+            {record.objectiveWeight != null && (
+              <div>
+                <span className="font-semibold">Weight:</span>{" "}
+                {record.objectiveWeight} kg
+              </div>
+            )}
+          </div>
 
-      {record.assessmentDiagnosisDesc && (
-        <div>
-          <div className="text-gray-600 text-sm">Diagnosis</div>
-          <div>{record.assessmentDiagnosisDesc}</div>
-        </div>
-      )}
+          {/* 主观描述简要 */}
+          {record.subjectiveNotes && (
+            <p className="text-sm text-gray-500 line-clamp-2">
+              {record.subjectiveNotes}
+            </p>
+          )}
 
-      {(record.objectiveBloodPressure ||
-        record.objectiveHeartRate ||
-        record.objectiveTemperature) && (
-        <div className="grid grid-cols-2 gap-2">
-          {record.objectiveBloodPressure && (
-            <div>
-              <div className="text-gray-600 text-sm">Blood Pressure</div>
-              <div>{record.objectiveBloodPressure}</div>
+          {/* 药物计划（如果有） */}
+          {record.planMedicationName && (
+            <div className="text-sm text-gray-700">
+              <span className="font-semibold">Medication:</span>{" "}
+              {record.planMedicationName} ({record.planDosageValue})
             </div>
           )}
-          {record.objectiveHeartRate && (
-            <div>
-              <div className="text-gray-600 text-sm">Heart Rate</div>
-              <div>{record.objectiveHeartRate} bpm</div>
-            </div>
-          )}
-          {record.objectiveTemperature && (
-            <div>
-              <div className="text-gray-600 text-sm">Temperature</div>
-              <div>{record.objectiveTemperature} °C</div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {record.planMedicationName && (
-        <div>
-          <div className="text-gray-600 text-sm">Medication Plan</div>
-          <div>{record.planMedicationName}</div>
-        </div>
-      )}
-
-      {record.planFollowupDate && (
-        <div>
-          <div className="text-gray-600 text-sm">Follow-up Date</div>
-          <div>{format(record.planFollowupDate)}</div>
-        </div>
-      )}
+        </Card>
+      </Link>
     </div>
   );
 }

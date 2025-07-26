@@ -78,7 +78,7 @@ export default function DoctorAppointmentsPage() {
 
       {/* 搜索与时间过滤器组件 */}
       <div className="flex flex-col md:flex-row md:items-center gap-4 mb-6">
-        <SearchBar value={searchTerm} onChange={setSearchTerm} />
+        <SearchBar value={searchTerm} onChange={setSearchTerm} placeholder={"Search by name"}/>
         <AppointmentDateFilter
           startDate={startDate}
           endDate={endDate}

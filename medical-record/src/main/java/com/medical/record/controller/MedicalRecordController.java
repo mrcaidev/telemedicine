@@ -4,7 +4,6 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
 import com.medical.record.common.Result;
 import com.medical.record.feign.AppointmentFeignClient;
-import com.medical.record.feign.UserFeignClient;
 import com.medical.record.model.dto.MedicalRecordCreateDTO;
 import com.medical.record.model.dto.MedicalRecordQueryDTO;
 import com.medical.record.model.dto.MedicalRecordUpdateDTO;
@@ -33,8 +32,6 @@ public class MedicalRecordController {
     @Resource
     private MedicalRecordService medicalRecordService;
     @Resource
-    private UserFeignClient userFeignClient;
-    @Resource
     private AppointmentFeignClient appointmentFeignClient;
 
     /**
@@ -46,13 +43,14 @@ public class MedicalRecordController {
     @Operation(summary = "创建病历", description = "创建新的病历记录")
     public Result<MedicalRecordVO> create(@Valid @RequestBody MedicalRecordCreateDTO record,
                                           @RequestHeader(value = "X-User-Id",required = false) String userId,
-                                          @RequestHeader(value = "X-User-Role",required = false) String role) {
+                                          @RequestHeader(value = "X-User-Role",required = false) String role,
+                                          @RequestHeader(value = "X-User-Email",required = false) String email) {
         log.info("Received POST request to create medical-records. User ID: {}", userId);
         if(StrUtil.isEmpty(role)||!role.equals("doctor")){
             throw new RuntimeException("不是医生没有权限");
         }
         // 获取预约信息
-        Result<AppointmentVO> appointmentVOResult = appointmentFeignClient.getAppointmentById(record.getAppointmentId(),userId);
+        Result<AppointmentVO> appointmentVOResult = appointmentFeignClient.getAppointmentById(record.getAppointmentId(),userId,role,email);
         if (appointmentVOResult.getCode() != 0 || appointmentVOResult.getData() == null) {
             throw new RuntimeException("预约id不存在");
         }

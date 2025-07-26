@@ -122,3 +122,12 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* globals.css */
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* 禁止 body 自己滚动条 */
+}

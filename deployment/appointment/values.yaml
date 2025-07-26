@@ -5,6 +5,7 @@ readinessProbe: /readyz
 paths:
   - /appointments
   - /doctor-availabilities
+  - /meta/appointment
 resources:
   requests:
     cpu: 100m
