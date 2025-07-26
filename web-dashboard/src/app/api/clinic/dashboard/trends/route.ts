@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
         { headers }
       ),
       fetch(
-        `${BACKEND_API}/meta/appointment/per-doctor-month?startAt=${startDateISO}&endAt=${endDateISO}`,
+        `${BACKEND_API}/meta/appointment/per-doctor-month?startAt=${startDateISO}&endAt=${endDateISO}&clinicId=${clinicId}`,
         {
           headers,
         }
