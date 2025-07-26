@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_BASE_URL}/appointments/${appointmentId}/reschedule`,
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/appointments/${appointmentId}/request-reschedule`,
       {
         method: "POST",
         headers: {
