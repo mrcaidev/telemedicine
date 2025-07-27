@@ -25,7 +25,7 @@ const format = (d: string) =>
 export default function AppointmentDetailPage() {
   const { id } = useParams();
   const router = useRouter();
-  const [recordId, setRecordId] = useState<string | null>(null);
+  const [medicalRecordId, setMedicalRecordId] = useState<string | null>(null);
   const [appointment, setAppointment] = useState<RawAppointment>();
   const [medicalRecord, setMedicalRecord] = useState<MedicalRecord | null>(
     null
@@ -37,20 +37,20 @@ export default function AppointmentDetailPage() {
       .then((data) => {
         console.log("Fetched appointment data:", data.data.data);
         setAppointment(data.data.data);
-        setRecordId(data.data.data.recordId);
+        setMedicalRecordId(data.data.data.medicalRecordId);
       });
   }, [id]);
 
   useEffect(() => {
-    if (recordId) {
-      fetch(`/api/doctor/patients/records/${recordId}`)
+    if (medicalRecordId) {
+      fetch(`/api/doctor/patients/records/${medicalRecordId}`)
         .then((res) => res.json())
         .then((data) => {
           console.log("Fetched medical record data:", data.data);
           setMedicalRecord(data.data.data);
         });
     }
-  }, [recordId]);
+  }, [medicalRecordId]);
 
   const handleReschedule = async (id: string) => {
     try {
@@ -179,11 +179,11 @@ export default function AppointmentDetailPage() {
               size="sm"
               variant="outline"
               className={`cursor-pointer  ${
-                !!appointment.recordId
+                !!appointment.medicalRecordId
                   ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                   : "bg-blue-500 text-white hover:bg-blue-600"
               }`}
-              disabled={!!appointment.recordId}
+              disabled={!!appointment.medicalRecordId}
               onClick={() =>
                 router.push(
                   `/dashboard/doctor/appointments/${appointment.id}/record`
@@ -201,7 +201,7 @@ export default function AppointmentDetailPage() {
       </Card>
 
       {/* Medical Record */}
-      {appointment.recordId && medicalRecord && (
+      {appointment.medicalRecordId && medicalRecord && (
         <MedicalRecordCard record={medicalRecord} />
       )}
     </div>
