@@ -36,7 +36,7 @@ public class KafkaConfig {
         configProps.put("ssl.truststore.type", "PEM");
         configProps.put("ssl.truststore.certificates", "/etc/kafka/certs/ca.crt");
         // 客户端证书和私钥配置
-        configProps.put("ssl.keystore.type", "PKCS12");
+        configProps.put("ssl.keystore.type", "PEM");
         configProps.put("ssl.keystore.certificate.chain", "/etc/kafka/certs/client.crt");
         configProps.put("ssl.keystore.key", "/etc/kafka/certs/client.key");
 
