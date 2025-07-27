@@ -44,7 +44,7 @@ public class KafkaConfig {
         configProps.put(SslConfigs.SSL_KEYSTORE_CERTIFICATE_CHAIN_CONFIG, readCertificateFile(("/etc/kafka/certs/client.crt")));
         configProps.put(SslConfigs.SSL_KEYSTORE_KEY_CONFIG, readCertificateFile("/etc/kafka/certs/client.key"));
 
-        // 配置JsonSerializer以支持对象序列化
+        // 配置 JsonSerializer 以支持对象序列化
 //        configProps.put(JsonSerializer.TYPE_MAPPINGS,
 //                "medical-record-created-event:com.medical.record.model.dto.MedicalRecordCreatedEvent");
         return new DefaultKafkaProducerFactory<>(configProps);
