@@ -198,14 +198,11 @@
         </dependency>
 
         <!-- 公共模块 -->
-
 <!--        <dependency>-->
 <!--            <groupId>com.medical</groupId>-->
 <!--            <artifactId>medical-common</artifactId>-->
 <!--            <version>${project.version}</version>-->
 <!--        </dependency>-->
-
-
 
         <!-- Jakarta Servlet API -->
         <dependency>
