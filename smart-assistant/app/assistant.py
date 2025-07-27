@@ -1,7 +1,9 @@
+import logging
 from uuid import UUID
 
 import app.session as session
 import app.chatbot as chatbot
+import app.chatbotWithDify as difyChatbot
 
 async def create_session(user_id:UUID, id:UUID):
     await session.insert_session(user_id, id)
@@ -14,7 +16,8 @@ async def get_user_history(user_id):
     return history_list
 
 async def speak_to_agent(id: UUID, message:str):
-    return await chatbot.speak_to_bot(id, message)
+    logging.info(f"Speak to Agent: {message}")
+    return await difyChatbot.speak_to_bot(id, message)
 
 async def delete_session(id: UUID,user_id:UUID):
     return await session.delete_session(id,user_id)
