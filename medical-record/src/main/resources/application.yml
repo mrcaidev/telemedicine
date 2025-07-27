@@ -45,6 +45,18 @@ spring:
       auto-offset-reset: earliest
       properties:
         spring.json.trusted.packages: "*"
+    properties:
+      # 使用 SSL 协议
+      security.protocol: SSL
+
+      # Truststore：CA 证书（PEM 格式）
+      ssl.truststore.type: PEM
+      ssl.truststore.certificates: /etc/kafka/certs/ca.crt
+
+      # Keystore：客户端证书链 & 私钥（PEM 格式）
+      ssl.keystore.type: PEM
+      ssl.keystore.certificate.chain: /etc/kafka/certs/client.crt
+      ssl.keystore.key: /etc/kafka/certs/client.key
 
 eureka:
   client:
