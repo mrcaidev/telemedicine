@@ -14,56 +14,80 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Doctor } from "@/types/doctor";
 import { RawAppointment } from "@/types/appointment";
+import { Calendar } from "@/components/ui/calendar";
 
 interface RescheduleDialogProps {
   open: boolean;
   onClose: () => void;
-  onConfirm: (startTime: string, endTime: string, date: Date) => void;
+  onConfirm: (availabilityId: string) => void;
   appointment?: RawAppointment;
   doctor?: Doctor;
 }
 
-const hourOptions = Array.from(
-  { length: 13 },
-  (_, i) => `${String(8 + i).padStart(2, "0")}:00`
-);
+const weekdayMap = [
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+];
 
 export function RescheduleDialog({
   open,
   onClose,
   onConfirm,
-  appointment,
   doctor,
 }: RescheduleDialogProps) {
-  console.log("RescheduleDialog", appointment);
-  const [startTime, setStartTime] = useState("");
-  const [endTime, setEndTime] = useState("");
-  const [date, setDate] = useState<Date | undefined>();
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
+  const [selectedWeekday, setSelectedWeekday] = useState<string>("");
+  const [selectedAvailabilityId, setSelectedAvailabilityId] =
+    useState<string>("");
+  const [availabilities, setAvailabilities] = useState<
+    Doctor["availableTimes"]
+  >([]);
+  const [loading, setLoading] = useState(false);
+  const handleDateSelect = (date: Date) => {
+    console.log("Selected date:", date);
+    setSelectedDate(date); // 更新选中的日期
+  };
 
   useEffect(() => {
-    if (open && appointment) {
-      const start = new Date(appointment.startAt)
-        .toISOString()
-        .substring(11, 16);
-      const end = new Date(appointment.endAt).toISOString().substring(11, 16);
-      const dateOnly = new Date(appointment.startAt);
-      setStartTime(start);
-      setEndTime(end);
-      setDate(dateOnly);
+    if (open && doctor?.id) {
+      setSelectedWeekday("");
+      setSelectedAvailabilityId("");
+      setAvailabilities([]);
+      setLoading(true);
+
+      fetch(`/api/clinic/doctor/${doctor.id}/available-times`)
+        .then((res) => res.json())
+        .then((data) => {
+          setAvailabilities(data.data); // 你可根据返回结构调整
+        })
+        .catch((err) => {
+          console.error("Failed to load availabilities:", err);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
     }
-  }, [open, appointment]);
+  }, [open, doctor?.id]);
+
+  // 更新 selectedWeekday 当日期改变时
+  useEffect(() => {
+    if (selectedDate) {
+      setSelectedWeekday(selectedDate.getDay().toString());
+    }
+  }, [selectedDate]);
+
+  const availabilitiesForDay = availabilities.filter(
+    (a) => a.weekday.toString() === selectedWeekday
+  );
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -72,88 +96,80 @@ export function RescheduleDialog({
           <DialogTitle>Reschedule Appointment</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
-          {/* 日期选择 */}
-          <div className="flex items-center gap-3">
-            <span className="text-sm w-[80px]">Date:</span>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="w-[200px] justify-start text-left cursor-pointer"
+        {loading ? (
+          <p className="text-center py-4 text-gray-500">
+            Loading availabilities...
+          </p>
+        ) : (
+          <div className="space-y-4">
+            {/* Date Selector */}
+            <div className="flex items-center gap-3">
+              <span className="text-sm w-[120px]">Select Date:</span>
+              <Calendar
+                selected={selectedDate}
+                onDayClick={handleDateSelect}
+                className="w-[280px]"
+                disabled={[{ before: new Date() }]}
+              />
+            </div>
+
+            {/* Weekday Selector */}
+            {selectedDate && (
+              <div className="flex items-center gap-3">
+                <span className="text-sm w-[120px]">Weekday:</span>
+                <Select
+                  value={selectedWeekday}
+                  onValueChange={(value) => {
+                    setSelectedWeekday(value);
+                    setSelectedAvailabilityId("");
+                  }}
+                  disabled
                 >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {date ? format(date, "PPP") : "Select date"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent align="start" className="w-auto p-0">
-                <Calendar
-                  mode="single"
-                  selected={date}
-                  onSelect={(day) => {
-                    setDate(day);
-                  }}
-                  disabled={(date) => {
-                    const today = new Date();
-                    today.setHours(0, 0, 0, 0);
+                  <SelectTrigger className="w-[280px] cursor-pointer">
+                    <SelectValue placeholder="Select weekday" />
+                  </SelectTrigger>
+                  <SelectContent className="cursor-pointer">
+                    {[...new Set(availabilities.map((a) => a.weekday))].map(
+                      (w) => (
+                        <SelectItem key={w} value={w.toString()}>
+                          {weekdayMap[Number(w)]}
+                        </SelectItem>
+                      )
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
 
-                    const doctorAvailableWeekdays = [
-                      ...new Set(
-                        doctor?.availableTimes.map((t) => t.weekday) ?? []
-                      ),
-                    ];
-
-                    return (
-                      date < today ||
-                      !doctorAvailableWeekdays.includes(date.getDay())
-                    );
-                  }}
-                />
-              </PopoverContent>
-            </Popover>
+            {/* Time Slot Selector */}
+            {selectedWeekday && (
+              <div className="flex items-center gap-3">
+                <span className="text-sm w-[120px]">Time Slot:</span>
+                <Select
+                  value={selectedAvailabilityId}
+                  onValueChange={setSelectedAvailabilityId}
+                >
+                  <SelectTrigger className="w-[280px] cursor-pointer">
+                    <SelectValue placeholder="Select time slot" />
+                  </SelectTrigger>
+                  <SelectContent className="cursor-pointer">
+                    {availabilitiesForDay.map((a) => (
+                      <SelectItem key={a.id} value={a.id}>
+                        {a.startTime} - {a.endTime}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
-
-          {/* 起始时间选择 */}
-          <div className="flex items-center gap-3">
-            <span className="text-sm w-[80px]">Start Time:</span>
-            <Select value={startTime} onValueChange={setStartTime}>
-              <SelectTrigger className="w-[160px] cursor-pointer">
-                <SelectValue placeholder="Select start time" />
-              </SelectTrigger>
-              <SelectContent>
-                {hourOptions.map((t) => (
-                  <SelectItem key={t} value={t}>
-                    {t}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <span className="text-sm w-[80px]">End Time:</span>
-            <Select value={endTime} onValueChange={setEndTime}>
-              <SelectTrigger className="w-[160px] cursor-pointer">
-                <SelectValue placeholder="Select end time" />
-              </SelectTrigger>
-              <SelectContent>
-                {hourOptions
-                  .filter((t) => !startTime || t > startTime)
-                  .map((t) => (
-                    <SelectItem key={t} value={t}>
-                      {t}
-                    </SelectItem>
-                  ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
+        )}
 
         <DialogFooter>
           <Button
-            disabled={!startTime || !endTime || !date}
-            onClick={() => onConfirm(startTime, endTime, date!)}
             className="cursor-pointer"
+            disabled={!selectedAvailabilityId || loading}
+            onClick={() => onConfirm(selectedAvailabilityId)}
           >
             Confirm
           </Button>
