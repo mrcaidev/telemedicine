@@ -84,6 +84,6 @@ jobs:
           helm upgrade --install smart-assistant ${{ github.workspace }}/deployment/smart-assistant \
             --values ${{ github.workspace }}/deployment/smart-assistant/values-${{ needs.set-env.outputs.environment }}.yaml \
             --set image=${{ vars.DOCKERHUB_USERNAME }}/telemedicine-smart-assistant:${{ needs.set-env.outputs.tag }} \
-            --set secrets.AGENT_ACCESS_KEY=${{ secrets.AGENT_ACCESS_KEY }} \
-            --set secrets.MONGO_URL=${{ secrets.SMART_ASSISTANT_MONGO_URL }} \
-            --set secrets.REDIS_URL=${{ secrets.REDIS_URL }}
+            --set secrets.AGENT_ACCESS_KEY="${{ secrets.AGENT_ACCESS_KEY }}" \
+            --set secrets.MONGO_URL="${{ secrets.SMART_ASSISTANT_MONGO_URL }}" \
+            --set secrets.REDIS_URL="${{ secrets.REDIS_URL }}"
