@@ -6,7 +6,6 @@ export async function POST(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const appointmentId = searchParams.get("appointmentId");
   const body = await request.json();
-  console.log("Reschedule appointment body", body);
 
   const session = await getServerSession(authOptions);
   if (!session || !session.user || !session.user.token) {
@@ -22,6 +21,7 @@ export async function POST(request: NextRequest) {
           Authorization: `Bearer ${session.user.token}`,
           "Content-Type": "application/json",
         },
+        body: JSON.stringify(body),
       }
     );
     const data = await res.json();

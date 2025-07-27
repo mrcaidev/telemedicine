@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    environment:
+      - AGENT_ACCESS_KEY=${OPENAI_API_KEY}
+      - MONGO_URL=mongodb://mongo:27017/
+      - REDIS_URL=redis://redis:6379/
+      - PYTHONPATH=/code
+    depends_on:
+      - redis
+      - mongo
+    volumes:
+      - ./tests:/code/tests
+      - ./app:/code/app
+    command: python -m pytest tests/ -v
+
+  redis:
+    image: redis
+    container_name: redis-test
+    restart: always
+    ports:
+      - "6380:6379"  # 使用不同端口避免冲突
+    volumes:
+      - redis_test_data:/data
+
+  mongo:
+    image: mongo
+    container_name: mongo-test
+    restart: unless-stopped
+    ports:
+      - "27018:27017"  # 使用不同端口避免冲突
+    volumes:
+      - mongo_test_data:/data/db
+
+volumes:
+  redis_test_data:
+  mongo_test_data: 
