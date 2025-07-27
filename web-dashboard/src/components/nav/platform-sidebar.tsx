@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Home, Calendar, Users } from "lucide-react";
+import { Home, Calendar, Users, Atom } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { clsx } from "clsx";
 
@@ -12,6 +12,7 @@ const menu = [
     icon: Calendar,
     href: "/dashboard/platform/clinics",
   },
+  { label: "Metadata", icon: Atom, href: "/dashboard/platform/metadata" },
   { label: "Profile", icon: Users, href: "/dashboard/platform/profile" },
 ];
 

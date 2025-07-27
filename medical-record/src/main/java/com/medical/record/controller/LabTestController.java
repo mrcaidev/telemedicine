@@ -3,7 +3,6 @@ package com.medical.record.controller;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
 import com.medical.record.common.Result;
-import com.medical.record.feign.UserFeignClient;
 import com.medical.record.model.dto.LabTestQueryDTO;
 import com.medical.record.model.entity.LabTest;
 import com.medical.record.model.vo.LabTestsVO;
@@ -26,8 +25,6 @@ import java.util.List;
 public class LabTestController {
     @Resource
     private LabTestService labTestService;
-    @Resource
-    private UserFeignClient userFeignClient;
 
     /**
      *获取检查项⽬列表

@@ -3,10 +3,9 @@ package com.medical.record.controller;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
 import com.medical.record.common.Result;
-import com.medical.record.feign.UserFeignClient;
 import com.medical.record.model.dto.DiagnosisQueryDTO;
 import com.medical.record.model.entity.Diagnosis;
-import com.medical.record.model.vo.DiagnosissVO;
+import com.medical.record.model.vo.DiagnosisVO;
 import com.medical.record.service.DiagnosisService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -27,8 +26,6 @@ import java.util.List;
 public class DiagnosisController {
     @Resource
     private DiagnosisService diagnosisService;
-    @Resource
-    private UserFeignClient userFeignClient;
 
     /**
      *获取诊断列表
@@ -36,7 +33,7 @@ public class DiagnosisController {
      */
     @GetMapping("/diagnoses")
     @Operation(summary = "获取诊断列表", description = "获取诊断列表")
-    public Result<DiagnosissVO> pageDiagnoses(
+    public Result<DiagnosisVO> pageDiagnoses(
             @Parameter(description = "编码") @RequestParam(required = false) String code,
             @Parameter(description = "描述") @RequestParam(required = false) String description,
             @Parameter(description = "每页大小") @RequestParam(required = false, defaultValue = "10") Integer limit,
@@ -51,8 +48,8 @@ public class DiagnosisController {
         queryDTO.setLimit(limit);
         queryDTO.setCursor(sort_info);
         List<Diagnosis> diagnoses = diagnosisService.listDiagnosis(queryDTO);
-        DiagnosissVO vo = new DiagnosissVO();
-        vo.setDiagnosiss(diagnoses);
+        DiagnosisVO vo = new DiagnosisVO();
+        vo.setDiagnosis(diagnoses);
         if(CollectionUtil.isNotEmpty(diagnoses)){
             vo.setNextCursor(diagnoses.get(diagnoses.size()-1).getCode().toString());
         }

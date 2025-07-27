@@ -25,23 +25,32 @@ export async function GET(
       "Content-Type": "application/json",
     };
 
-    const [patientRes, medicalRecordsRes] = await Promise.all([
-      fetch(`${BACKEND_API}/patients/${patientId}`, { headers }),
-      fetch(`${BACKEND_API}/medical-records?patientId=${patientId}`, { headers }),
-    ]);
+    const patientRes = await fetch(`${BACKEND_API}/patients/${patientId}`, {
+      headers,
+    });
 
-
-    if (!patientRes.ok || !medicalRecordsRes.ok) {
-      return NextResponse.json({ message: "Failed to fetch" }, { status: 500 });
+    if (!patientRes.ok) {
+      return NextResponse.json({ message: "Failed to fetch patient" }, { status: 500 });
     }
 
-    const patientData = await patientRes.json();
-    const medicalRecordsData = await medicalRecordsRes.json();
+    const data = await patientRes.json();
 
-    const data = {
-      ...patientData.data,
-      medicalRecords: medicalRecordsData.data,
-    };
+    // const [patientRes, medicalRecordsRes] = await Promise.all([
+    //   fetch(`${BACKEND_API}/patients/${patientId}`, { headers }),
+    //   fetch(`${BACKEND_API}/medical-records?patientId=${patientId}`, { headers }),
+    // ]);
+
+    // if (!patientRes.ok || !medicalRecordsRes.ok) {
+    //   return NextResponse.json({ message: "Failed to fetch" }, { status: 500 });
+    // }
+
+    // const patientData = await patientRes.json();
+    // const medicalRecordsData = await medicalRecordsRes.json();
+
+    // const data = {
+    //   ...patientData.data,
+    //   medicalRecords: medicalRecordsData.data,
+    // };
 
     return NextResponse.json({ data }, { status: 200 });
   } catch (error) {

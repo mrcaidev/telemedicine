@@ -15,13 +15,10 @@ import {
   CalendarClock,
 } from "lucide-react";
 import Image from "next/image";
-import {
-  Doctor,
-  // , AvailableTime
-} from "@/types/doctor";
-// import { RawAppointment } from "@/types/appointment";
-// import { toast } from "sonner";
-// import { RescheduleDialog } from "@/components/dialog/appointment-schedule-dialog";
+import { Doctor } from "@/types/doctor";
+import { RawAppointment } from "@/types/appointment";
+import { toast } from "sonner";
+import { RescheduleDialog } from "@/components/dialog/appointment-schedule-dialog";
 
 const weekdayMap = [
   "Sunday",
@@ -33,42 +30,11 @@ const weekdayMap = [
   "Saturday",
 ];
 
-// // Function to check if the selected time is within the doctor's available times
-// function isTimeWithinAvailable(
-//   startTime: string,
-//   endTime: string,
-//   availableTimes: AvailableTime[],
-//   weekday: number
-// ): boolean {
-//   const toMinutes = (t: string) => {
-//     const [h, m] = t.split(":").map(Number);
-//     return h * 60 + m;
-//   };
-
-//   const startMin = toMinutes(startTime);
-//   const endMin = toMinutes(endTime);
-
-//   return availableTimes.some((slot) => {
-//     if (slot.weekday !== weekday) return false;
-//     const slotStart = toMinutes(slot.startTime);
-//     const slotEnd = toMinutes(slot.endTime);
-//     return startMin >= slotStart && endMin <= slotEnd;
-//   });
-// }
-
-// // Function to convert date and time strings to UTC ISO string
-// function toUtcISOString(dateStr: string, timeStr: string): string {
-//   const [year, month, day] = dateStr.split("-").map(Number);
-//   const [hour, minute] = timeStr.split(":").map(Number);
-//   const date = new Date(Date.UTC(year, month - 1, day, hour, minute, 0));
-//   return date.toISOString();
-// }
-
 export default function DoctorDetailPage() {
   const { id } = useParams();
   const router = useRouter();
   const [doctor, setDoctor] = useState<Doctor | null>(null);
-  // const [appointments, setAppointments] = useState<RawAppointment[]>([]);
+  const [appointments, setAppointments] = useState<RawAppointment[]>([]);
 
   function GenderIcon({ gender }: { gender: string }) {
     if (gender === "female") return <Venus className="w-4 h-4 text-pink-500" />;
@@ -84,96 +50,63 @@ export default function DoctorDetailPage() {
       });
   }, [id]);
 
-  // useEffect(() => {
-  //   fetch(`/api/clinic/doctor/${id}/appointment`)
-  //     .then((res) => res.json())
-  //     .then((data) => {
-  //       const appointments = data.data.appointments.filter(
-  //         (appt: RawAppointment) =>
-  //           appt.status === "to_be_rescheduled" || appt.status === "normal"
-  //       );
-  //       setAppointments(appointments);
-  //     });
-  // }, [id]);
+  useEffect(() => {
+    fetch(`/api/clinic/doctor/${id}/appointment`)
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("Appointments data:", data);
+        const appointments = data.data.appointments.filter(
+          (appt: RawAppointment) => appt.status === "to_be_rescheduled"
+        );
+        setAppointments(appointments);
+      });
+  }, [id]);
 
   // Dialog state
-  // const [dialogOpen, setDialogOpen] = useState(false);
-  // const [selectedAppt, setSelectedAppt] = useState<RawAppointment | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedAppt, setSelectedAppt] = useState<RawAppointment | null>(null);
 
-  // const handleOpen = (appt: RawAppointment) => {
-  //   setSelectedAppt(appt);
-  //   setDialogOpen(true);
-  // };
+  const handleOpen = (appt: RawAppointment) => {
+    setSelectedAppt(appt);
+    setDialogOpen(true);
+  };
 
-  // const handleApprove = async (
-  //   startTime: string,
-  //   endTime: string,
-  //   date: Date
-  // ) => {
-  //   if (!selectedAppt || !doctor) return;
+  const handleApprove = async (availabilityId: string) => {
+    if (!selectedAppt || !doctor) return;
 
-  //   const appointmentDate = date.toISOString().split("T")[0];
-  //   const startAt = `${appointmentDate}T${startTime}`;
-  //   const endAt = `${appointmentDate}T${endTime}`;
+    try {
+      const res = await fetch(
+        `/api/clinic/appointment?appointmentId=${selectedAppt.id}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            availabilityId,
+            doctorId: doctor.id,
+          }),
+        }
+      );
 
-  //   const weekday = date.getDay(); // Sunday = 0
-  //   const isValid = isTimeWithinAvailable(
-  //     startTime,
-  //     endTime,
-  //     doctor.availableTimes,
-  //     weekday
-  //   );
+      if (!res.ok) {
+        const { error } = await res.json();
+        throw new Error(error || "Failed to approve appointment");
+      }
 
-  //   if (!isValid) {
-  //     toast.error("Selected time is not within doctor's schedule.");
-  //     return;
-  //   }
+      toast.success("Appointment rescheduled successfully!");
+      router.refresh();
 
-  //   const currentStart = new Date(selectedAppt.startAt).toISOString();
-  //   const currentEnd = new Date(selectedAppt.endAt).toISOString();
-  //   if (startAt === currentStart && endAt === currentEnd) {
-  //     toast.error("No changes made to the appointment time.");
-  //     return;
-  //   }
+      setAppointments((prevAppointments) =>
+        prevAppointments.filter((appt) => appt.id !== selectedAppt.id)
+      );
 
-  //   try {
-  //     const res = await fetch(
-  //       `/api/clinic/appointment?appointmentId=${selectedAppt?.id}`,
-  //       {
-  //         method: "POST",
-  //         body: JSON.stringify({
-  //           startTime,
-  //           endTime,
-  //           doctorId: id,
-  //         }),
-  //       }
-  //     );
-
-  //     if (!res.ok) {
-  //       throw new Error("Failed to approve appointment");
-  //     }
-
-  //     toast.success("Appointment approved successfully!");
-  //     router.refresh();
-
-  //     const appointmentDate = date.toISOString().split("T")[0];
-  //     setAppointments((prev) =>
-  //       prev.map((appt) =>
-  //         appt.id === selectedAppt?.id
-  //           ? {
-  //               ...appt,
-  //               status: "normal",
-  //               startAt: toUtcISOString(appointmentDate, startTime),
-  //               endAt: toUtcISOString(appointmentDate, endTime),
-  //             }
-  //           : appt
-  //       )
-  //     );
-  //     setDialogOpen(false);
-  //   } catch (error) {
-  //     console.error("Error approving appointment:", error);
-  //   }
-  // };
+      setDialogOpen(false);
+    } catch (error) {
+      console.error("Error approving appointment:", error);
+      toast.error("Failed to reschedule appointment");
+    }
+  };
 
   if (!doctor)
     return (
@@ -290,7 +223,7 @@ export default function DoctorDetailPage() {
       </Card>
 
       {/* Recent Appointments，including all the appointment status normal and rescheduling */}
-      {/* <Card className="w-full bg-muted border rounded-xl bg-white shadow-sm">
+      <Card className="w-full bg-muted border rounded-xl bg-white shadow-sm">
         <CardContent className="p-6 space-y-4">
           <h2 className="text-xl font-semibold">{`Dr.${doctor.lastName}'s Appointments`}</h2>
 
@@ -335,7 +268,6 @@ export default function DoctorDetailPage() {
                 open={dialogOpen}
                 onClose={() => setDialogOpen(false)}
                 onConfirm={handleApprove}
-                appointment={selectedAppt ?? undefined}
                 doctor={doctor}
               />
             </>
@@ -345,7 +277,7 @@ export default function DoctorDetailPage() {
             </p>
           )}
         </CardContent>
-      </Card> */}
+      </Card>
     </div>
   );
 }

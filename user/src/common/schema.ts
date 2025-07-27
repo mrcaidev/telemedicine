@@ -81,3 +81,14 @@ export const otpSchema = v.pipe(
   v.length(6, "otp should be 6 digits"),
   v.digits("otp should be 6 digits"),
 );
+
+export const metaTimeRangeSchema = v.object({
+  startAt: v.pipe(
+    v.string("startAt should be an ISO 8601 timestamp"),
+    v.isoTimestamp("startAt should be an ISO 8601 timestamp"),
+  ),
+  endAt: v.pipe(
+    v.string("endAt should be an ISO 8601 timestamp"),
+    v.isoTimestamp("endAt should be an ISO 8601 timestamp"),
+  ),
+});

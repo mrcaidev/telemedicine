@@ -3,7 +3,6 @@ package com.medical.record.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.medical.record.common.Result;
 import com.medical.record.feign.AppointmentFeignClient;
-import com.medical.record.feign.UserFeignClient;
 import com.medical.record.model.dto.MedicalRecordCreateDTO;
 import com.medical.record.model.dto.MedicalRecordQueryDTO;
 import com.medical.record.model.dto.MedicalRecordUpdateDTO;
@@ -45,8 +44,7 @@ public class MedicalRecordControllerTest {
 
     @MockBean
     private MedicalRecordService medicalRecordService;
-    @MockBean
-    private UserFeignClient userFeignClient;
+
     @MockBean
     private AppointmentFeignClient appointmentFeignClient;
 
@@ -99,7 +97,7 @@ public class MedicalRecordControllerTest {
     @Test
     public void testCreate_WithValidDoctorRole_Success() throws Exception {
         // 模拟Feign调用返回有效预约信息
-        when(appointmentFeignClient.getAppointmentById(eq("1"), eq(VALID_DOCTOR_ID)))
+        when(appointmentFeignClient.getAppointmentById(eq("1"), eq(VALID_DOCTOR_ID),"",""))
                 .thenReturn(Result.success(validAppointmentVO));
         when(medicalRecordService.create(any()))
                 .thenReturn(validRecordVO);
@@ -116,7 +114,7 @@ public class MedicalRecordControllerTest {
                 .andExpect(jsonPath("$.data.patientId", is(VALID_PATIENT_ID)));
 
         // 验证调用链
-        verify(appointmentFeignClient, times(1)).getAppointmentById("1", VALID_DOCTOR_ID);
+        verify(appointmentFeignClient, times(1)).getAppointmentById("1", VALID_DOCTOR_ID,"","");
         verify(medicalRecordService, times(1)).create(any());
     }
 

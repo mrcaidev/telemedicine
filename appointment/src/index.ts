@@ -6,6 +6,7 @@ import { HTTPException } from "hono/http-exception";
 import { isValiError } from "valibot";
 import { appointmentController } from "./controller/appointment";
 import { doctorAvailabilityController } from "./controller/doctor-availability";
+import { metaController } from "./controller/meta";
 
 const app = new Hono();
 
@@ -20,6 +21,7 @@ app.get("/readyz", async (c) => {
 
 app.route("/appointments", appointmentController);
 app.route("/doctor-availabilities", doctorAvailabilityController);
+app.route("/meta/appointment", metaController);
 
 app.onError((error, c) => {
   if (isValiError(error)) {

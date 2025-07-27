@@ -1,0 +1,8 @@
+com\medical\record\controller\LabTestControllerTest.class
+com\medical\record\controller\DiagnosisControllerTest.class
+com\medical\record\service\impl\DiagnosisServiceImplTest.class
+com\medical\record\service\impl\MedicationServiceImplTest.class
+com\medical\record\service\impl\MedicalRecordServiceImplTest.class
+com\medical\record\service\impl\LabTestServiceImplTest.class
+com\medical\record\controller\MedicalRecordControllerTest.class
+com\medical\record\controller\MedicationControllerTest.class

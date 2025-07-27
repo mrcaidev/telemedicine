@@ -86,6 +86,7 @@ jobs:
             --set image=${{ vars.DOCKERHUB_USERNAME }}/telemedicine-user:${{ needs.set-env.outputs.tag }} \
             --set secrets.JWT_SECRET=${{ secrets.JWT_SECRET }} \
             --set secrets.SUPER_ADMIN_TOKEN=${{ secrets.SUPER_ADMIN_TOKEN }} \
+            --set secrets.GOOGLE_OAUTH_CLIENT_IDS=${{ secrets.GOOGLE_OAUTH_CLIENT_IDS }} \
             --set secrets.OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} \
             --set secrets.POSTGRES_URL=${{ secrets.USER_POSTGRES_URL }} \
             --set secrets.KAFKA_BROKERS=${{ secrets.KAFKA_BROKERS }} \

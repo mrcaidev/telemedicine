@@ -1,0 +1,16 @@
+image: mrcaidev/telemedicine-medical-record
+port: 8082
+livenessProbe: /livez
+readinessProbe: /readyz
+paths:
+  - /medical-records
+  - /diagnoses
+  - /medications
+  - /lab-tests
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi

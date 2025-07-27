@@ -5,3 +5,6 @@
 *.log
 *.pem
 .DS_Store
+target/
+medical-record/target/
+
