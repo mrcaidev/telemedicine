@@ -14,3 +14,6 @@ REDIS_URL = os.getenv("REDIS_URL")
 
 #MongoDB config
 MONGO_URL = os.getenv("MONGO_URL")
+
+#Dify api key
+DIFY_API_KEY = os.getenv("DIFY_API_KEY")

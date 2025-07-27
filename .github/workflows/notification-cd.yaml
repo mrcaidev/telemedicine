@@ -84,9 +84,9 @@ jobs:
           helm upgrade --install notification ${{ github.workspace }}/deployment/notification \
             --values ${{ github.workspace }}/deployment/notification/values-${{ needs.set-env.outputs.environment }}.yaml \
             --set image=${{ vars.DOCKERHUB_USERNAME }}/telemedicine-notification:${{ needs.set-env.outputs.tag }} \
-            --set secrets.RESEND_API_KEY=${{ secrets.RESEND_API_KEY }} \
-            --set secrets.KAFKA_BROKERS=${{ secrets.KAFKA_BROKERS }} \
-            --set secrets.KAFKA_SECURITY_PROTOCOL=${{ secrets.KAFKA_SECURITY_PROTOCOL }} \
-            --set secrets.KAFKA_SSL_CA=${{ secrets.KAFKA_SSL_CA }} \
-            --set secrets.KAFKA_SSL_KEY=${{ secrets.KAFKA_SSL_KEY }} \
-            --set secrets.KAFKA_SSL_CERT=${{ secrets.KAFKA_SSL_CERT }}
+            --set secrets.RESEND_API_KEY="${{ secrets.RESEND_API_KEY }}" \
+            --set secrets.KAFKA_BROKERS="${{ secrets.KAFKA_BROKERS }}" \
+            --set secrets.KAFKA_SECURITY_PROTOCOL="${{ secrets.KAFKA_SECURITY_PROTOCOL }}" \
+            --set secrets.KAFKA_SSL_CA="${{ secrets.KAFKA_SSL_CA }}" \
+            --set secrets.KAFKA_SSL_KEY="${{ secrets.KAFKA_SSL_KEY }}" \
+            --set secrets.KAFKA_SSL_CERT="${{ secrets.KAFKA_SSL_CERT }}"

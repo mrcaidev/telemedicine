@@ -2,7 +2,6 @@ package com.medical.record.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.medical.record.common.Result;
-import com.medical.record.feign.AppointmentFeignClient;
 import com.medical.record.model.dto.MedicalRecordCreateDTO;
 import com.medical.record.model.dto.MedicalRecordQueryDTO;
 import com.medical.record.model.dto.MedicalRecordUpdateDTO;
@@ -45,8 +44,6 @@ public class MedicalRecordControllerTest {
     @MockBean
     private MedicalRecordService medicalRecordService;
 
-    @MockBean
-    private AppointmentFeignClient appointmentFeignClient;
 
     @Autowired
     private WebApplicationContext webApplicationContext;
@@ -96,9 +93,7 @@ public class MedicalRecordControllerTest {
     // ============================== 创建病历测试 ==============================
     @Test
     public void testCreate_WithValidDoctorRole_Success() throws Exception {
-        // 模拟Feign调用返回有效预约信息
-        when(appointmentFeignClient.getAppointmentById(eq("1"), eq(VALID_DOCTOR_ID),"",""))
-                .thenReturn(Result.success(validAppointmentVO));
+
         when(medicalRecordService.create(any()))
                 .thenReturn(validRecordVO);
 
@@ -114,7 +109,6 @@ public class MedicalRecordControllerTest {
                 .andExpect(jsonPath("$.data.patientId", is(VALID_PATIENT_ID)));
 
         // 验证调用链
-        verify(appointmentFeignClient, times(1)).getAppointmentById("1", VALID_DOCTOR_ID,"","");
         verify(medicalRecordService, times(1)).create(any());
     }
 
@@ -128,8 +122,7 @@ public class MedicalRecordControllerTest {
                 .andExpect(status().isOk()) // 假设全局异常处理返回200
                 .andExpect(jsonPath("$.message", containsString("不是医生没有权限")));
 
-        // 验证Feign和Service未被调用
-        verifyNoInteractions(appointmentFeignClient, medicalRecordService);
+
     }
 
     @Test

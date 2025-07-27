@@ -84,4 +84,4 @@ jobs:
           helm upgrade --install auth-gateway ${{ github.workspace }}/deployment/auth-gateway \
             --values ${{ github.workspace }}/deployment/auth-gateway/values-${{ needs.set-env.outputs.environment }}.yaml \
             --set image=${{ vars.DOCKERHUB_USERNAME }}/telemedicine-auth-gateway:${{ needs.set-env.outputs.tag }} \
-            --set secrets.JWT_SECRET=${{ secrets.JWT_SECRET }}
+            --set secrets.JWT_SECRET="${{ secrets.JWT_SECRET }}"
