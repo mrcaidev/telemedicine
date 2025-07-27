@@ -30,13 +30,13 @@ public class KafkaConfig {
         configProps.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         configProps.put("value.serializer", JsonSerializer.class);
         configProps.put("security.protocol", "SSL");
-        // 服务器CA证书位置
+// Truststore (CA)
         configProps.put(SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG, "PEM");
-        configProps.put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG, "/etc/kafka/certs/ca.crt");
+        configProps.put(SslConfigs.SSL_TRUSTSTORE_CERTIFICATES_CONFIG, "/etc/kafka/certs/ca.crt");
 
-        // 客户端证书和密钥
+// Keystore (client cert + key)
         configProps.put(SslConfigs.SSL_KEYSTORE_TYPE_CONFIG, "PEM");
-        configProps.put(SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG, "/etc/kafka/certs/client.crt");
+        configProps.put(SslConfigs.SSL_KEYSTORE_CERTIFICATE_CHAIN_CONFIG, "/etc/kafka/certs/client.crt");
         configProps.put(SslConfigs.SSL_KEYSTORE_KEY_CONFIG, "/etc/kafka/certs/client.key");
 
         // 配置JsonSerializer以支持对象序列化
