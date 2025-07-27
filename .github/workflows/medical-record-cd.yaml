@@ -84,13 +84,13 @@ jobs:
           helm upgrade --install medical-record ${{ github.workspace }}/deployment/medical-record \
             --values ${{ github.workspace }}/deployment/medical-record/values-${{ needs.set-env.outputs.environment }}.yaml \
             --set image=${{ vars.DOCKERHUB_USERNAME }}/telemedicine-medical-record:${{ needs.set-env.outputs.tag }} \
-            --set secrets.MYSQL_URL=${{ secrets.MEDICAL_RECORD_MYSQL_URL }} \
-            --set secrets.MYSQL_USERNAME=${{ secrets.MEDICAL_RECORD_MYSQL_USERNAME }} \
-            --set secrets.MYSQL_PASSWORD=${{ secrets.MEDICAL_RECORD_MYSQL_PASSWORD }} \
-            --set secrets.QWEN_BASE_URL=${{ secrets.QWEN_BASE_URL }} \
-            --set secrets.QWEN_API_KEY=${{ secrets.QWEN_API_KEY }} \
-            --set secrets.KAFKA_BROKERS=${{ secrets.KAFKA_BROKERS }} \
-            --set secrets.KAFKA_SECURITY_PROTOCOL=${{ secrets.KAFKA_SECURITY_PROTOCOL }} \
-            --set secrets.KAFKA_SSL_CA=${{ secrets.KAFKA_SSL_CA }} \
-            --set secrets.KAFKA_SSL_KEY=${{ secrets.KAFKA_SSL_KEY }} \
-            --set secrets.KAFKA_SSL_CERT=${{ secrets.KAFKA_SSL_CERT }}
+            --set secrets.MYSQL_URL="${{ secrets.MEDICAL_RECORD_MYSQL_URL }}" \
+            --set secrets.MYSQL_USERNAME="${{ secrets.MEDICAL_RECORD_MYSQL_USERNAME }}" \
+            --set secrets.MYSQL_PASSWORD="${{ secrets.MEDICAL_RECORD_MYSQL_PASSWORD }}" \
+            --set secrets.QWEN_BASE_URL="${{ secrets.QWEN_BASE_URL }}" \
+            --set secrets.QWEN_API_KEY="${{ secrets.QWEN_API_KEY }}" \
+            --set secrets.KAFKA_BROKERS="${{ secrets.KAFKA_BROKERS }}" \
+            --set secrets.KAFKA_SECURITY_PROTOCOL="${{ secrets.KAFKA_SECURITY_PROTOCOL }}" \
+            --set secrets.KAFKA_SSL_CA="${{ secrets.KAFKA_SSL_CA }}" \
+            --set secrets.KAFKA_SSL_KEY="${{ secrets.KAFKA_SSL_KEY }}" \
+            --set secrets.KAFKA_SSL_CERT="${{ secrets.KAFKA_SSL_CERT }}"
