@@ -37,7 +37,7 @@ export default function AppointmentDetailPage() {
       .then((data) => {
         console.log("Fetched appointment data:", data.data.data);
         setAppointment(data.data.data);
-        setMedicalRecordId(data.data.data.recordId);
+        setMedicalRecordId(data.data.data.medicalRecordId);
       });
   }, [id]);
 
