@@ -24,7 +24,7 @@ import {
   DialogDescription,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { MarkdownPreview } from "@/components/ui/markdown";
+import { MarkdownPreview } from "@/components/medical-record/markdown";
 
 function formatDateTime(dateString?: string): string {
   if (!dateString) return "N/A";
