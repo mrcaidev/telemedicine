@@ -24,6 +24,7 @@ import {
   DialogDescription,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { MarkdownPreview } from "@/components/medical-record/markdown";
 
 function formatDateTime(dateString?: string): string {
   if (!dateString) return "N/A";
@@ -298,7 +299,8 @@ export default function MedicalRecordDetailPage() {
       );
       if (!res.ok) throw new Error("Failed to fetch summary");
       const data = await res.json();
-      setSummary(data.data.data);
+      const parsed = JSON.parse(data.data.data);
+      setSummary(parsed.choices?.[0]?.message?.content || "");
     } catch {
       setSummary("No summary available.");
     } finally {
@@ -337,8 +339,14 @@ export default function MedicalRecordDetailPage() {
               </DialogDescription>
             </DialogHeader>
 
-            <div className="max-h-[60vh] overflow-auto mt-2 text-sm text-gray-700 whitespace-pre-line">
-              {loading ? <Spinner /> : summary || "No summary available."}
+            <div className="max-h-[60vh] overflow-auto mt-2 text-sm text-gray-700">
+              {loading ? (
+                <Spinner />
+              ) : summary ? (
+                <MarkdownPreview content={summary} />
+              ) : (
+                "No summary available."
+              )}
             </div>
           </DialogContent>
         </Dialog>
