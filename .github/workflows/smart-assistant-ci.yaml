@@ -1,0 +1,25 @@
+name: Smart Assistant CI
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - smart-assistant/**
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    name: CI
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: smart-assistant
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Run tests
+        run: bash scripts/run_tests_docker.sh
