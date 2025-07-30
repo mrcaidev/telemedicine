@@ -218,12 +218,18 @@
             <artifactId>spring-kafka</artifactId>
         </dependency>
 
+
         <!-- Spring Data Redis (已去重) -->
         <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-redis</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka-test</artifactId>
+            <scope>test</scope>
+            <version>3.2.4</version>
+        </dependency>
         <!-- JUnit 5 -->
         <dependency>
             <groupId>org.mockito</groupId>
